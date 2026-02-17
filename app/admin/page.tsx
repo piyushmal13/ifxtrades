@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"
 'use client'
 import { useAdmin } from "@/lib/useAdmin"
 import { useEffect, useState } from "react"
