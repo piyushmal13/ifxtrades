@@ -1,11 +1,11 @@
 "use client"
 
 import { createBrowserClient } from "@supabase/ssr"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 
 const AuthContext = createContext<any>(null)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [supabase] = useState(() =>
     createBrowserClient(
