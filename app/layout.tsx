@@ -1,11 +1,10 @@
-import './globals.css'
-import { AuthProvider } from '@/lib/auth-provider'
-import Header from '@/components/Header'
+"use client"
 
-export const metadata = {
-  title: "IFXTrades — Institutional Capital Intelligence",
-  description: "Global trading ecosystem structured around disciplined execution."
-}
+export const dynamic = "force-dynamic"
+
+import "./globals.css"
+import { AuthProvider } from "@/lib/auth-provider"
+import Header from "@/components/Header"
 
 export default function RootLayout({
   children,
@@ -14,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-white text-[#0F172A] antialiased">
+      <body className="bg-white text-[#0F172A]">
         <AuthProvider>
           <Header />
           {children}
