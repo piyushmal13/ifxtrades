@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================= */
+/* INSTITUTIONAL DESIGN SYSTEM  */
+/* ============================= */
+
+:root {
+  --bg: 248 249 252;
+  --card: 255 255 255;
+  --text: 22 28 45;
+  --muted: 110 118 140;
+  --border: 226 232 240;
+  --gold: 198 160 70;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Typography */
+.display-serif {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
+
+.gold-text {
+  color: rgb(var(--gold));
+}
+
+.gold-border {
+  border-color: rgb(var(--gold));
+}
+
+.card {
+  background: rgb(var(--card));
+  border: 1px solid rgb(var(--border));
+  border-radius: 16px;
+}
+
+.section-spacing {
+  padding-top: 120px;
+  padding-bottom: 120px;
+}
+
+.btn-primary {
+  background: rgb(var(--gold));
+  color: white;
+  padding: 14px 34px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-outline {
+  border: 1px solid rgb(var(--gold));
+  padding: 14px 34px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: rgb(var(--gold));
+  color: white;
+}
