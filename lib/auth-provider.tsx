@@ -2,10 +2,13 @@
 
 import { createBrowserClient } from "@supabase/ssr"
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
+import { useRouter } from "next/navigation"
 
 const AuthContext = createContext<any>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+
+  const router = useRouter()
 
   const [supabase] = useState(() =>
     createBrowserClient(
@@ -31,11 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
+      router.refresh()   // 🔥 IMPORTANT
     })
 
     return () => subscription.unsubscribe()
 
-  }, [supabase])
+  }, [supabase, router])
 
   return (
     <AuthContext.Provider value={{ supabase, session, loading }}>
