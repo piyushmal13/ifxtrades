@@ -1,30 +1,26 @@
-let cachedData: any = null
-let lastFetchTime = 0
+import { NextResponse } from "next/server"
+
+export const dynamic = "force-dynamic"
 
 export async function GET() {
-  const now = Date.now()
-  const fiveMinutes = 5 * 60 * 1000
-
-  // If cached and not expired
-  if (cachedData && now - lastFetchTime < fiveMinutes) {
-    return Response.json(cachedData)
-  }
-
   try {
-    const symbols = "XAU/USD,EUR/USD,BTC/USD,SPY"
-    const apiKey = process.env.TWELVEDATA_API_KEY
+    const symbols = ["XAU/USD", "EUR/USD", "GBP/USD", "BTC/USD"]
 
-    const res = await fetch(
-      `https://api.twelvedata.com/quote?symbol=${symbols}&apikey=${apiKey}`
+    const requests = symbols.map(symbol =>
+      fetch(`https://api.twelvedata.com/price?symbol=${symbol}&apikey=demo`, {
+        next: { revalidate: 60 }
+      }).then(res => res.json())
     )
 
-    const data = await res.json()
+    const results = await Promise.all(requests)
 
-    cachedData = data
-    lastFetchTime = now
+    const formatted = results.map((data, i) => ({
+      symbol: symbols[i],
+      price: data.price || "N/A"
+    }))
 
-    return Response.json(data)
-  } catch (error) {
-    return Response.json({ error: "Market data unavailable" })
+    return NextResponse.json(formatted)
+  } catch (err) {
+    return NextResponse.json([])
   }
 }

@@ -1,3 +1,25 @@
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.section-spacing {
+  padding-top: clamp(4rem, 8vw, 8rem);
+  padding-bottom: clamp(4rem, 8vw, 8rem);
+}
+
+.display-serif {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.gold-text {
+  color: #C6A23A;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -69,4 +91,13 @@ body {
 .btn-outline:hover {
   background: rgb(var(--gold));
   color: white;
+}
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 25s linear infinite;
 }
