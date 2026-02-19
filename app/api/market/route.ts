@@ -1,26 +1,39 @@
 import { NextResponse } from "next/server"
 
-export const dynamic = "force-dynamic"
-
 export async function GET() {
-  try {
-    const symbols = ["XAU/USD", "EUR/USD", "GBP/USD", "BTC/USD"]
 
-    const requests = symbols.map(symbol =>
-      fetch(`https://api.twelvedata.com/price?symbol=${symbol}&apikey=demo`, {
-        next: { revalidate: 60 }
-      }).then(res => res.json())
+  try {
+
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd",
+      { signal: controller.signal }
     )
 
-    const results = await Promise.all(requests)
+    clearTimeout(timeout)
 
-    const formatted = results.map((data, i) => ({
-      symbol: symbols[i],
-      price: data.price || "N/A"
-    }))
+    if (!response.ok) {
+      throw new Error("API failed")
+    }
 
-    return NextResponse.json(formatted)
-  } catch (err) {
-    return NextResponse.json([])
+    const data = await response.json()
+
+    return NextResponse.json({
+      bitcoin: data.bitcoin.usd,
+      ethereum: data.ethereum.usd
+    })
+
+  } catch (error) {
+
+    console.error("Market API Error:", error)
+
+    // SAFE FALLBACK DATA
+    return NextResponse.json({
+      bitcoin: 0,
+      ethereum: 0
+    })
+
   }
 }

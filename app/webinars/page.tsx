@@ -10,56 +10,71 @@ export default function WebinarPage() {
   const router = useRouter()
 
   const [webinar, setWebinar] = useState<any>(null)
-  const [registrations, setRegistrations] = useState<number>(0)
-  const [loading, setLoading] = useState(true)
-  const [registered, setRegistered] = useState(false)
+  const [registrations, setRegistrations] = useState(0)
+  const [timeLeft, setTimeLeft] = useState<any>(null)
+  const [speakers, setSpeakers] = useState<any[]>([])
+  const [sponsors, setSponsors] = useState<any[]>([])
 
   useEffect(() => {
     fetchWebinar()
   }, [])
 
+  useEffect(() => {
+    if (!webinar?.event_date) return
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime()
+      const target = new Date(webinar.event_date).getTime()
+      const diff = target - now
+
+      if (diff <= 0) {
+        clearInterval(interval)
+        return
+      }
+
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / 1000 / 60) % 60),
+      })
+
+    }, 1000)
+
+    return () => clearInterval(interval)
+
+  }, [webinar])
+
   const fetchWebinar = async () => {
 
-    const { data: webinarData, error } = await supabase
+    const { data } = await supabase
       .from("webinars")
       .select("*")
       .eq("is_active", true)
       .single()
 
-    if (!webinarData) {
-      setLoading(false)
-      return
-    }
+    if (!data) return
 
-    setWebinar(webinarData)
+    setWebinar(data)
 
-    // Fetch registrations manually (more reliable)
-    const { data: registrationData } = await supabase
+    const { data: regData } = await supabase
       .from("webinar_registrations")
       .select("id")
-      .eq("webinar_id", webinarData.id)
+      .eq("webinar_id", data.id)
 
-    const totalRegistrations = registrationData?.length || 0
-    setRegistrations(totalRegistrations)
+    setRegistrations(regData?.length || 0)
 
-    console.log("Seat Limit:", webinarData.seat_limit)
-    console.log("Registrations:", totalRegistrations)
+    const { data: speakerData } = await supabase
+      .from("webinar_speakers")
+      .select("*")
+      .eq("webinar_id", data.id)
 
-    // Check if current user already registered
-    if (session) {
-      const { data: existing } = await supabase
-        .from("webinar_registrations")
-        .select("id")
-        .eq("webinar_id", webinarData.id)
-        .eq("user_id", session.user.id)
-        .single()
+    const { data: sponsorData } = await supabase
+      .from("webinar_sponsors")
+      .select("*")
+      .eq("webinar_id", data.id)
 
-      if (existing) {
-        setRegistered(true)
-      }
-    }
-
-    setLoading(false)
+    setSpeakers(speakerData || [])
+    setSponsors(sponsorData || [])
   }
 
   const register = async () => {
@@ -75,88 +90,157 @@ export default function WebinarPage() {
       email: session.user.email
     })
 
-    setRegistered(true)
-    setRegistrations(prev => prev + 1)
+    fetchWebinar()
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Loading Webinar...
-      </div>
-    )
-  }
+  if (!webinar)
+    return <div className="p-20 text-center">Loading Webinar...</div>
 
-  if (!webinar) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        No Active Webinar Found
-      </div>
-    )
-  }
-
-  const seatLimit = webinar.seat_limit ?? 0
-  const remainingSeats = Math.max(seatLimit - registrations, 0)
+  const maxSeats = Number(webinar.max_seats) || 0
+  const remainingSeats = maxSeats - registrations
+  const progress = maxSeats > 0 ? (registrations / maxSeats) * 100 : 0
 
   return (
     <div className="min-h-screen bg-white">
 
-      {/* HERO SECTION */}
-      <section className="bg-[#0B1C2D] text-white py-28 text-center relative">
+      {/* HERO */}
+      <section
+        className="relative text-white py-32"
+        style={{
+          backgroundImage: `url(${webinar.hero_image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        }}
+      >
+        <div className="absolute inset-0 bg-[#0E1A2B]/80"></div>
 
-        <h1 className="text-5xl font-semibold tracking-tight">
-          {webinar.title}
-        </h1>
+        <div className="relative max-w-5xl mx-auto px-6 text-center">
 
-        <p className="mt-6 text-lg text-gray-300 max-w-3xl mx-auto">
-          {webinar.description}
-        </p>
+          <h1 className="text-5xl font-serif">
+            {webinar.title}
+          </h1>
 
-        <div className="mt-6 text-sm text-gray-400">
-          {new Date(webinar.event_date).toLocaleString()}
-        </div>
+          <p className="mt-6 text-gray-300">
+            {webinar.description}
+          </p>
 
-        <div className="mt-6 text-yellow-400 font-semibold text-lg">
-          {remainingSeats} Seats Remaining
-        </div>
-
-        <div className="mt-10">
-          {registered ? (
-            <div className="bg-green-600 px-8 py-4 rounded-xl inline-block">
-              Registered Successfully
-              <div className="mt-3">
-                <a
-                  href={webinar.zoom_link}
-                  target="_blank"
-                  className="underline text-white"
-                >
-                  Join Webinar
-                </a>
-              </div>
+          {timeLeft && (
+            <div className="mt-10 flex justify-center gap-10">
+              <TimeBox value={timeLeft.days} label="Days" />
+              <TimeBox value={timeLeft.hours} label="Hours" />
+              <TimeBox value={timeLeft.minutes} label="Minutes" />
             </div>
-          ) : (
-            <button
-              onClick={register}
-              className="bg-[#C6A23A] hover:bg-[#b8932f] transition px-12 py-4 rounded-xl text-white font-semibold"
-            >
-              Reserve Your Seat
-            </button>
           )}
+
+        </div>
+      </section>
+
+      {/* SEATS */}
+      <section className="py-16 text-center">
+
+        <div className="max-w-3xl mx-auto px-6">
+
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div
+              className="bg-[#C6A23A] h-4 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <p className="mt-4 text-gray-600">
+            {remainingSeats} seats remaining
+          </p>
+
+          <button
+            onClick={register}
+            className="mt-8 bg-[#C6A23A] text-white px-10 py-4 rounded-xl shadow-lg hover:shadow-2xl transition"
+          >
+            Reserve Your Seat
+          </button>
+
         </div>
 
       </section>
 
-      {/* ABOUT SECTION */}
-      <section className="py-20 max-w-6xl mx-auto px-8 text-center">
-        <h2 className="text-3xl font-semibold text-[#0B1C2D]">
-          About This Webinar
-        </h2>
-        <p className="mt-6 text-gray-600 max-w-3xl mx-auto">
-          Executive-level capital structuring, algorithmic deployment,
-          broker partnerships and institutional risk frameworks.
-        </p>
-      </section>
+      {/* SPEAKERS */}
+      {speakers.length > 0 && (
+        <section className="py-20 bg-[#F9F7F2]">
 
+          <div className="max-w-6xl mx-auto px-6">
+
+            <h2 className="text-3xl text-center font-serif mb-16">
+              Featured Speakers
+            </h2>
+
+            <div className="grid md:grid-cols-3 gap-10">
+
+              {speakers.map((s, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-lg p-8 text-center">
+
+                  <img
+                    src={s.image}
+                    className="w-24 h-24 mx-auto rounded-full object-cover"
+                  />
+
+                  <h3 className="mt-6 font-semibold text-lg">
+                    {s.name}
+                  </h3>
+
+                  <p className="text-[#C6A23A] text-sm">
+                    {s.role}
+                  </p>
+
+                  <p className="text-gray-600 text-sm mt-4">
+                    {s.bio}
+                  </p>
+
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+
+        </section>
+      )}
+
+      {/* SPONSORS */}
+      {sponsors.length > 0 && (
+        <section className="py-20 text-center">
+
+          <h2 className="text-3xl font-serif mb-16">
+            Strategic Partners
+          </h2>
+
+          <div className="grid md:grid-cols-4 gap-10 max-w-6xl mx-auto px-6">
+
+            {sponsors.map((sp, i) => (
+              <div key={i} className="flex items-center justify-center">
+                <img
+                  src={sp.logo}
+                  className="h-12 object-contain"
+                />
+              </div>
+            ))}
+
+          </div>
+
+        </section>
+      )}
+
+    </div>
+  )
+}
+
+function TimeBox({ value, label }: any) {
+  return (
+    <div>
+      <div className="text-3xl font-bold text-[#C6A23A]">
+        {value}
+      </div>
+      <div className="text-sm text-gray-400">
+        {label}
+      </div>
     </div>
   )
 }
