@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { GlobeHero } from "./globe-hero"
+import MarketTicker from "@/components/MarketTicker"
 
 export default function Home() {
 
@@ -9,7 +11,7 @@ export default function Home() {
     <main className="overflow-x-hidden">
 
       {/* ================= HERO SECTION ================= */}
-      <section className="relative bg-gradient-to-br from-white via-[#F9F7F2] to-white">
+      <section className="relative bg-gradient-to-br from-white via-[#F9F7F2] to-white min-h-[90vh] flex flex-col justify-center pt-20 pb-32">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-20 sm:py-28 lg:py-32">
 
@@ -57,7 +59,7 @@ export default function Home() {
                 </Link>
 
                 <Link
-                  href="/algo"
+                  href="/algos"
                   className="border border-[#C6A23A] text-[#C6A23A] px-8 py-4 rounded-xl hover:bg-[#C6A23A] hover:text-white transition-all duration-300 text-center"
                 >
                   Explore Algo Systems
@@ -83,30 +85,42 @@ export default function Home() {
 
         </div>
 
+        {/* TICKER AT BASE OF HERO */}
+        <div className="absolute bottom-0 left-0 w-full">
+          <MarketTicker />
+        </div>
+
       </section>
 
 
       {/* ================= ECOSYSTEM SECTION ================= */}
       <section className="bg-white border-t border-gray-100 py-20 sm:py-28">
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl">
-            The IFXTrades Ecosystem
-          </h2>
+          <div className="grid lg:grid-cols-3 gap-12 items-center">
+            
+            <div className="lg:col-span-2">
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#0E1A2B]">
+                The IFXTrades Ecosystem
+              </h2>
 
-          <p className="mt-6 text-gray-600 max-w-2xl mx-auto">
-            Education, execution and capital strategy integrated into
-            one unified institutional trading framework.
-          </p>
+              <p className="mt-6 text-gray-600 max-w-2xl">
+                Education, execution and capital strategy integrated into
+                one unified institutional trading framework.
+              </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 mt-14 sm:mt-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 mt-14 sm:mt-16">
+                <Feature title="Algorithmic Intelligence" />
+                <Feature title="Structured Education" />
+                <Feature title="Broker Partnerships" />
+                <Feature title="Capital Deployment Systems" />
+              </div>
+            </div>
 
-            <Feature title="Algorithmic Intelligence" />
-            <Feature title="Structured Education" />
-            <Feature title="Broker Partnerships" />
-            <Feature title="Capital Deployment Systems" />
-
+            <div className="hidden lg:block lg:col-span-1 h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 relative">
+               <GlobeHero minimal={true} />
+            </div>
           </div>
 
         </div>

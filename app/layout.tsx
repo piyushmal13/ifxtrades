@@ -1,7 +1,6 @@
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth-provider"
-import Header from "@/components/Header"
-import MarketTicker from "@/components/MarketTicker"
+import { Navbar } from "@/components/navbar"
 
 export const metadata = {
   title: "IFXTrades",
@@ -18,8 +17,7 @@ export default function RootLayout({
       <body>
 
         <AuthProvider>
-          <MarketTicker />
-          <Header />
+          <Navbar />
           {children}
         </AuthProvider>
 

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html {
   scroll-behavior: smooth;
 }
@@ -20,9 +24,6 @@ body {
 .gold-text {
   color: #C6A23A;
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* ============================= */
 /* INSTITUTIONAL DESIGN SYSTEM  */
@@ -32,9 +33,10 @@ body {
   --bg: 248 249 252;
   --card: 255 255 255;
   --text: 22 28 45;
-  --muted: 110 118 140;
+  --muted: 100 116 139;
   --border: 226 232 240;
-  --gold: 198 160 70;
+  --gold: 198 162 58;
+  --navy: 14 26 43;
 }
 
 body {

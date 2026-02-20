@@ -13,7 +13,7 @@ const TICKER_DATA = [
   { symbol: "NDX", price: "18,100.00", change: "-0.5%" },
 ]
 
-export default function MarketTicker() {
+export function Ticker() {
   return (
     <div className="w-full bg-white border-t border-b border-gray-200 py-3 overflow-hidden flex items-center relative z-40">
       {/* Black Logo Area */}
