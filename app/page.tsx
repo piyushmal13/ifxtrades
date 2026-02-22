@@ -1,188 +1,159 @@
-"use client"
+import Link from "next/link";
+import { buildMetadata } from "@/lib/seo";
+import { listBlogPosts, listReviews } from "@/lib/data/platform";
 
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { GlobeHero } from "./globe-hero"
-import MarketTicker from "@/components/MarketTicker"
+export const metadata = buildMetadata({
+  title: "Institutional Capital Intelligence",
+  description:
+    "Institutional webinars, algorithm licensing, structured university programs, and macro market intelligence.",
+  path: "/",
+});
 
-export default function Home() {
+export default async function HomePage() {
+  const [posts, reviews] = await Promise.all([listBlogPosts("all"), listReviews()]);
 
   return (
-    <main className="overflow-x-hidden">
-
-      {/* ================= HERO SECTION ================= */}
-      <section className="relative bg-gradient-to-br from-white via-[#F9F7F2] to-white min-h-[90vh] flex flex-col justify-center pt-20 pb-32">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-20 sm:py-28 lg:py-32">
-
-          <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-
-            {/* LEFT SIDE */}
-            <div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight"
-              >
-                Institutional{" "}
-                <span className="text-[#C6A23A]">
-                  Capital
-                </span>
-                <br />
-                Intelligence
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-6 sm:mt-8 text-base sm:text-lg text-gray-600 max-w-xl"
-              >
-                Structured execution. Algorithmic systems.
-                Institutional discipline. Built for serious
-                traders who think beyond retail noise.
-              </motion.p>
-
-              <motion.div
-                className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 sm:gap-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Link
-                  href="/webinars"
-                  className="bg-[#C6A23A] text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 text-center"
-                >
-                  Reserve Webinar Seat
-                </Link>
-
-                <Link
-                  href="/algos"
-                  className="border border-[#C6A23A] text-[#C6A23A] px-8 py-4 rounded-xl hover:bg-[#C6A23A] hover:text-white transition-all duration-300 text-center"
-                >
-                  Explore Algo Systems
-                </Link>
-              </motion.div>
-
-            </div>
-
-            {/* RIGHT SIDE METRICS CARD */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 grid grid-cols-2 gap-6 sm:gap-10 text-center border border-gray-100"
-            >
-              <Metric number="12M+" label="Institutional Track Record" />
-              <Metric number="Global" label="Community Presence" />
-              <Metric number="Weekly" label="Broker Webinars" />
-              <Metric number="Structured" label="Risk Framework" />
-            </motion.div>
-
-          </div>
-
-        </div>
-
-        {/* TICKER AT BASE OF HERO */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <MarketTicker />
-        </div>
-
-      </section>
-
-
-      {/* ================= ECOSYSTEM SECTION ================= */}
-      <section className="bg-white border-t border-gray-100 py-20 sm:py-28">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-
-          <div className="grid lg:grid-cols-3 gap-12 items-center">
-            
-            <div className="lg:col-span-2">
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#0E1A2B]">
-                The IFXTrades Ecosystem
-              </h2>
-
-              <p className="mt-6 text-gray-600 max-w-2xl">
-                Education, execution and capital strategy integrated into
-                one unified institutional trading framework.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 mt-14 sm:mt-16">
-                <Feature title="Algorithmic Intelligence" />
-                <Feature title="Structured Education" />
-                <Feature title="Broker Partnerships" />
-                <Feature title="Capital Deployment Systems" />
-              </div>
-            </div>
-
-            <div className="hidden lg:block lg:col-span-1 h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 relative">
-               <GlobeHero minimal={true} />
-            </div>
-          </div>
-
-        </div>
-
-      </section>
-
-
-      {/* ================= CTA SECTION ================= */}
-      <section className="bg-[#0E1A2B] text-white py-20 sm:py-28">
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
-
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl">
-            Build With Discipline.
-          </h2>
-
-          <p className="mt-6 text-gray-300">
-            Join our institutional-grade trading university and weekly
-            global webinars.
+    <main className="min-h-screen bg-jpm-cream">
+      <section className="bg-jpm-navy text-white pt-28 pb-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.2em] text-jpm-gold mb-4">
+            Institutional Capital Intelligence
           </p>
-
-          <Link
-            href="/webinars"
-            className="inline-block mt-10 bg-[#C6A23A] text-white px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl transition"
-          >
-            Join Next Live Webinar
-          </Link>
-
+          <h1 className="font-serif text-4xl md:text-6xl leading-tight max-w-4xl">
+            Structured market research, licensed algorithmic systems, and
+            institutional execution education.
+          </h1>
+          <p className="mt-6 text-white/85 text-base max-w-2xl leading-relaxed">
+            IFXTrades is a disciplined capital intelligence platform built for
+            professional participants focused on process, governance, and
+            measurable execution quality.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link href="/webinars" className="btn-accent">
+              View Webinars
+            </Link>
+            <Link href="/algos" className="btn-outline border-white text-white hover:text-jpm-navy">
+              Explore Algos
+            </Link>
+          </div>
         </div>
-
       </section>
 
+      <section className="section-spacing px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-serif text-3xl text-jpm-navy mb-12">Platform Pillars</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <PillarCard
+              title="Webinars"
+              description="Live market briefings with institutional speakers, sponsor integrations, and structured agendas."
+              href="/webinars"
+            />
+            <PillarCard
+              title="Algo Licensing"
+              description="Risk-classified strategies with transparent performance snapshots and controlled license governance."
+              href="/algos"
+            />
+            <PillarCard
+              title="University"
+              description="Structured learning tracks from foundational macro concepts to institutional deployment frameworks."
+              href="/university"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 bg-white border-y border-jpm-border px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-xs uppercase tracking-[0.2em] text-jpm-muted">Trusted Standards</p>
+          <p className="font-serif text-2xl text-jpm-navy mt-4">
+            Built for disciplined capital participants.
+          </p>
+        </div>
+      </section>
+
+      <section className="section-spacing px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="font-serif text-3xl text-jpm-navy">Research and Insights</h2>
+            <Link href="/blog" className="text-sm font-semibold uppercase tracking-[0.12em] text-jpm-gold">
+              View Blog
+            </Link>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {posts.slice(0, 3).map((post) => (
+              <article key={post.id} className="card p-6">
+                <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">{post.category}</p>
+                <h3 className="font-serif text-xl text-jpm-navy mb-3">{post.title}</h3>
+                <p className="text-sm text-jpm-muted leading-relaxed">{post.excerpt || post.body.slice(0, 140)}</p>
+                <Link href={`/blog/${post.slug}`} className="inline-block mt-5 text-xs uppercase tracking-[0.12em] text-jpm-navy hover:text-jpm-gold">
+                  Read Analysis
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-spacing px-6 bg-white border-y border-jpm-border">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-serif text-3xl text-jpm-navy mb-10">Reviews and Authority</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {reviews.slice(0, 2).map((review) => (
+              <article key={review.id} className="card p-8">
+                <p className="text-sm text-jpm-muted leading-relaxed">"{review.quote}"</p>
+                <p className="mt-6 text-xs uppercase tracking-[0.14em] text-jpm-gold">
+                  {review.companyName}
+                </p>
+              </article>
+            ))}
+          </div>
+          <Link href="/reviews" className="inline-block mt-8 btn-outline">
+            View All Reviews
+          </Link>
+        </div>
+      </section>
+
+      <footer className="bg-jpm-navy text-white py-14 px-6">
+        <div className="max-w-7xl mx-auto">
+          <p className="font-serif text-xl">IFXTrades</p>
+          <p className="mt-3 text-white/75 text-sm max-w-2xl">
+            Institutional capital intelligence platform. All trading activity
+            involves risk. Past performance is not indicative of future results.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4 text-xs uppercase tracking-[0.12em]">
+            <Link href="/webinars">Webinars</Link>
+            <Link href="/algos">Algos</Link>
+            <Link href="/university">University</Link>
+            <Link href="/blog">Blog</Link>
+            <Link href="/reviews">Reviews</Link>
+            <Link href="/login">Login</Link>
+            <Link href="/signup">Signup</Link>
+          </div>
+        </div>
+      </footer>
     </main>
-  )
+  );
 }
 
-
-/* ================= COMPONENTS ================= */
-
-function Metric({ number, label }: { number: string; label: string }) {
+function PillarCard({
+  title,
+  description,
+  href,
+}: {
+  title: string;
+  description: string;
+  href: string;
+}) {
   return (
-    <div>
-      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#C6A23A]">
-        {number}
-      </div>
-      <div className="text-xs sm:text-sm text-gray-500 mt-2">
-        {label}
-      </div>
-    </div>
-  )
-}
-
-function Feature({ title }: { title: string }) {
-  return (
-    <div className="bg-[#F9F7F2] p-8 rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
-      <h3 className="text-lg font-semibold text-[#C6A23A]">
-        {title}
-      </h3>
-      <p className="mt-4 text-sm text-gray-600">
-        Designed around disciplined risk allocation and
-        institutional-grade execution logic.
-      </p>
-    </div>
-  )
+    <article className="card p-8">
+      <h3 className="font-serif text-2xl text-jpm-navy mb-3">{title}</h3>
+      <p className="text-sm text-jpm-muted leading-relaxed">{description}</p>
+      <Link
+        href={href}
+        className="inline-block mt-5 text-xs uppercase tracking-[0.12em] text-jpm-gold hover:underline"
+      >
+        Explore
+      </Link>
+    </article>
+  );
 }

@@ -5,14 +5,18 @@ import { useAuth } from "@/lib/auth-provider"
 import { useState } from "react"
 import { motion } from "framer-motion"
 
-export default function LoginClient() {
+export default function LoginClient({
+  initialView = "login",
+}: {
+  initialView?: "login" | "signup";
+}) {
   const { supabase } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const redirect = searchParams.get("redirect")
 
-  const [view, setView] = useState<"login" | "signup" | "verify" | "forgotPassword">("login")
+  const [view, setView] = useState<"login" | "signup" | "verify" | "forgotPassword">(initialView)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
@@ -110,13 +114,13 @@ export default function LoginClient() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-jpm-cream px-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white shadow-2xl rounded-2xl p-12 w-[420px] space-y-6"
+        className="bg-white border border-jpm-border shadow-jpm-md rounded-sm p-10 w-full max-w-[420px] space-y-5"
       >
-        <h1 className="text-3xl font-semibold text-[#C6A23A]">
+        <h1 className="text-2xl font-serif font-bold text-jpm-navy">
           {view === "login" && "Welcome Back"}
           {view === "signup" && "Create Account"}
           {view === "verify" && "Verify Email"}
@@ -126,7 +130,9 @@ export default function LoginClient() {
         {message && (
           <div
             className={`p-3 rounded text-sm ${
-              message.type === "error" ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
+              message.type === "error"
+                ? "bg-red-50 text-red-700 border border-red-100"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-100"
             }`}
           >
             {message.text}
@@ -135,7 +141,7 @@ export default function LoginClient() {
 
         {view === "signup" && (
           <input
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-[#C6A23A] outline-none"
+            className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none"
             placeholder="Full Name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -145,7 +151,7 @@ export default function LoginClient() {
         {view !== "verify" && (
           <>
             <input
-              className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-[#C6A23A] outline-none"
+              className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -154,7 +160,7 @@ export default function LoginClient() {
             {view !== "forgotPassword" && (
               <input
                 type="password"
-                className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-[#C6A23A] outline-none"
+                className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -165,7 +171,7 @@ export default function LoginClient() {
 
         {view === "verify" && (
           <input
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-[#C6A23A] outline-none text-center tracking-widest text-xl"
+            className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none text-center tracking-widest text-xl"
             placeholder="Enter 6-digit Code"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
@@ -177,7 +183,7 @@ export default function LoginClient() {
             <div className="flex justify-end">
               <button
                 onClick={() => setView("forgotPassword")}
-                className="text-sm text-gray-500 hover:text-[#C6A23A]"
+                className="text-sm text-jpm-muted hover:text-jpm-gold"
               >
                 Forgot Password?
               </button>
@@ -185,7 +191,7 @@ export default function LoginClient() {
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+              className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -196,7 +202,7 @@ export default function LoginClient() {
           <button
             onClick={handleSignup}
             disabled={loading}
-            className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+            className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
           >
             {loading ? "Signing up..." : "Sign Up"}
           </button>
@@ -206,7 +212,7 @@ export default function LoginClient() {
           <button
             onClick={handleVerify}
             disabled={loading}
-            className="w-full bg-[#C6A23A] text-white py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+            className="w-full bg-jpm-gold text-white py-3 rounded-sm hover:bg-jpm-gold-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
           >
             {loading ? "Verifying..." : "Verify & Login"}
           </button>
@@ -216,20 +222,20 @@ export default function LoginClient() {
           <button
             onClick={handleForgotPassword}
             disabled={loading}
-            className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+            className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
           >
             {loading ? "Sending..." : "Send Reset Link"}
           </button>
         )}
 
         {view !== "verify" && (
-          <div className="flex justify-between text-sm text-gray-500 mt-4">
+          <div className="flex justify-between text-sm text-jpm-muted mt-4">
             {view === "forgotPassword" ? (
-              <button onClick={() => setView("login")} className="hover:text-[#C6A23A]">
+              <button onClick={() => setView("login")} className="hover:text-jpm-gold">
                 Back to Login
               </button>
             ) : (
-              <button onClick={() => setView(view === "login" ? "signup" : "login")} className="hover:text-[#C6A23A]">
+              <button onClick={() => setView(view === "login" ? "signup" : "login")} className="hover:text-jpm-gold">
                 {view === "login" ? "Need an account? Sign Up" : "Already have an account? Login"}
               </button>
             )}
@@ -240,16 +246,16 @@ export default function LoginClient() {
           <>
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-jpm-border"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-jpm-muted">Or continue with</span>
               </div>
             </div>
 
             <button
               onClick={google}
-              className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2"
+              className="w-full border border-jpm-border text-jpm-navy py-3 rounded-sm hover:bg-jpm-cream transition flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

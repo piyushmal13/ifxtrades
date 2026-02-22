@@ -1,36 +1,18 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "./auth-provider"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-provider";
 
-export function useAdmin() {
-
-  const { session, supabase, loading } = useAuth()
-  const router = useRouter()
-  const [role, setRole] = useState<string | null>(null)
+export function useAdmin(redirectTarget = "/dashboard") {
+  const { role, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-
-    if (!session) return
-
-    const fetchRole = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single()
-
-      if (!data || data.role !== "admin") {
-        router.push("/")
-      } else {
-        setRole("admin")
-      }
+    if (!loading && role !== "admin") {
+      router.push(redirectTarget);
     }
+  }, [loading, redirectTarget, role, router]);
 
-    fetchRole()
-
-  }, [session, supabase, router])
-
-  return { role, loading }
+  return { role, loading };
 }

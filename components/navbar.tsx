@@ -1,116 +1,184 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useAuth } from "@/lib/auth-provider"
-import { useState } from "react"
-import Image from "next/image"
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/lib/auth-provider";
+
+type LinkItem = {
+  label: string;
+  href: string;
+};
+
+const PRIMARY_LINKS: LinkItem[] = [
+  { label: "Home", href: "/" },
+  { label: "Webinars", href: "/webinars" },
+  { label: "Algos", href: "/algos" },
+  { label: "University", href: "/university" },
+  { label: "Blog", href: "/blog" },
+  { label: "Reviews", href: "/reviews" },
+];
 
 export function Navbar() {
-  const pathname = usePathname()
-  const { session, supabase } = useAuth()
-  const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname();
+  const { session, supabase, role } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const isActive = (path: string) => pathname === path ? "text-[#C6A23A] font-bold" : "text-gray-600 hover:text-[#0E1A2B]"
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  const navLinks = [
-    { name: "University", href: "/university" },
-    { name: "Products", href: "/products" },
-    { name: "Algo Arena", href: "/algos" },
-    { name: "Webinars", href: "/webinars" },
-    { name: "About Us", href: "/about" },
-  ]
+  const utilityLinks = useMemo(() => {
+    const links: LinkItem[] = [];
+    if (session) {
+      links.push({ label: "Dashboard", href: "/dashboard" });
+      if (role === "admin") {
+        links.push({ label: "Admin", href: "/admin" });
+      }
+    } else {
+      links.push({ label: "Login", href: "/login" });
+      links.push({ label: "Signup", href: "/signup" });
+    }
+    return links;
+  }, [session, role]);
 
-  const authLinks = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Test Strategy", href: "/test-strategy" },
-    { name: "Explore", href: "/blogs" },
-  ]
+  const getLinkClass = (href: string, mobile = false) => {
+    const isActive = pathname === href;
+    const base = "text-xs font-semibold uppercase tracking-[0.14em] transition-colors";
+    if (mobile) {
+      return `${base} block py-3 ${
+        isActive ? "text-jpm-gold" : "text-jpm-navy hover:text-jpm-gold"
+      }`;
+    }
+    if (isActive) {
+      return `${base} text-jpm-gold`;
+    }
+    return scrolled
+      ? `${base} text-jpm-navy hover:text-jpm-gold`
+      : `${base} text-white hover:text-jpm-gold`;
+  };
+
+  const utilityClass = scrolled
+    ? "text-xs font-semibold uppercase tracking-[0.14em] text-jpm-navy hover:text-jpm-gold transition-colors"
+    : "text-xs font-semibold uppercase tracking-[0.14em] text-white hover:text-jpm-gold transition-colors";
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-sm transition-all h-20">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-12 h-12 md:w-14 md:h-14">
-            <Image src="/logo.png" alt="IFX Logo" fill className="object-contain" priority />
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-jpm-cream/95 border-b border-jpm-border backdrop-blur-md py-2 shadow-jpm"
+          : "bg-transparent py-4"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto h-14 md:h-16 px-4 md:px-8 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative w-9 h-9 md:w-10 md:h-10">
+            <Image src="/logo.png" alt="IFXTrades Logo" fill className="object-contain" priority />
           </div>
+          <span
+            className={`font-serif text-lg font-bold tracking-tight ${
+              scrolled ? "text-jpm-navy" : "text-white"
+            }`}
+          >
+            IFX<span className="text-jpm-gold">Trades</span>
+          </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className={`text-sm font-medium transition-colors duration-200 ${isActive(link.href)}`}>
-              {link.name}
+          {PRIMARY_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className={getLinkClass(item.href)}>
+              {item.label}
             </Link>
           ))}
-          
-          {session && (
-            <>
-              <div className="h-5 w-px bg-gray-300 mx-2"></div>
-              {authLinks.map((link) => (
-                <Link key={link.name} href={link.href} className={`text-sm font-medium transition-colors duration-200 ${isActive(link.href)}`}>
-                  {link.name}
-                </Link>
-              ))}
-            </>
-          )}
         </div>
 
-        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          {session ? (
-            <button 
+          {utilityLinks.map((item) =>
+            item.href === "/signup" ? (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="bg-jpm-navy text-white px-5 py-2.5 rounded-sm text-xs font-semibold uppercase tracking-[0.14em] hover:bg-jpm-navy-light transition-colors"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={utilityClass}
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
+          {session && (
+            <button
               onClick={() => supabase.auth.signOut()}
-              className="text-[#0E1A2B] font-medium hover:text-red-600 transition text-sm"
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-red-700 hover:text-red-800 transition-colors"
             >
               Sign Out
             </button>
-          ) : (
-            <Link href="/signup" className="inline-block bg-[#0E1A2B] text-white px-6 py-2.5 rounded-sm text-xs md:text-sm font-bold hover:bg-[#C6A23A] transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-widest border border-[#0E1A2B] hover:border-[#C6A23A]">
-              Sign Up
-            </Link>
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-[#0E1A2B] p-2">
-          <span className="text-2xl">{isOpen ? "✕" : "☰"}</span>
+        <button
+          className={`md:hidden p-2 ${scrolled ? "text-jpm-navy" : "text-white"}`}
+          onClick={() => setIsOpen((state) => !state)}
+          aria-label="Toggle navigation"
+        >
+          {isOpen ? "X" : "="}
         </button>
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white/98 backdrop-blur-xl border-t border-gray-100 absolute w-full left-0 top-20 shadow-2xl py-8 px-6 flex flex-col gap-6 animate-in slide-in-from-top-5 z-40 h-screen">
-          {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className={`block py-2 text-lg font-medium ${isActive(link.href)}`} onClick={() => setIsOpen(false)}>
-              {link.name}
-            </Link>
-          ))}
-
-          {session && (
-            <div className="border-t border-gray-100 pt-4 mt-2">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Member Access</p>
-              {authLinks.map((link) => (
-                <Link key={link.name} href={link.href} className={`block py-2 text-lg font-medium ${isActive(link.href)}`} onClick={() => setIsOpen(false)}>
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          <div className="pt-6 mt-2 border-t border-gray-100">
-            {session ? (
-              <button onClick={() => { supabase.auth.signOut(); setIsOpen(false) }} className="block w-full text-center border border-gray-200 text-gray-600 px-5 py-4 rounded-sm font-medium hover:bg-gray-50 transition">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="md:hidden bg-white border-t border-jpm-border shadow-jpm-md px-6 py-4"
+          >
+            {PRIMARY_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={getLinkClass(item.href, true)}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {utilityLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={getLinkClass(item.href, true)}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {session && (
+              <button
+                onClick={() => {
+                  supabase.auth.signOut();
+                  setIsOpen(false);
+                }}
+                className="mt-3 w-full text-left text-xs font-semibold uppercase tracking-[0.14em] text-red-700 hover:text-red-800 transition-colors"
+              >
                 Sign Out
               </button>
-            ) : (
-              <Link href="/signup" className="block w-full text-center bg-[#0E1A2B] text-white px-5 py-4 rounded-sm font-bold hover:bg-[#C6A23A] transition uppercase tracking-wider" onClick={() => setIsOpen(false)}>
-                Sign Up
-              </Link>
             )}
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
-  )
+  );
 }

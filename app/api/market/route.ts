@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
 export async function GET() {
   return NextResponse.json({
-    bitcoin: 68000,
-    ethereum: 3500,
-    gold: 2300,
-    eurusd: 1.09
-  })
+    xauusd: 2314.2,
+    eurusd: 1.0823,
+    dxy: 103.4,
+    us10y: 4.21,
+    spx: 5188.5,
+  });
 }
