@@ -25,22 +25,28 @@ export default async function ReviewsPage() {
           risk governance, and institutional communication quality.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-12">
-          {reviews.map((review) => (
-            <article key={review.id} className="card p-8">
-              <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-3">
-                {review.isFeatured ? "Featured Review" : "Review"}
-              </p>
-              <h2 className="font-serif text-2xl text-jpm-navy">{review.companyName}</h2>
-              <p className="mt-4 text-sm text-jpm-muted leading-relaxed">"{review.quote}"</p>
-              {review.brokerEndorsement && (
-                <p className="mt-5 text-xs uppercase tracking-[0.12em] text-jpm-muted">
-                  Endorsement: {review.brokerEndorsement}
+        {reviews.length === 0 ? (
+          <p className="card p-6 mt-12 text-sm text-jpm-muted">
+            No reviews are available yet.
+          </p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6 mt-12">
+            {reviews.map((review) => (
+              <article key={review.id} className="card p-8">
+                <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-3">
+                  {review.isFeatured ? "Featured Review" : "Review"}
                 </p>
-              )}
-            </article>
-          ))}
-        </div>
+                <h2 className="font-serif text-2xl text-jpm-navy">{review.companyName}</h2>
+                <p className="mt-4 text-sm text-jpm-muted leading-relaxed">"{review.quote}"</p>
+                {review.brokerEndorsement && (
+                  <p className="mt-5 text-xs uppercase tracking-[0.12em] text-jpm-muted">
+                    Endorsement: {review.brokerEndorsement}
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

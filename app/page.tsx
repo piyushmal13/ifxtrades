@@ -79,34 +79,46 @@ export default async function HomePage() {
               View Blog
             </Link>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {posts.slice(0, 3).map((post) => (
-              <article key={post.id} className="card p-6">
-                <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">{post.category}</p>
-                <h3 className="font-serif text-xl text-jpm-navy mb-3">{post.title}</h3>
-                <p className="text-sm text-jpm-muted leading-relaxed">{post.excerpt || post.body.slice(0, 140)}</p>
-                <Link href={`/blog/${post.slug}`} className="inline-block mt-5 text-xs uppercase tracking-[0.12em] text-jpm-navy hover:text-jpm-gold">
-                  Read Analysis
-                </Link>
-              </article>
-            ))}
-          </div>
+          {posts.length === 0 ? (
+            <p className="card p-6 text-sm text-jpm-muted">
+              Research posts will appear here once published.
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {posts.slice(0, 3).map((post) => (
+                <article key={post.id} className="card p-6">
+                  <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">{post.category}</p>
+                  <h3 className="font-serif text-xl text-jpm-navy mb-3">{post.title}</h3>
+                  <p className="text-sm text-jpm-muted leading-relaxed">{post.excerpt || post.body.slice(0, 140)}</p>
+                  <Link href={`/blog/${post.slug}`} className="inline-block mt-5 text-xs uppercase tracking-[0.12em] text-jpm-navy hover:text-jpm-gold">
+                    Read Analysis
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       <section className="section-spacing px-6 bg-white border-y border-jpm-border">
         <div className="max-w-7xl mx-auto">
           <h2 className="font-serif text-3xl text-jpm-navy mb-10">Reviews and Authority</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {reviews.slice(0, 2).map((review) => (
-              <article key={review.id} className="card p-8">
-                <p className="text-sm text-jpm-muted leading-relaxed">"{review.quote}"</p>
-                <p className="mt-6 text-xs uppercase tracking-[0.14em] text-jpm-gold">
-                  {review.companyName}
-                </p>
-              </article>
-            ))}
-          </div>
+          {reviews.length === 0 ? (
+            <p className="card p-6 text-sm text-jpm-muted">
+              Partner reviews will appear here after verification.
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {reviews.slice(0, 2).map((review) => (
+                <article key={review.id} className="card p-8">
+                  <p className="text-sm text-jpm-muted leading-relaxed">"{review.quote}"</p>
+                  <p className="mt-6 text-xs uppercase tracking-[0.14em] text-jpm-gold">
+                    {review.companyName}
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
           <Link href="/reviews" className="inline-block mt-8 btn-outline">
             View All Reviews
           </Link>

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logAdminAction } from "@/lib/admin/audit";
+import { algoCreateSchema } from "@/lib/validation/admin";
 
 export async function GET() {
   const guard = await requireAdminApi();
@@ -23,32 +25,45 @@ export async function POST(request: Request) {
   const guard = await requireAdminApi();
   if (guard.error) return guard.error;
 
-  const payload = await request.json();
-  if (!payload?.name || !payload?.slug || !payload?.description) {
-    return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+  const payload = algoCreateSchema.safeParse(await request.json());
+  if (!payload.success) {
+    return NextResponse.json(
+      { error: payload.error.issues[0]?.message ?? "Invalid request body." },
+      { status: 400 },
+    );
   }
 
   const admin = createSupabaseAdminClient();
+  const input = payload.data;
   const { data, error } = await admin
     .from("algorithms")
     .insert({
-      name: payload.name,
-      slug: payload.slug,
-      description: payload.description,
-      risk_classification: payload.risk_classification ?? "MEDIUM",
-      monthly_roi_pct: Number(payload.monthly_roi_pct ?? 0),
-      min_capital: Number(payload.min_capital ?? 0),
-      price: Number(payload.price ?? 0),
-      compliance_disclaimer:
-        payload.compliance_disclaimer ??
-        "Past performance is not indicative of future results.",
-      is_active: payload.is_active !== false,
+      name: input.name,
+      slug: input.slug,
+      description: input.description,
+      risk_classification: input.risk_classification,
+      monthly_roi_pct: input.monthly_roi_pct,
+      min_capital: input.min_capital,
+      price: input.price,
+      compliance_disclaimer: input.compliance_disclaimer,
+      image_url: input.image_url ?? null,
+      is_active: input.is_active,
     })
     .select("*")
     .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (guard.auth?.user?.id && data?.id) {
+    await logAdminAction(admin, {
+      actorId: guard.auth.user.id,
+      action: "create",
+      entity: "algorithms",
+      entityId: data.id,
+      payload: input,
+    });
   }
 
   return NextResponse.json({ item: data });

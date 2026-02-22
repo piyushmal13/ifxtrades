@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 const TICKER_DATA = [
   { symbol: "BTC", price: "64,230.50", change: "+2.4%" },
@@ -18,8 +19,15 @@ export function Ticker() {
     <div className="w-full bg-white border-t border-b border-gray-200 py-3 overflow-hidden flex items-center relative z-40">
       {/* Black Logo Area */}
       <div className="absolute left-0 top-0 bottom-0 bg-white z-10 px-4 flex items-center border-r border-gray-100 shadow-sm">
-        <div className="font-serif font-bold text-xl text-black tracking-tighter">
-          IFX<span className="text-[#C6A23A]">.</span>
+        <div className="h-8">
+          <Image 
+            src="/logo.png" 
+            alt="IFX Logo" 
+            width={0} 
+            height={0} 
+            sizes="100vw" 
+            className="h-full w-auto object-contain" 
+          />
         </div>
       </div>
 

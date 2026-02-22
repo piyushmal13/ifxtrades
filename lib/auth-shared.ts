@@ -27,10 +27,5 @@ export async function resolveUserRole(
     return "admin";
   }
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
-  if (adminEmail && user.email?.toLowerCase() === adminEmail) {
-    return "admin";
-  }
-
   return "user";
 }

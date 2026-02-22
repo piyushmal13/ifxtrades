@@ -58,13 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return "admin";
       }
 
-      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
-      const fallbackRole =
-        adminEmail && currentUser.email?.toLowerCase() === adminEmail
-          ? "admin"
-          : "user";
-      setRole(fallbackRole);
-      return fallbackRole;
+      setRole("user");
+      return "user";
     },
     [supabase],
   );

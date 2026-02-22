@@ -22,15 +22,19 @@ export default async function AdminBlogPage() {
       rows={posts.map((item) => ({
         id: item.id,
         title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        body: item.body,
         category: item.category,
-        author: item.authorName,
-        published: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : "Draft",
+        meta_title: item.title,
+        meta_description: item.excerpt,
+        published_at: item.publishedAt ?? "",
       }))}
       columns={[
         { key: "title", label: "Title" },
+        { key: "slug", label: "Slug" },
         { key: "category", label: "Category" },
-        { key: "author", label: "Author" },
-        { key: "published", label: "Published" },
+        { key: "published_at", label: "Published" },
       ]}
     />
   );

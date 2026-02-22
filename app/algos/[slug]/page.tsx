@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAlgoBySlug } from "@/lib/data/platform";
 import { buildMetadata, productJsonLd } from "@/lib/seo";
+import BuyLicenseButton from "@/components/algos/BuyLicenseButton";
 
 type Params = {
   params: Promise<{ slug: string }>;
@@ -73,6 +74,7 @@ export default async function AlgoDetailPage({ params }: Params) {
           <p className="mt-2 text-xs text-jpm-muted uppercase tracking-[0.12em]">
             License fee
           </p>
+          <BuyLicenseButton algoId={algo.id} algoSlug={algo.slug} price={algo.price} />
         </div>
 
         <section className="mt-10">

@@ -24,32 +24,38 @@ export default async function WebinarsPage() {
           and seat governance.
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-          {webinars.map((webinar) => (
-            <article key={webinar.id} className="card p-7 flex flex-col">
-              <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">
-                {webinar.isPremium ? "Premium" : "Open"} Webinar
-              </p>
-              <h2 className="font-serif text-2xl text-jpm-navy">{webinar.title}</h2>
-              <p className="mt-3 text-sm text-jpm-muted leading-relaxed flex-1">
-                {webinar.description}
-              </p>
-              <div className="mt-5 space-y-1 text-xs uppercase tracking-[0.12em] text-jpm-muted">
-                <p>Venue: {webinar.venue}</p>
-                <p>Seats Remaining: {webinar.seatsRemaining}</p>
-                <p>Sponsor Tier: {webinar.sponsorTier}</p>
-              </div>
-              <div className="mt-6 flex items-center justify-between">
-                <p className="font-serif text-2xl text-jpm-navy">
-                  {webinar.price > 0 ? `$${webinar.price.toLocaleString()}` : "Free"}
+        {webinars.length === 0 ? (
+          <p className="card p-6 mt-12 text-sm text-jpm-muted">
+            No webinars are available right now.
+          </p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            {webinars.map((webinar) => (
+              <article key={webinar.id} className="card p-7 flex flex-col">
+                <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">
+                  {webinar.isPremium ? "Premium" : "Open"} Webinar
                 </p>
-                <Link href={`/webinars/${webinar.slug}`} className="btn-primary">
-                  Details
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+                <h2 className="font-serif text-2xl text-jpm-navy">{webinar.title}</h2>
+                <p className="mt-3 text-sm text-jpm-muted leading-relaxed flex-1">
+                  {webinar.description}
+                </p>
+                <div className="mt-5 space-y-1 text-xs uppercase tracking-[0.12em] text-jpm-muted">
+                  <p>Venue: {webinar.venue}</p>
+                  <p>Seats Remaining: {webinar.seatsRemaining}</p>
+                  <p>Sponsor Tier: {webinar.sponsorTier}</p>
+                </div>
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="font-serif text-2xl text-jpm-navy">
+                    {webinar.price > 0 ? `$${webinar.price.toLocaleString()}` : "Free"}
+                  </p>
+                  <Link href={`/webinars/${webinar.slug}`} className="btn-primary">
+                    Details
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

@@ -151,6 +151,54 @@ export type CourseProgressRow = {
   completedAt: string | null;
 };
 
+export type WebinarAgendaItemRow = {
+  id: string;
+  webinar_id: string;
+  time: string | null;
+  topic: string;
+  speaker_name: string;
+  speaker_linkedin: string | null;
+  speaker_image_url: string | null;
+  sort_order: number;
+};
+
+export type WebinarFaqRow = {
+  id: string;
+  webinar_id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+};
+
+export type WebinarSponsorRow = {
+  id: string;
+  webinar_id: string;
+  tier: string;
+  name: string;
+  logo_url: string | null;
+  link_url: string | null;
+};
+
+export type CourseLessonRow = {
+  id: string;
+  course_id: string;
+  title: string;
+  sort_order: number;
+  duration_minutes: number | null;
+  video_url: string | null;
+  pdf_url: string | null;
+  is_free: boolean;
+};
+
+export type AlgoSnapshotRow = {
+  id: string;
+  algo_id: string;
+  period_start: string | null;
+  period_end: string | null;
+  roi_pct: number;
+  drawdown_pct: number;
+};
+
 const FALLBACK_WEBINARS: WebinarSummary[] = [
   {
     id: "w1",
@@ -295,6 +343,10 @@ const FALLBACK_REVIEWS: ReviewSummary[] = [
   },
 ];
 
+const enableDemoFallback =
+  process.env.NODE_ENV !== "production" &&
+  process.env.IFX_ENABLE_DEMO_FALLBACK === "true";
+
 function asString(row: Row, keys: string[], fallback = "") {
   for (const key of keys) {
     const value = row[key];
@@ -378,7 +430,7 @@ async function firstSuccessfulCount(
 export async function listWebinars() {
   const rows = await firstSuccessfulRows(["webinars"], 36);
   if (!rows.length) {
-    return FALLBACK_WEBINARS;
+    return enableDemoFallback ? FALLBACK_WEBINARS : [];
   }
 
   const supabase = await createSupabaseServerClient();
@@ -418,6 +470,43 @@ export async function listWebinars() {
     const bDate = b.startsAt ? new Date(b.startsAt).getTime() : 0;
     return aDate - bDate;
   });
+}
+
+export async function listWebinarAgendaItems(): Promise<WebinarAgendaItemRow[]> {
+  const rows = await firstSuccessfulRows(["webinar_agenda_items"], 500);
+  return rows.map((row) => ({
+    id: asString(row, ["id"], crypto.randomUUID()),
+    webinar_id: asString(row, ["webinar_id"], ""),
+    time: asIso(row, ["time"]),
+    topic: asString(row, ["topic"], ""),
+    speaker_name: asString(row, ["speaker_name"], ""),
+    speaker_linkedin: asString(row, ["speaker_linkedin"]) || null,
+    speaker_image_url: asString(row, ["speaker_image_url"]) || null,
+    sort_order: asNumber(row, ["sort_order"], 0),
+  }));
+}
+
+export async function listWebinarFaqs(): Promise<WebinarFaqRow[]> {
+  const rows = await firstSuccessfulRows(["webinar_faqs"], 500);
+  return rows.map((row) => ({
+    id: asString(row, ["id"], crypto.randomUUID()),
+    webinar_id: asString(row, ["webinar_id"], ""),
+    question: asString(row, ["question"], ""),
+    answer: asString(row, ["answer"], ""),
+    sort_order: asNumber(row, ["sort_order"], 0),
+  }));
+}
+
+export async function listWebinarSponsors(): Promise<WebinarSponsorRow[]> {
+  const rows = await firstSuccessfulRows(["webinar_sponsors"], 500);
+  return rows.map((row) => ({
+    id: asString(row, ["id"], crypto.randomUUID()),
+    webinar_id: asString(row, ["webinar_id"], ""),
+    tier: asString(row, ["tier"], "SILVER"),
+    name: asString(row, ["name"], ""),
+    logo_url: asString(row, ["logo_url"]) || null,
+    link_url: asString(row, ["link_url"]) || null,
+  }));
 }
 
 export async function getWebinarBySlug(slug: string): Promise<WebinarDetail | null> {
@@ -479,37 +568,53 @@ export async function getWebinarBySlug(slug: string): Promise<WebinarDetail | nu
   };
 }
 
-export async function listAlgos() {
+export async function listAlgoSnapshots(): Promise<AlgoSnapshotRow[]> {
+  const rows = await firstSuccessfulRows(["algo_performance_snapshots"], 1000);
+  return rows.map((row) => ({
+    id: asString(row, ["id"], crypto.randomUUID()),
+    algo_id: asString(row, ["algo_id"], ""),
+    period_start: asIso(row, ["period_start"]),
+    period_end: asIso(row, ["period_end"]),
+    roi_pct: asNumber(row, ["roi_pct"], 0),
+    drawdown_pct: asNumber(row, ["drawdown_pct"], 0),
+  }));
+}
+
+export async function listAlgos(options: { includeInactive?: boolean } = {}) {
   const rows = await firstSuccessfulRows(["algorithms", "algos"], 36);
   if (!rows.length) {
-    return FALLBACK_ALGOS;
+    return enableDemoFallback ? FALLBACK_ALGOS : [];
   }
 
-  return rows
-    .map(
-      (row): AlgoSummary => ({
-        id: asString(row, ["id"], crypto.randomUUID()),
-        slug: asString(row, ["slug"], asString(row, ["id"], "algo")),
-        name: asString(row, ["name", "title"], "Institutional Strategy"),
-        description: asString(row, ["description"], "Institutional strategy."),
-        riskClass: asString(
-          row,
-          ["risk_classification", "risk_level"],
-          "MEDIUM",
-        ),
-        monthlyRoi: asNumber(row, ["monthly_roi_pct", "monthly_roi"], 0),
-        minCapital: asNumber(row, ["min_capital", "min_investment"], 0),
-        price: asNumber(row, ["price"], 0),
-        isActive: asBoolean(row, ["is_active"], true),
-        complianceDisclaimer: asString(
-          row,
-          ["compliance_disclaimer"],
-          "Past performance is not indicative of future results.",
-        ),
-        imageUrl: asString(row, ["image_url"]) || null,
-      }),
-    )
-    .filter((item) => item.isActive);
+  const mapped = rows.map(
+    (row): AlgoSummary => ({
+      id: asString(row, ["id"], crypto.randomUUID()),
+      slug: asString(row, ["slug"], asString(row, ["id"], "algo")),
+      name: asString(row, ["name", "title"], "Institutional Strategy"),
+      description: asString(row, ["description"], "Institutional strategy."),
+      riskClass: asString(
+        row,
+        ["risk_classification", "risk_level"],
+        "MEDIUM",
+      ),
+      monthlyRoi: asNumber(row, ["monthly_roi_pct", "monthly_roi"], 0),
+      minCapital: asNumber(row, ["min_capital", "min_investment"], 0),
+      price: asNumber(row, ["price"], 0),
+      isActive: asBoolean(row, ["is_active"], true),
+      complianceDisclaimer: asString(
+        row,
+        ["compliance_disclaimer"],
+        "Past performance is not indicative of future results.",
+      ),
+      imageUrl: asString(row, ["image_url"]) || null,
+    }),
+  );
+
+  if (options.includeInactive) {
+    return mapped;
+  }
+
+  return mapped.filter((item) => item.isActive);
 }
 
 export async function getAlgoBySlug(slug: string): Promise<AlgoDetail | null> {
@@ -542,7 +647,7 @@ export async function getAlgoBySlug(slug: string): Promise<AlgoDetail | null> {
 export async function listCourses() {
   const courseRows = await firstSuccessfulRows(["university_courses", "courses"], 40);
   if (!courseRows.length) {
-    return FALLBACK_COURSES;
+    return enableDemoFallback ? FALLBACK_COURSES : [];
   }
 
   const lessons = await firstSuccessfulRows(["course_lessons", "lessons"], 500);
@@ -596,9 +701,24 @@ export async function getCourseBySlug(slug: string): Promise<CourseDetail | null
   };
 }
 
+export async function listCourseLessons(): Promise<CourseLessonRow[]> {
+  const rows = await firstSuccessfulRows(["course_lessons", "lessons"], 1200);
+  return rows.map((row) => ({
+    id: asString(row, ["id"], crypto.randomUUID()),
+    course_id: asString(row, ["course_id"], ""),
+    title: asString(row, ["title"], ""),
+    sort_order: asNumber(row, ["sort_order"], 0),
+    duration_minutes:
+      typeof row.duration_minutes === "number" ? row.duration_minutes : null,
+    video_url: asString(row, ["video_url"]) || null,
+    pdf_url: asString(row, ["pdf_url"]) || null,
+    is_free: asBoolean(row, ["is_free"], false),
+  }));
+}
+
 export async function listBlogPosts(category = "all") {
   const rows = await firstSuccessfulRows(["blog_posts"], 80);
-  const source = rows.length ? rows : FALLBACK_BLOG;
+  const source = rows.length ? rows : enableDemoFallback ? FALLBACK_BLOG : [];
 
   const mapped = source.map(
     (row): BlogPostSummary => ({
@@ -652,7 +772,7 @@ export async function getBlogPostBySlug(slug: string) {
 
 export async function listReviews() {
   const rows = await firstSuccessfulRows(["reviews"], 50);
-  const source = rows.length ? rows : FALLBACK_REVIEWS;
+  const source = rows.length ? rows : enableDemoFallback ? FALLBACK_REVIEWS : [];
 
   return source.map(
     (row): ReviewSummary => ({

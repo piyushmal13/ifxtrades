@@ -18,14 +18,16 @@ export default async function AdminReviewsPage() {
       ]}
       rows={reviews.map((item) => ({
         id: item.id,
-        company: item.companyName,
-        featured: item.isFeatured ? "Yes" : "No",
-        endorsement: item.brokerEndorsement ? "Available" : "-",
+        company_name: item.companyName,
+        quote: item.quote,
+        video_url: item.videoUrl ?? "",
+        broker_endorsement: item.brokerEndorsement ?? "",
+        is_featured: item.isFeatured,
       }))}
       columns={[
-        { key: "company", label: "Company" },
-        { key: "featured", label: "Featured" },
-        { key: "endorsement", label: "Endorsement" },
+        { key: "company_name", label: "Company" },
+        { key: "is_featured", label: "Featured" },
+        { key: "broker_endorsement", label: "Endorsement" },
       ]}
     />
   );

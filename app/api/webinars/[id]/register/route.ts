@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, { params }: Params) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
+  const admin = createSupabaseAdminClient();
 
   const {
     data: { user },
@@ -15,9 +17,9 @@ export async function POST(_request: Request, { params }: Params) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: webinar, error: webinarError } = await supabase
+  const { data: webinar, error: webinarError } = await admin
     .from("webinars")
-    .select("id, capacity, registration_deadline")
+    .select("id, slug, capacity, registration_deadline, is_premium, price")
     .eq("id", id)
     .maybeSingle();
 
@@ -32,7 +34,32 @@ export async function POST(_request: Request, { params }: Params) {
     return NextResponse.json({ error: "Registration deadline passed" }, { status: 400 });
   }
 
-  const { count } = await supabase
+  const requiresPayment =
+    Boolean(webinar.is_premium) || Number(webinar.price ?? 0) > 0;
+  if (requiresPayment) {
+    const { data: payment } = await admin
+      .from("payments")
+      .select("id, status")
+      .eq("user_id", user.id)
+      .eq("product_type", "webinar")
+      .eq("product_id", webinar.id)
+      .in("status", ["paid", "succeeded", "complete", "success"])
+      .maybeSingle();
+
+    if (!payment) {
+      return NextResponse.json(
+        {
+          error: "Payment required for this webinar.",
+          checkoutRequired: true,
+          webinarId: webinar.id,
+          webinarSlug: webinar.slug,
+        },
+        { status: 402 },
+      );
+    }
+  }
+
+  const { count } = await admin
     .from("webinar_registrations")
     .select("*", { head: true, count: "exact" })
     .eq("webinar_id", webinar.id)
@@ -42,7 +69,7 @@ export async function POST(_request: Request, { params }: Params) {
     return NextResponse.json({ error: "Seat limit reached" }, { status: 400 });
   }
 
-  const { error } = await supabase.from("webinar_registrations").insert({
+  const { error } = await admin.from("webinar_registrations").insert({
     webinar_id: webinar.id,
     user_id: user.id,
     status: "confirmed",

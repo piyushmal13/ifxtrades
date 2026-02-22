@@ -24,26 +24,32 @@ export default async function UniversityPage() {
           beginner, intermediate, and institutional levels.
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-          {courses.map((course) => (
-            <article key={course.id} className="card p-7 flex flex-col">
-              <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">
-                {course.category}
-              </p>
-              <h2 className="font-serif text-2xl text-jpm-navy">{course.title}</h2>
-              <p className="mt-3 text-sm text-jpm-muted leading-relaxed flex-1">
-                {course.description}
-              </p>
-              <div className="mt-5 text-xs uppercase tracking-[0.12em] text-jpm-muted">
-                <p>Lessons: {course.lessonCount}</p>
-                <p>Plan: {course.planRequired}</p>
-              </div>
-              <Link href={`/university/${course.slug}`} className="btn-primary mt-6 w-fit">
-                View Syllabus
-              </Link>
-            </article>
-          ))}
-        </div>
+        {courses.length === 0 ? (
+          <p className="card p-6 mt-12 text-sm text-jpm-muted">
+            No courses are available right now.
+          </p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            {courses.map((course) => (
+              <article key={course.id} className="card p-7 flex flex-col">
+                <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">
+                  {course.category}
+                </p>
+                <h2 className="font-serif text-2xl text-jpm-navy">{course.title}</h2>
+                <p className="mt-3 text-sm text-jpm-muted leading-relaxed flex-1">
+                  {course.description}
+                </p>
+                <div className="mt-5 text-xs uppercase tracking-[0.12em] text-jpm-muted">
+                  <p>Lessons: {course.lessonCount}</p>
+                  <p>Plan: {course.planRequired}</p>
+                </div>
+                <Link href={`/university/${course.slug}`} className="btn-primary mt-6 w-fit">
+                  View Syllabus
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

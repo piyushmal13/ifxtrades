@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { buildMetadata, eventJsonLd } from "@/lib/seo";
 import { getWebinarBySlug } from "@/lib/data/platform";
 import RegisterButton from "@/components/webinar/RegisterButton";
+import Countdown from "@/components/webinar/Countdown";
 
 type Params = {
   params: Promise<{ slug: string }>;
@@ -40,6 +41,7 @@ export default async function WebinarDetailPage({ params }: Params) {
   const registrationOpen = !deadline || deadline > now;
   const hasSeats = webinar.seatsRemaining > 0;
   const registrationState = registrationOpen && hasSeats ? "Open" : "Closed";
+  const requiresPayment = webinar.isPremium || webinar.price > 0;
   const startDate = webinar.startsAt ? new Date(webinar.startsAt) : null;
   const endDate = startDate ? new Date(startDate.getTime() + 60 * 60 * 1000) : null;
   const toCal = (value: Date) => value.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
@@ -76,11 +78,28 @@ export default async function WebinarDetailPage({ params }: Params) {
           {webinar.description}
         </p>
 
+        {webinar.heroImageUrl && (
+          <div className="w-full h-64 md:h-80 mt-8 rounded-sm overflow-hidden border border-jpm-border">
+            <img
+              src={webinar.heroImageUrl}
+              alt={`${webinar.title} hero`}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )}
+
         <div className="grid md:grid-cols-4 gap-4 mt-8">
           <Metric label="Venue" value={webinar.venue} />
           <Metric label="Sponsor Tier" value={webinar.sponsorTier} />
           <Metric label="Seats Remaining" value={`${webinar.seatsRemaining}`} />
           <Metric label="Registration" value={registrationState} />
+        </div>
+
+        <div className="card p-5 mt-6">
+          <p className="text-xs uppercase tracking-[0.12em] text-jpm-muted mb-2">
+            Webinar Countdown
+          </p>
+          <Countdown deadlineIso={webinar.deadline} startsAtIso={webinar.startsAt} />
         </div>
 
         <div className="card p-7 mt-8">
@@ -97,11 +116,18 @@ export default async function WebinarDetailPage({ params }: Params) {
               <RegisterButton
                 webinarId={webinar.id}
                 webinarSlug={webinar.slug}
+                requiresPayment={requiresPayment}
+                price={webinar.price}
                 disabled={!registrationOpen || !hasSeats}
               />
               {googleCalendarLink && (
                 <Link href={googleCalendarLink} target="_blank" className="btn-outline">
                   Add to Calendar
+                </Link>
+              )}
+              {webinar.promoVideoUrl && (
+                <Link href={webinar.promoVideoUrl} target="_blank" className="btn-outline">
+                  Watch Promo
                 </Link>
               )}
               <Link href="/webinars" className="btn-outline">
@@ -127,8 +153,32 @@ export default async function WebinarDetailPage({ params }: Params) {
                     <p className="text-xs uppercase tracking-[0.12em] text-jpm-muted">
                       {item.time ? new Date(item.time).toLocaleString() : "TBA"}
                     </p>
-                    <p className="font-semibold text-jpm-navy mt-1">{item.topic}</p>
-                    <p className="text-sm text-jpm-muted mt-1">{item.speakerName}</p>
+                    <div className="mt-2 flex items-center gap-3">
+                      {item.speakerImageUrl ? (
+                        <img
+                          src={item.speakerImageUrl}
+                          alt={item.speakerName}
+                          className="h-12 w-12 rounded-full object-cover border border-jpm-border"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-full border border-jpm-border bg-jpm-ivory flex items-center justify-center text-xs text-jpm-muted">
+                          {item.speakerName.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-jpm-navy">{item.topic}</p>
+                        <p className="text-sm text-jpm-muted">{item.speakerName}</p>
+                        {item.speakerLinkedin && (
+                          <Link
+                            href={item.speakerLinkedin}
+                            target="_blank"
+                            className="text-xs text-jpm-gold hover:underline"
+                          >
+                            LinkedIn
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -164,6 +214,24 @@ export default async function WebinarDetailPage({ params }: Params) {
                     {sponsor.tier}
                   </p>
                   <p className="font-semibold text-jpm-navy mt-1">{sponsor.name}</p>
+                  {sponsor.logoUrl && (
+                    <div className="h-12 w-full mt-3">
+                      <img
+                        src={sponsor.logoUrl}
+                        alt={`${sponsor.name} logo`}
+                        className="h-full w-full object-contain object-left"
+                      />
+                    </div>
+                  )}
+                  {sponsor.linkUrl && (
+                    <Link
+                      href={sponsor.linkUrl}
+                      target="_blank"
+                      className="text-xs text-jpm-gold hover:underline mt-3 inline-block"
+                    >
+                      Visit Sponsor
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>

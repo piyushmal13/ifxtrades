@@ -52,25 +52,31 @@ export default async function BlogPage({
           })}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-          {posts.map((post) => (
-            <article key={post.id} className="card p-7">
-              <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">
-                {post.category}
-              </p>
-              <h2 className="font-serif text-2xl text-jpm-navy">{post.title}</h2>
-              <p className="mt-3 text-sm text-jpm-muted leading-relaxed">
-                {post.excerpt || post.body.slice(0, 150)}
-              </p>
-              <p className="mt-4 text-xs uppercase tracking-[0.12em] text-jpm-muted">
-                {post.authorName}
-              </p>
-              <Link href={`/blog/${post.slug}`} className="inline-block mt-5 btn-outline">
-                Read
-              </Link>
-            </article>
-          ))}
-        </div>
+        {posts.length === 0 ? (
+          <p className="card p-6 mt-10 text-sm text-jpm-muted">
+            No blog posts are published yet.
+          </p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            {posts.map((post) => (
+              <article key={post.id} className="card p-7">
+                <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-2">
+                  {post.category}
+                </p>
+                <h2 className="font-serif text-2xl text-jpm-navy">{post.title}</h2>
+                <p className="mt-3 text-sm text-jpm-muted leading-relaxed">
+                  {post.excerpt || post.body.slice(0, 150)}
+                </p>
+                <p className="mt-4 text-xs uppercase tracking-[0.12em] text-jpm-muted">
+                  {post.authorName}
+                </p>
+                <Link href={`/blog/${post.slug}`} className="inline-block mt-5 btn-outline">
+                  Read
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

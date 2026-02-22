@@ -6,8 +6,13 @@ const NAV_ITEMS = [
   { href: "/admin/crm", label: "CRM" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/webinars", label: "Webinars" },
+  { href: "/admin/webinar-agenda", label: "Webinar Agenda" },
+  { href: "/admin/webinar-faqs", label: "Webinar FAQs" },
+  { href: "/admin/webinar-sponsors", label: "Webinar Sponsors" },
   { href: "/admin/algos", label: "Algos" },
+  { href: "/admin/algo-snapshots", label: "Algo Snapshots" },
   { href: "/admin/university", label: "University" },
+  { href: "/admin/course-lessons", label: "Course Lessons" },
   { href: "/admin/blog", label: "Blog" },
   { href: "/admin/reviews", label: "Reviews" },
 ];

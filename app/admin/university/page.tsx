@@ -21,15 +21,18 @@ export default async function AdminUniversityPage() {
       rows={courses.map((item) => ({
         id: item.id,
         title: item.title,
+        slug: item.slug,
         category: item.category,
-        lessons: item.lessonCount,
-        plan: item.planRequired,
+        description: item.description,
+        plan_required: item.planRequired,
+        sort_order: 0,
+        is_published: false,
       }))}
       columns={[
         { key: "title", label: "Title" },
+        { key: "slug", label: "Slug" },
         { key: "category", label: "Category" },
-        { key: "lessons", label: "Lessons" },
-        { key: "plan", label: "Plan" },
+        { key: "plan_required", label: "Plan" },
       ]}
     />
   );

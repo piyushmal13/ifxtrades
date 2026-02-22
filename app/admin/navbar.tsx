@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-provider"
 import { useState } from "react"
@@ -34,8 +35,16 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-serif font-bold text-[#0E1A2B] tracking-tight">
-          IFX<span className="text-[#C6A23A]">TRADES</span>
+        <Link href="/" className="block h-10">
+          <Image 
+            src="/logo.png" 
+            alt="IFXTRADES" 
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-full w-auto object-contain" 
+            priority 
+          />
         </Link>
 
         {/* Desktop Navigation */}
