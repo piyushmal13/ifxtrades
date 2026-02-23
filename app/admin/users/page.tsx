@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import UserRoleTable from "@/components/admin/UserRoleTable";
 import { listCrmUsers } from "@/lib/data/platform";
 

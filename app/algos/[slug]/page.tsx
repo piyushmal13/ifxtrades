@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { getAlgoBySlug } from "@/lib/data/platform";
 import { buildMetadata, productJsonLd } from "@/lib/seo";
 import BuyLicenseButton from "@/components/algos/BuyLicenseButton";

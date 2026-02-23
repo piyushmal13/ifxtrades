@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { buildMetadata, courseJsonLd } from "@/lib/seo";
 import { getCourseBySlug } from "@/lib/data/platform";
 

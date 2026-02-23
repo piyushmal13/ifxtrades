@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { getDashboardSummary } from "@/lib/data/platform";
 import { requireUser } from "@/lib/auth";
 

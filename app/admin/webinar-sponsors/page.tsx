@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import CrudManager from "@/components/admin/CrudManager";
 import { listWebinarSponsors, listWebinars } from "@/lib/data/platform";
 

@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { getAdminSummary } from "@/lib/data/platform";
 
 export default async function AdminHomePage() {

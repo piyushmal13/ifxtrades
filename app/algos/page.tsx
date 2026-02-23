@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo";
 import { listAlgos } from "@/lib/data/platform";

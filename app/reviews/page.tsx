@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { buildMetadata } from "@/lib/seo";
 import { listReviews } from "@/lib/data/platform";
 

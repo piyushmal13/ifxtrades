@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { buildMetadata, eventJsonLd } from "@/lib/seo";
 import { getWebinarBySlug } from "@/lib/data/platform";
@@ -48,10 +50,10 @@ export default async function WebinarDetailPage({ params }: Params) {
   const googleCalendarLink =
     startDate && endDate
       ? `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-          webinar.title,
-        )}&dates=${toCal(startDate)}/${toCal(endDate)}&details=${encodeURIComponent(
-          webinar.description,
-        )}&location=${encodeURIComponent(webinar.venue)}`
+        webinar.title,
+      )}&dates=${toCal(startDate)}/${toCal(endDate)}&details=${encodeURIComponent(
+        webinar.description,
+      )}&location=${encodeURIComponent(webinar.venue)}`
       : null;
 
   const jsonLd = eventJsonLd({

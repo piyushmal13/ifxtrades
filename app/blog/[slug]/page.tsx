@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { articleJsonLd, buildMetadata } from "@/lib/seo";
 import { getBlogPostBySlug } from "@/lib/data/platform";
 
