@@ -5,6 +5,12 @@ import { useAuth } from "@/lib/auth-provider"
 import { useState } from "react"
 import { motion } from "framer-motion"
 
+// Resolves the correct canonical origin regardless of SSR/CSR context
+function siteOrigin(): string {
+  if (typeof window !== "undefined") return window.location.origin
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+}
+
 export default function LoginClient({
   initialView = "login",
 }: {
@@ -14,7 +20,11 @@ export default function LoginClient({
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const redirect = searchParams.get("redirect")
+  const redirectAfterAuth = searchParams.get("redirect") ?? "/dashboard"
+
+  // Build the auth callback URL that Supabase will redirect to after link-click
+  const callbackUrl = (next: string) =>
+    `${siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}`
 
   const [view, setView] = useState<"login" | "signup" | "verify" | "forgotPassword">(initialView)
   const [email, setEmail] = useState("")
@@ -22,6 +32,7 @@ export default function LoginClient({
   const [fullName, setFullName] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null)
 
   const validateEmail = (email: string) => {
@@ -29,6 +40,7 @@ export default function LoginClient({
     return re.test(email)
   }
 
+  // ─── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async () => {
     if (!validateEmail(email)) {
       setMessage({ text: "Please enter a valid email address.", type: "error" })
@@ -36,56 +48,106 @@ export default function LoginClient({
     }
     setLoading(true)
     setMessage(null)
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (!error) {
-      router.push(redirect || "/dashboard")
+      router.push(redirectAfterAuth)
     } else {
       setMessage({ text: error.message, type: "error" })
     }
     setLoading(false)
   }
 
+  // ─── Signup ──────────────────────────────────────────────────────────────────
   const handleSignup = async () => {
     if (!validateEmail(email)) {
       setMessage({ text: "Please enter a valid email address.", type: "error" })
       return
     }
+    if (password.length < 6) {
+      setMessage({ text: "Password must be at least 6 characters.", type: "error" })
+      return
+    }
     setLoading(true)
     setMessage(null)
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          full_name: fullName,
-        },
+        data: { full_name: fullName },
+        // ✅ FIX: provide a proper emailRedirectTo so the magic-link in the
+        //         confirmation email lands on our callback route, not a Supabase URL.
+        emailRedirectTo: callbackUrl(redirectAfterAuth),
       },
     })
 
     if (error) {
       setMessage({ text: error.message, type: "error" })
     } else if (data.user && !data.session) {
+      // Email confirmation required — switch to OTP entry screen
       setView("verify")
-      setMessage({ text: "Verification code sent to your email.", type: "success" })
+      setMessage({
+        text: "A 6-digit verification code has been sent to your email.",
+        type: "success",
+      })
+    } else if (data.session) {
+      // Auto-confirmed (e.g. email confirmation disabled in Supabase settings)
+      router.push(redirectAfterAuth)
     } else {
-      router.push(redirect || "/dashboard")
+      // Edge case: user object but no session and no error usually means the
+      // user already exists but is unconfirmed — resend the OTP.
+      setView("verify")
+      setMessage({
+        text: "Account exists but is unverified. A new code has been sent to your email.",
+        type: "success",
+      })
     }
     setLoading(false)
   }
 
+  // ─── Verify OTP ──────────────────────────────────────────────────────────────
   const handleVerify = async () => {
     setLoading(true)
     setMessage(null)
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: "signup" })
-    if (error) setMessage({ text: error.message, type: "error" })
-    else router.push(redirect || "/dashboard")
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: "signup",
+    })
+
+    if (error) {
+      setMessage({ text: error.message, type: "error" })
+    } else {
+      router.push(redirectAfterAuth)
+    }
     setLoading(false)
   }
 
+  // ─── Resend OTP ──────────────────────────────────────────────────────────────
+  const handleResend = async () => {
+    setResendLoading(true)
+    setMessage(null)
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: callbackUrl(redirectAfterAuth),
+      },
+    })
+
+    if (error) {
+      setMessage({ text: error.message, type: "error" })
+    } else {
+      setMessage({ text: "A new verification code has been sent.", type: "success" })
+    }
+    setResendLoading(false)
+  }
+
+  // ─── Forgot Password ─────────────────────────────────────────────────────────
   const handleForgotPassword = async () => {
     if (!validateEmail(email)) {
       setMessage({ text: "Please enter a valid email address.", type: "error" })
@@ -93,26 +155,35 @@ export default function LoginClient({
     }
     setLoading(true)
     setMessage(null)
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin,
+      // ✅ FIX: point to our callback so Supabase knows where to land after reset
+      redirectTo: callbackUrl("/dashboard"),
     })
+
     if (error) {
       setMessage({ text: error.message, type: "error" })
     } else {
-      setMessage({ text: "Password reset instructions sent.", type: "success" })
+      setMessage({
+        text: "Password reset instructions sent. Check your inbox.",
+        type: "success",
+      })
     }
     setLoading(false)
   }
 
-  const google = async () => {
+  // ─── Google OAuth ─────────────────────────────────────────────────────────────
+  const handleGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin
-      }
+        // ✅ FIX: use the proper callback URL, not bare origin
+        redirectTo: callbackUrl(redirectAfterAuth),
+      },
     })
   }
 
+  // ─── UI ───────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center bg-jpm-cream px-4">
       <motion.div
@@ -127,18 +198,19 @@ export default function LoginClient({
           {view === "forgotPassword" && "Reset Password"}
         </h1>
 
+        {/* Status message */}
         {message && (
           <div
-            className={`p-3 rounded text-sm ${
-              message.type === "error"
+            className={`p-3 rounded text-sm ${message.type === "error"
                 ? "bg-red-50 text-red-700 border border-red-100"
                 : "bg-emerald-50 text-emerald-700 border border-emerald-100"
-            }`}
+              }`}
           >
             {message.text}
           </div>
         )}
 
+        {/* Full Name – signup only */}
         {view === "signup" && (
           <input
             className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none"
@@ -148,11 +220,13 @@ export default function LoginClient({
           />
         )}
 
+        {/* Email + Password inputs */}
         {view !== "verify" && (
           <>
             <input
               className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none"
               placeholder="Email"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -161,7 +235,7 @@ export default function LoginClient({
               <input
                 type="password"
                 className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none"
-                placeholder="Password"
+                placeholder="Password (min. 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -169,33 +243,39 @@ export default function LoginClient({
           </>
         )}
 
+        {/* OTP input – verify screen */}
         {view === "verify" && (
           <input
             className="w-full border border-jpm-border p-3 rounded-sm focus:ring-1 focus:ring-jpm-gold focus:border-jpm-gold outline-none text-center tracking-widest text-xl"
             placeholder="Enter 6-digit Code"
             value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            maxLength={6}
+            inputMode="numeric"
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
         )}
 
+        {/* ── Forgot Password link (login view) ── */}
         {view === "login" && (
-          <>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setView("forgotPassword")}
-                className="text-sm text-jpm-muted hover:text-jpm-gold"
-              >
-                Forgot Password?
-              </button>
-            </div>
+          <div className="flex justify-end">
             <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
+              onClick={() => setView("forgotPassword")}
+              className="text-sm text-jpm-muted hover:text-jpm-gold"
             >
-              {loading ? "Logging in..." : "Login"}
+              Forgot Password?
             </button>
-          </>
+          </div>
+        )}
+
+        {/* ── Primary CTA buttons ── */}
+        {view === "login" && (
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
+          >
+            {loading ? "Logging in…" : "Login"}
+          </button>
         )}
 
         {view === "signup" && (
@@ -204,17 +284,17 @@ export default function LoginClient({
             disabled={loading}
             className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
           >
-            {loading ? "Signing up..." : "Sign Up"}
+            {loading ? "Signing up…" : "Sign Up"}
           </button>
         )}
 
         {view === "verify" && (
           <button
             onClick={handleVerify}
-            disabled={loading}
+            disabled={loading || otp.length < 6}
             className="w-full bg-jpm-gold text-white py-3 rounded-sm hover:bg-jpm-gold-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
           >
-            {loading ? "Verifying..." : "Verify & Login"}
+            {loading ? "Verifying…" : "Verify & Login"}
           </button>
         )}
 
@@ -224,24 +304,40 @@ export default function LoginClient({
             disabled={loading}
             className="w-full bg-jpm-navy text-white py-3 rounded-sm hover:bg-jpm-navy-light transition disabled:opacity-50 text-xs font-semibold uppercase tracking-[0.14em]"
           >
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading ? "Sending…" : "Send Reset Link"}
           </button>
         )}
 
+        {/* ── Resend OTP (verify screen only) ── */}
+        {view === "verify" && (
+          <button
+            onClick={handleResend}
+            disabled={resendLoading}
+            className="w-full text-sm text-jpm-muted hover:text-jpm-gold disabled:opacity-50 text-center py-1"
+          >
+            {resendLoading ? "Resending…" : "Didn't receive a code? Resend"}
+          </button>
+        )}
+
+        {/* ── Navigation links ── */}
         {view !== "verify" && (
           <div className="flex justify-between text-sm text-jpm-muted mt-4">
             {view === "forgotPassword" ? (
               <button onClick={() => setView("login")} className="hover:text-jpm-gold">
-                Back to Login
+                ← Back to Login
               </button>
             ) : (
-              <button onClick={() => setView(view === "login" ? "signup" : "login")} className="hover:text-jpm-gold">
+              <button
+                onClick={() => setView(view === "login" ? "signup" : "login")}
+                className="hover:text-jpm-gold"
+              >
                 {view === "login" ? "Need an account? Sign Up" : "Already have an account? Login"}
               </button>
             )}
           </div>
         )}
 
+        {/* ── Google OAuth (login view only) ── */}
         {view === "login" && (
           <>
             <div className="relative my-4">
@@ -254,7 +350,7 @@ export default function LoginClient({
             </div>
 
             <button
-              onClick={google}
+              onClick={handleGoogle}
               className="w-full border border-jpm-border text-jpm-navy py-3 rounded-sm hover:bg-jpm-cream transition flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
