@@ -1,0 +1,141 @@
+/* Generated from tokens.json for runtime CSS variable consumption */
+
+@font-face {
+  font-family: "InterVariable";
+  src:
+    local("Inter Variable"),
+    local("Inter var"),
+    url("./assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TiemposHeadline";
+  src:
+    local("Tiempos Headline"),
+    local("GT Sectra"),
+    url("./assets/fonts/TiemposHeadline-Regular.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+html.ifx-ui-overlay,
+body.ifx-ui-overlay,
+.ifx-ui-overlay {
+  --ifx-font-sans: "InterVariable", "Inter var", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ifx-font-display: "TiemposHeadline", "GT Sectra", Georgia, "Times New Roman", serif;
+  --ifx-font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --ifx-font-weight-regular: 400;
+  --ifx-font-weight-medium: 500;
+  --ifx-font-weight-semibold: 600;
+  --ifx-font-weight-bold: 700;
+
+  --ifx-leading-tight: 1.15;
+  --ifx-leading-body: 1.5;
+  --ifx-leading-relaxed: 1.7;
+
+  --ifx-text-xs: 0.75rem;
+  --ifx-text-sm: 0.875rem;
+  --ifx-text-md: 1rem;
+  --ifx-text-lg: 1.125rem;
+  --ifx-text-xl: 1.25rem;
+  --ifx-text-2xl: 1.5rem;
+  --ifx-text-3xl: 2rem;
+  --ifx-text-4xl: 2.75rem;
+  --ifx-text-5xl: 3.5rem;
+
+  --ifx-space-0: 0;
+  --ifx-space-1: 4px;
+  --ifx-space-2: 8px;
+  --ifx-space-3: 12px;
+  --ifx-space-4: 16px;
+  --ifx-space-5: 24px;
+  --ifx-space-6: 32px;
+  --ifx-space-7: 40px;
+  --ifx-space-8: 48px;
+  --ifx-space-9: 64px;
+  --ifx-space-10: 80px;
+
+  --ifx-radius-sm: 8px;
+  --ifx-radius-md: 10px;
+  --ifx-radius-lg: 14px;
+  --ifx-radius-pill: 999px;
+
+  --ifx-shadow-0: none;
+  --ifx-shadow-1: 0 6px 18px rgba(2, 8, 20, 0.28);
+  --ifx-shadow-2: 0 12px 34px rgba(2, 8, 20, 0.32);
+  --ifx-shadow-3: 0 24px 56px rgba(2, 8, 20, 0.36);
+
+  --ifx-motion-fast: 120ms;
+  --ifx-motion-press: 80ms;
+  --ifx-motion-focus: 160ms;
+  --ifx-motion-medium: 200ms;
+  --ifx-motion-hero: 220ms;
+  --ifx-motion-slow: 320ms;
+  --ifx-ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ifx-ease-decelerate: cubic-bezier(0.16, 1, 0.3, 1);
+  --ifx-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  --ifx-btn-height-sm: 36px;
+  --ifx-btn-height-md: 44px;
+  --ifx-btn-height-lg: 52px;
+  --ifx-btn-px-sm: 14px;
+  --ifx-btn-px-md: 18px;
+  --ifx-btn-px-lg: 22px;
+}
+
+html.ifx-ui-overlay,
+body.ifx-ui-overlay,
+.ifx-ui-overlay,
+html.ifx-ui-overlay[data-theme="dark"],
+body.ifx-ui-overlay[data-theme="dark"],
+.ifx-ui-overlay[data-theme="dark"] {
+  --ifx-color-bg: #0b111d;
+  --ifx-color-surface: #101a2b;
+  --ifx-color-surface-elevated: #152238;
+  --ifx-color-surface-subtle: #0f1727;
+  --ifx-color-text: #e7eef8;
+  --ifx-color-text-muted: #a5b5cc;
+  --ifx-color-text-inverse: #071022;
+  --ifx-color-border: #24334a;
+  --ifx-color-border-strong: #35506f;
+  --ifx-color-accent: #c8a45a;
+  --ifx-color-accent-hover: #b79247;
+  --ifx-color-accent-active: #9e7c35;
+  --ifx-color-link: #5e9cff;
+  --ifx-color-link-hover: #76adff;
+  --ifx-color-destructive: #d85661;
+  --ifx-color-success: #37b27f;
+  --ifx-color-warning: #d7a147;
+  --ifx-color-focus: #8eb8ff;
+  --ifx-color-overlay: rgba(5, 10, 18, 0.72);
+}
+
+html.ifx-ui-overlay[data-theme="light"],
+body.ifx-ui-overlay[data-theme="light"],
+.ifx-ui-overlay[data-theme="light"] {
+  --ifx-color-bg: #f5f7fb;
+  --ifx-color-surface: #ffffff;
+  --ifx-color-surface-elevated: #ffffff;
+  --ifx-color-surface-subtle: #eef2f9;
+  --ifx-color-text: #102033;
+  --ifx-color-text-muted: #4f627b;
+  --ifx-color-text-inverse: #f8fbff;
+  --ifx-color-border: #d8e1ef;
+  --ifx-color-border-strong: #c2cfdf;
+  --ifx-color-accent: #9f7a2f;
+  --ifx-color-accent-hover: #8b6a28;
+  --ifx-color-accent-active: #775920;
+  --ifx-color-link: #225fc8;
+  --ifx-color-link-hover: #1c52ad;
+  --ifx-color-destructive: #bf2f3d;
+  --ifx-color-success: #1f8f61;
+  --ifx-color-warning: #a9781e;
+  --ifx-color-focus: #1f63d5;
+  --ifx-color-overlay: rgba(8, 15, 26, 0.36);
+}
+

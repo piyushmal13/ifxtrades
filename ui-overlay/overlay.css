@@ -1,0 +1,588 @@
+/*
+  IFXTrades UI Overlay v1
+  Scope: apply only under .ifx-ui-overlay root.
+  Dependency: tokens.css should be loaded before this file.
+*/
+
+html.ifx-ui-overlay,
+body.ifx-ui-overlay,
+.ifx-ui-overlay {
+  color-scheme: dark;
+  background: var(--ifx-color-bg);
+  color: var(--ifx-color-text);
+  font-family: var(--ifx-font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.ifx-ui-overlay[data-theme="light"],
+body.ifx-ui-overlay[data-theme="light"],
+.ifx-ui-overlay[data-theme="light"] {
+  color-scheme: light;
+}
+
+html.ifx-ui-overlay *,
+html.ifx-ui-overlay *::before,
+html.ifx-ui-overlay *::after,
+.ifx-ui-overlay *,
+.ifx-ui-overlay *::before,
+.ifx-ui-overlay *::after {
+  box-sizing: border-box;
+}
+
+html.ifx-ui-overlay body,
+.ifx-ui-overlay body {
+  margin: 0;
+  background: radial-gradient(circle at 0% 0%, rgba(94, 156, 255, 0.08), transparent 32%),
+    radial-gradient(circle at 100% 0%, rgba(200, 164, 90, 0.09), transparent 28%), var(--ifx-color-bg);
+  color: var(--ifx-color-text);
+  font-size: var(--ifx-text-md);
+  line-height: var(--ifx-leading-body);
+}
+
+.ifx-ui-overlay :is(h1, h2, h3, h4) {
+  margin: 0;
+  color: var(--ifx-color-text);
+  letter-spacing: -0.02em;
+}
+
+.ifx-ui-overlay h1 {
+  font-family: var(--ifx-font-display);
+  font-size: clamp(var(--ifx-text-3xl), 5vw, var(--ifx-text-5xl));
+  line-height: var(--ifx-leading-tight);
+}
+
+.ifx-ui-overlay h2 {
+  font-family: var(--ifx-font-display);
+  font-size: clamp(var(--ifx-text-2xl), 3vw, var(--ifx-text-4xl));
+  line-height: var(--ifx-leading-tight);
+}
+
+.ifx-ui-overlay h3 {
+  font-size: clamp(var(--ifx-text-lg), 2vw, var(--ifx-text-2xl));
+  line-height: 1.25;
+}
+
+.ifx-ui-overlay p {
+  color: var(--ifx-color-text-muted);
+  margin: 0;
+}
+
+.ifx-ui-overlay a {
+  color: var(--ifx-color-link);
+  text-decoration-color: color-mix(in srgb, var(--ifx-color-link) 55%, transparent);
+  text-underline-offset: 2px;
+  transition: color var(--ifx-motion-fast) var(--ifx-ease-standard);
+}
+
+.ifx-ui-overlay a:hover {
+  color: var(--ifx-color-link-hover);
+}
+
+/* Accessible focus ring with fade (testid: ifx-overlay-focus-ring) */
+.ifx-ui-overlay :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ifx-color-focus);
+  outline-offset: 2px;
+  transition: outline-color var(--ifx-motion-focus) var(--ifx-ease-standard);
+}
+
+.ifx-ui-overlay :is(a, button, input, select, textarea, [tabindex]):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Layout utilities on 8px baseline */
+.ifx-ui-overlay .ifx-u-container {
+  width: min(1200px, calc(100% - var(--ifx-space-8)));
+  margin-inline: auto;
+}
+
+.ifx-ui-overlay .ifx-u-stack > * + * {
+  margin-top: var(--ifx-space-4);
+}
+
+.ifx-ui-overlay .ifx-u-stack-lg > * + * {
+  margin-top: var(--ifx-space-6);
+}
+
+.ifx-ui-overlay .ifx-u-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ifx-space-3);
+  align-items: center;
+}
+
+.ifx-ui-overlay .ifx-u-grid-2 {
+  display: grid;
+  gap: var(--ifx-space-5);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ifx-ui-overlay .ifx-u-grid-3 {
+  display: grid;
+  gap: var(--ifx-space-5);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+  .ifx-ui-overlay .ifx-u-grid-2,
+  .ifx-ui-overlay .ifx-u-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hero */
+.ifx-ui-overlay .ifx-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ifx-radius-lg);
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 78%, transparent);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--ifx-color-surface-elevated) 94%, var(--ifx-color-link) 6%), transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ifx-color-surface) 95%, white 5%), var(--ifx-color-surface-subtle));
+  box-shadow: var(--ifx-shadow-2);
+  padding: clamp(var(--ifx-space-6), 6vw, var(--ifx-space-9));
+}
+
+.ifx-ui-overlay .ifx-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -30% auto;
+  width: min(42vw, 460px);
+  aspect-ratio: 1 / 1;
+  background: url("./assets/motifs/hero-data-motif.svg") no-repeat center / contain;
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.ifx-ui-overlay .ifx-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ifx-space-2);
+  padding: var(--ifx-space-1) var(--ifx-space-3);
+  border-radius: var(--ifx-radius-pill);
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 88%, transparent);
+  color: var(--ifx-color-text-muted);
+  font-size: var(--ifx-text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ifx-ui-overlay [data-ifx-hero-reveal] > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--ifx-motion-hero) var(--ifx-ease-decelerate),
+    transform var(--ifx-motion-hero) var(--ifx-ease-decelerate);
+}
+
+.ifx-ui-overlay [data-ifx-hero-reveal].ifx-revealed > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Surfaces */
+.ifx-ui-overlay .ifx-card {
+  border-radius: var(--ifx-radius-md);
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 82%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ifx-color-surface) 90%, white 10%), var(--ifx-color-surface-subtle));
+  color: var(--ifx-color-text);
+  padding: var(--ifx-space-5);
+}
+
+.ifx-ui-overlay .ifx-card--e1 {
+  box-shadow: var(--ifx-shadow-1);
+}
+
+.ifx-ui-overlay .ifx-card--e2 {
+  box-shadow: var(--ifx-shadow-2);
+}
+
+.ifx-ui-overlay .ifx-card--e3 {
+  box-shadow: var(--ifx-shadow-3);
+}
+
+.ifx-ui-overlay .ifx-metadata-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ifx-space-3) var(--ifx-space-5);
+  color: var(--ifx-color-text-muted);
+  font-size: var(--ifx-text-sm);
+}
+
+.ifx-ui-overlay .ifx-metadata-row strong {
+  color: var(--ifx-color-text);
+  font-weight: var(--ifx-font-weight-semibold);
+}
+
+/* Buttons (testid: ifx-overlay-button-primary/secondary/ghost/destructive/icon) */
+.ifx-ui-overlay .ifx-btn,
+.ifx-ui-overlay [data-ifx-button] {
+  --ifx-btn-height: var(--ifx-btn-height-md);
+  --ifx-btn-px: var(--ifx-btn-px-md);
+  --ifx-btn-bg: var(--ifx-color-surface-elevated);
+  --ifx-btn-text: var(--ifx-color-text);
+  --ifx-btn-border: color-mix(in srgb, var(--ifx-color-border) 92%, transparent);
+  --ifx-btn-shadow: var(--ifx-shadow-1);
+  --ifx-btn-shadow-hover: var(--ifx-shadow-2);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ifx-space-2);
+  min-height: var(--ifx-btn-height);
+  min-width: var(--ifx-btn-height);
+  padding: 0 var(--ifx-btn-px);
+  border-radius: var(--ifx-radius-md);
+  border: 1px solid var(--ifx-btn-border);
+  background: var(--ifx-btn-bg);
+  color: var(--ifx-btn-text);
+  font-family: var(--ifx-font-sans);
+  font-size: var(--ifx-text-sm);
+  font-weight: var(--ifx-font-weight-semibold);
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: var(--ifx-btn-shadow);
+  cursor: pointer;
+  transition:
+    transform var(--ifx-motion-fast) var(--ifx-ease-standard),
+    box-shadow var(--ifx-motion-fast) var(--ifx-ease-standard),
+    background-color var(--ifx-motion-fast) var(--ifx-ease-standard),
+    border-color var(--ifx-motion-fast) var(--ifx-ease-standard);
+}
+
+.ifx-ui-overlay .ifx-btn:hover,
+.ifx-ui-overlay [data-ifx-button]:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: var(--ifx-btn-shadow-hover);
+}
+
+.ifx-ui-overlay .ifx-btn:active,
+.ifx-ui-overlay [data-ifx-button]:active,
+.ifx-ui-overlay .ifx-btn.ifx-is-pressed,
+.ifx-ui-overlay [data-ifx-button].ifx-is-pressed {
+  transform: translateY(0) scale(0.985);
+  transition-duration: var(--ifx-motion-press);
+}
+
+.ifx-ui-overlay .ifx-btn[disabled],
+.ifx-ui-overlay [data-ifx-button][disabled],
+.ifx-ui-overlay .ifx-btn[aria-disabled="true"],
+.ifx-ui-overlay [data-ifx-button][aria-disabled="true"] {
+  opacity: 0.48;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.ifx-ui-overlay .ifx-btn--sm {
+  --ifx-btn-height: var(--ifx-btn-height-sm);
+  --ifx-btn-px: var(--ifx-btn-px-sm);
+}
+
+.ifx-ui-overlay .ifx-btn--lg {
+  --ifx-btn-height: var(--ifx-btn-height-lg);
+  --ifx-btn-px: var(--ifx-btn-px-lg);
+  font-size: var(--ifx-text-md);
+}
+
+.ifx-ui-overlay .ifx-btn--primary,
+.ifx-ui-overlay .btn-primary,
+.ifx-ui-overlay [data-ifx-button="primary"] {
+  --ifx-btn-bg: linear-gradient(180deg, var(--ifx-color-accent), var(--ifx-color-accent-hover));
+  --ifx-btn-text: var(--ifx-color-text-inverse);
+  --ifx-btn-border: color-mix(in srgb, var(--ifx-color-accent) 80%, black);
+  --ifx-btn-shadow: 0 8px 20px color-mix(in srgb, var(--ifx-color-accent) 28%, rgba(2, 8, 20, 0.5));
+  --ifx-btn-shadow-hover: 0 12px 28px color-mix(in srgb, var(--ifx-color-accent) 36%, rgba(2, 8, 20, 0.55));
+}
+
+.ifx-ui-overlay .ifx-btn--primary:hover,
+.ifx-ui-overlay .btn-primary:hover,
+.ifx-ui-overlay [data-ifx-button="primary"]:hover {
+  filter: saturate(1.06);
+}
+
+.ifx-ui-overlay .ifx-btn--secondary,
+.ifx-ui-overlay .btn-secondary,
+.ifx-ui-overlay [data-ifx-button="secondary"] {
+  --ifx-btn-bg: color-mix(in srgb, var(--ifx-color-link) 16%, var(--ifx-color-surface));
+  --ifx-btn-text: color-mix(in srgb, var(--ifx-color-link) 82%, white);
+  --ifx-btn-border: color-mix(in srgb, var(--ifx-color-link) 44%, var(--ifx-color-border));
+}
+
+.ifx-ui-overlay .ifx-btn--ghost,
+.ifx-ui-overlay [data-ifx-button="ghost"] {
+  --ifx-btn-bg: transparent;
+  --ifx-btn-text: var(--ifx-color-text);
+  --ifx-btn-border: color-mix(in srgb, var(--ifx-color-border) 86%, transparent);
+  --ifx-btn-shadow: none;
+  --ifx-btn-shadow-hover: none;
+}
+
+.ifx-ui-overlay .ifx-btn--ghost:hover,
+.ifx-ui-overlay [data-ifx-button="ghost"]:hover {
+  background: color-mix(in srgb, var(--ifx-color-surface-subtle) 70%, transparent);
+}
+
+.ifx-ui-overlay .ifx-btn--destructive,
+.ifx-ui-overlay [data-ifx-button="destructive"] {
+  --ifx-btn-bg: color-mix(in srgb, var(--ifx-color-destructive) 22%, var(--ifx-color-surface));
+  --ifx-btn-text: #ffdbe0;
+  --ifx-btn-border: color-mix(in srgb, var(--ifx-color-destructive) 56%, var(--ifx-color-border));
+}
+
+.ifx-ui-overlay .ifx-btn--icon,
+.ifx-ui-overlay [data-ifx-button="icon"] {
+  --ifx-btn-px: 0;
+  width: var(--ifx-btn-height);
+  padding: 0;
+}
+
+/* Form controls */
+.ifx-ui-overlay .ifx-form-field {
+  display: grid;
+  gap: var(--ifx-space-2);
+}
+
+.ifx-ui-overlay .ifx-form-field + .ifx-form-field {
+  margin-top: var(--ifx-space-4);
+}
+
+.ifx-ui-overlay .ifx-field-label,
+.ifx-ui-overlay label {
+  color: var(--ifx-color-text);
+  font-size: var(--ifx-text-sm);
+  font-weight: var(--ifx-font-weight-medium);
+}
+
+.ifx-ui-overlay .ifx-help-text {
+  color: var(--ifx-color-text-muted);
+  font-size: var(--ifx-text-xs);
+}
+
+.ifx-ui-overlay input:not([type="checkbox"]):not([type="radio"]),
+.ifx-ui-overlay select,
+.ifx-ui-overlay textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--ifx-space-4);
+  border-radius: var(--ifx-radius-md);
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 88%, transparent);
+  background: color-mix(in srgb, var(--ifx-color-surface) 88%, black 12%);
+  color: var(--ifx-color-text);
+  font: inherit;
+  line-height: 1.25;
+  transition:
+    border-color var(--ifx-motion-fast) var(--ifx-ease-standard),
+    box-shadow var(--ifx-motion-fast) var(--ifx-ease-standard),
+    background-color var(--ifx-motion-fast) var(--ifx-ease-standard);
+}
+
+.ifx-ui-overlay textarea {
+  min-height: 112px;
+  padding-top: var(--ifx-space-3);
+  padding-bottom: var(--ifx-space-3);
+  resize: vertical;
+}
+
+.ifx-ui-overlay input::placeholder,
+.ifx-ui-overlay textarea::placeholder {
+  color: color-mix(in srgb, var(--ifx-color-text-muted) 84%, transparent);
+}
+
+.ifx-ui-overlay input:hover,
+.ifx-ui-overlay select:hover,
+.ifx-ui-overlay textarea:hover {
+  border-color: color-mix(in srgb, var(--ifx-color-border-strong) 92%, transparent);
+}
+
+.ifx-ui-overlay input:focus-visible,
+.ifx-ui-overlay select:focus-visible,
+.ifx-ui-overlay textarea:focus-visible {
+  border-color: var(--ifx-color-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ifx-color-focus) 22%, transparent);
+}
+
+.ifx-ui-overlay input:invalid,
+.ifx-ui-overlay select:invalid,
+.ifx-ui-overlay textarea:invalid,
+.ifx-ui-overlay input[aria-invalid="true"],
+.ifx-ui-overlay select[aria-invalid="true"],
+.ifx-ui-overlay textarea[aria-invalid="true"] {
+  border-color: color-mix(in srgb, var(--ifx-color-destructive) 78%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ifx-color-destructive) 18%, transparent);
+}
+
+.ifx-ui-overlay .ifx-error-text {
+  color: color-mix(in srgb, var(--ifx-color-destructive) 92%, white);
+  font-size: var(--ifx-text-xs);
+}
+
+/* Tables */
+.ifx-ui-overlay .ifx-table-wrap {
+  border-radius: var(--ifx-radius-md);
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 86%, transparent);
+  background: var(--ifx-color-surface);
+  box-shadow: var(--ifx-shadow-1);
+}
+
+.ifx-ui-overlay table,
+.ifx-ui-overlay .ifx-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--ifx-color-text);
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 56px;
+  padding: 0 var(--ifx-space-4);
+  text-align: left;
+  font-size: var(--ifx-text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifx-color-text-muted);
+  background: color-mix(in srgb, var(--ifx-color-surface-subtle) 90%, black 10%);
+  border-bottom: 1px solid color-mix(in srgb, var(--ifx-color-border) 88%, transparent);
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) tbody tr {
+  min-height: 52px;
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) tbody td {
+  padding: var(--ifx-space-3) var(--ifx-space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--ifx-color-border) 46%, transparent);
+  vertical-align: middle;
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--ifx-color-surface-subtle) 40%, transparent);
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) [data-ifx-sortable] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) [data-ifx-sortable]::after {
+  content: " \2195";
+  opacity: 0.55;
+  font-size: 0.9em;
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) [aria-sort="ascending"]::after {
+  content: " \2191";
+}
+
+.ifx-ui-overlay :is(table, .ifx-table) [aria-sort="descending"]::after {
+  content: " \2193";
+}
+
+/* Modal (testid: ifx-overlay-modal) */
+.ifx-ui-overlay [data-ifx-modal-backdrop] {
+  position: fixed;
+  inset: 0;
+  background: var(--ifx-color-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--ifx-ease-standard);
+}
+
+.ifx-ui-overlay [data-ifx-modal-backdrop].ifx-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ifx-ui-overlay [data-ifx-modal] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(560px, calc(100% - var(--ifx-space-6)));
+  max-height: 85vh;
+  overflow: auto;
+  transform: translate(-50%, -46%);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: var(--ifx-radius-lg);
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 86%, transparent);
+  background: var(--ifx-color-surface-elevated);
+  box-shadow: var(--ifx-shadow-3);
+  padding: var(--ifx-space-6);
+  transition:
+    opacity 200ms var(--ifx-ease-standard),
+    transform 220ms var(--ifx-ease-decelerate);
+}
+
+.ifx-ui-overlay [data-ifx-modal].ifx-open {
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Toasts (testid: ifx-overlay-toast) */
+.ifx-ui-overlay [data-ifx-toast-region] {
+  position: fixed;
+  right: var(--ifx-space-5);
+  bottom: var(--ifx-space-5);
+  display: grid;
+  gap: var(--ifx-space-3);
+  width: min(360px, calc(100% - var(--ifx-space-6)));
+  z-index: 1200;
+}
+
+.ifx-ui-overlay .ifx-toast {
+  border-radius: var(--ifx-radius-md);
+  border: 1px solid color-mix(in srgb, var(--ifx-color-border) 82%, transparent);
+  background: color-mix(in srgb, var(--ifx-color-surface-elevated) 92%, black 8%);
+  color: var(--ifx-color-text);
+  box-shadow: var(--ifx-shadow-2);
+  padding: var(--ifx-space-3) var(--ifx-space-4);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 180ms var(--ifx-ease-standard),
+    transform 220ms var(--ifx-ease-decelerate);
+}
+
+.ifx-ui-overlay .ifx-toast.ifx-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ifx-ui-overlay .ifx-toast--success {
+  border-left: 3px solid var(--ifx-color-success);
+}
+
+.ifx-ui-overlay .ifx-toast--warning {
+  border-left: 3px solid var(--ifx-color-warning);
+}
+
+.ifx-ui-overlay .ifx-toast--error {
+  border-left: 3px solid var(--ifx-color-destructive);
+}
+
+/* Respect reduced motion and runtime motion toggle */
+@media (prefers-reduced-motion: reduce) {
+  .ifx-ui-overlay *,
+  .ifx-ui-overlay *::before,
+  .ifx-ui-overlay *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.ifx-ui-overlay.ifx-motion-off *,
+body.ifx-ui-overlay.ifx-motion-off *,
+.ifx-ui-overlay.ifx-motion-off * {
+  animation: none !important;
+  transition: none !important;
+}
+
