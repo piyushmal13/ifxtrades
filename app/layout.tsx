@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@/lib/auth-provider";
 import { Navbar } from "@/components/navbar";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { Analytics } from "@vercel/analytics/next";
 
 const SITE_URL = "https://www.ifxtrades.com";
 const SITE_TITLE = "IFXTrades - Institutional Capital Intelligence";
@@ -58,6 +59,7 @@ export default function RootLayout({
           <Navbar />
           {children}
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
