@@ -81,13 +81,6 @@ export function Navbar() {
           <div className="relative w-9 h-9 md:w-10 md:h-10">
             <Image src="/logo.png" alt="IFXTrades Logo" fill className="object-contain" priority />
           </div>
-          <span
-            className={`font-serif text-lg font-bold tracking-tight ${
-              scrolled ? "text-jpm-navy" : "text-white"
-            }`}
-          >
-            IFX<span className="text-jpm-gold">Trades</span>
-          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
