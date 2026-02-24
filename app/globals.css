@@ -202,6 +202,124 @@ body::before {
   padding-bottom: clamp(4rem, 8vw, 6rem);
 }
 
+/* Shared page shells */
+.ifx-page-shell {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  padding: 7rem 1.5rem 5rem;
+}
+
+.ifx-page-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 42% at 50% 0%, rgba(212, 175, 55, 0.07), transparent),
+    radial-gradient(ellipse 60% 45% at 100% 100%, rgba(52, 211, 153, 0.03), transparent 70%);
+}
+
+.ifx-page-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ifx-page-container {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.ifx-page-container-compact {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.ifx-page-container-narrow {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.ifx-page-kicker {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(212, 175, 55, 0.75);
+  margin-bottom: 0.625rem;
+}
+
+.ifx-page-title {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.ifx-page-intro {
+  margin-top: 1rem;
+  max-width: 48rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(241, 245, 249, 0.52);
+}
+
+.ifx-auth-shell {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding: 4rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+}
+
+.ifx-auth-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(212, 175, 55, 0.08), transparent);
+}
+
+.ifx-table-shell {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ifx-table-shell table thead tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ifx-table-shell table th {
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.ifx-table-shell table tbody tr {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.ifx-table-shell table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.ifx-table-shell table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
 /* ── Buttons ─────────────────────────────────────────────────── */
 
 .btn-base {
@@ -887,3 +1005,71 @@ body::before {
     animation: none !important;
   }
 }
+
+/* ---------------------------------------------------------------
+   Cinematic Utilities & Premium Animations
+--------------------------------------------------------------- */
+
+.glass-premium {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-gold {
+  background: rgba(212, 175, 55, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.05);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #f3e5ab 0%, #d4af37 50%, #aa8c2c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animations */
+@keyframes cinematic-fade-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-cinematic {
+  animation: cinematic-fade-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mask-fade-out {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+.premium-scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.premium-scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* -- Typography Enhancements ---------------------------------- */
+h1, h2, h3, .font-serif {
+  font-family: var(--font-playfair), "Playfair Display", serif !important;
+  letter-spacing: -0.01em;
+}
+
+body, p, .font-sans {
+  font-family: var(--font-inter), "Inter", sans-serif !important;
+  letter-spacing: 0.01em;
+}
+

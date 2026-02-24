@@ -582,7 +582,7 @@ export async function listAlgoSnapshots(): Promise<AlgoSnapshotRow[]> {
 }
 
 export async function listAlgos(options: { includeInactive?: boolean } = {}) {
-  const rows = await firstSuccessfulRows(["algorithms", "algos"], 36);
+  const rows = await firstSuccessfulRows(["algorithms"], 36);
   if (!rows.length) {
     return enableDemoFallback ? FALLBACK_ALGOS : [];
   }
@@ -646,7 +646,7 @@ export async function getAlgoBySlug(slug: string): Promise<AlgoDetail | null> {
 }
 
 export async function listCourses() {
-  const courseRows = await firstSuccessfulRows(["university_courses", "courses"], 40);
+  const courseRows = await firstSuccessfulRows(["university_courses"], 40);
   if (!courseRows.length) {
     return enableDemoFallback ? FALLBACK_COURSES : [];
   }

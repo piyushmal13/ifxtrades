@@ -25,13 +25,15 @@ type Review = {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function HomePageClient({ posts, reviews }: { posts: Post[]; reviews: Review[] }) {
   return (
-    <main className="min-h-screen bg-[#020617] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#020617] text-white overflow-x-hidden selection:bg-jpm-gold selection:text-black">
       <HeroSection />
-      <TrustStrip />
-      <PlatformPillars />
-      <ResearchSection posts={posts} />
-      <ReviewsSection reviews={reviews} />
-      <CTASection />
+      <div className="relative z-10">
+        <TrustStrip />
+        <PlatformPillars />
+        <ResearchSection posts={posts} />
+        <ReviewsSection reviews={reviews} />
+        <CTASection />
+      </div>
     </main>
   );
 }
@@ -79,9 +81,9 @@ function HeroSection() {
             </span>
           </div>
 
-          <h1 className="font-serif text-7xl lg:text-8xl leading-[1.05] text-white tracking-[-0.02em]">
+          <h1 className="font-serif text-7xl lg:text-8xl leading-[1.05] text-white tracking-[-0.02em] font-medium">
             Precision forex
-            <span className="block mt-2 bg-gradient-to-r from-white via-jpm-gold-light to-jpm-gold bg-clip-text text-transparent italic">
+            <span className="block mt-2 bg-gradient-to-r from-white via-jpm-gold-light to-jpm-gold bg-clip-text text-transparent italic text-glow-gold">
               intelligence built
             </span>
             <span className="block mt-1 text-white/90">for institutional flow.</span>
@@ -133,7 +135,7 @@ function HeroSection() {
             <div className="w-px h-8 bg-jpm-gold/20 self-center" />
             <V3Stat label="Global Nodes" value={14} />
             <div className="w-px h-8 bg-jpm-gold/20 self-center" />
-            <V3Stat label="Platform Uptime" value={99.99} suffix="%" />
+            <V3Stat label="Institutional SLA" value={99.99} suffix="%" />
           </div>
         </motion.div>
 
@@ -343,11 +345,11 @@ function ResearchSection({ posts }: { posts: Post[] }) {
             {posts.slice(0, 3).map((post, index) => (
               <motion.article
                 key={post.id}
-                className="card group relative overflow-hidden border border-white/8 bg-white/3 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-jpm-gold/40 hover:shadow-[0_18px_50px_rgba(212,175,55,0.08)] backdrop-blur-sm"
-                initial={{ opacity: 0, y: 24 }}
+                className="glass-premium group relative overflow-hidden border border-white/8 p-6 transition-all duration-500 hover:-translate-y-2 hover:border-jpm-gold/40 hover:shadow-[0_22px_60px_rgba(212,175,55,0.12)]"
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
+                transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
                 {post.featuredImageUrl && (
                   <div className="w-full h-36 rounded-md overflow-hidden mb-5 -mx-0">
@@ -415,11 +417,11 @@ function ReviewsSection({ reviews }: { reviews: Review[] }) {
             {reviews.slice(0, 4).map((review, index) => (
               <motion.article
                 key={review.id}
-                className="card relative overflow-hidden border border-white/8 bg-[#0a0a0a]/80 p-8 backdrop-blur"
-                initial={{ opacity: 0, y: 20 }}
+                className="glass-gold relative overflow-hidden border border-white/8 p-8"
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
+                transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.04),_transparent_65%)]" />
                 {review.videoUrl && (

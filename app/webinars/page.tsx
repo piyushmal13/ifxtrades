@@ -44,26 +44,26 @@ function WebinarCard({ webinar }: { webinar: WebinarSummary }) {
   const tierClass = riskColorMap[webinar.sponsorTier] ?? riskColorMap.SILVER;
 
   return (
-    <article className="card group relative overflow-hidden border border-white/8 bg-white/3 p-7 flex flex-col transition-all duration-300 hover:-translate-y-1.5 hover:border-jpm-gold/35 hover:shadow-[0_20px_50px_rgba(212,175,55,0.08)] backdrop-blur-md">
+    <article className="glass-premium group relative overflow-hidden border border-white/8 p-7 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:border-jpm-gold/35 hover:shadow-[0_20px_60px_rgba(212,175,55,0.12)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.05),_transparent_60%)]" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-jpm-gold/0 via-jpm-gold/50 to-jpm-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <div className="flex items-start justify-between gap-3 mb-4">
-        <span className={`text-[9px] uppercase tracking-[0.2em] font-semibold border px-2.5 py-1 rounded-full ${tierClass}`}>
+        <span className={`text-[10px] uppercase tracking-[0.2em] font-semibold border px-2.5 py-1 rounded-full ${tierClass}`}>
           {webinar.sponsorTier}
         </span>
         {webinar.isPremium && (
-          <span className="text-[9px] uppercase tracking-[0.18em] font-semibold border border-jpm-gold/40 bg-jpm-gold/10 text-jpm-gold px-2.5 py-1 rounded-full">
+          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold border border-jpm-gold/40 bg-jpm-gold/10 text-jpm-gold px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.2)]">
             Premium Access
           </span>
         )}
       </div>
 
-      <h2 className="font-serif text-xl text-white leading-snug mb-2">{webinar.title}</h2>
-      <p className="text-sm text-white/45 leading-relaxed mb-4">{webinar.description}</p>
+      <h2 className="font-serif text-xl text-white leading-snug mb-2 group-hover:text-jpm-gold transition-colors">{webinar.title}</h2>
+      <p className="text-sm text-white/45 leading-relaxed mb-4 line-clamp-2">{webinar.description}</p>
 
       {webinar.startsAt && (
-        <div className="mb-4 p-3 bg-white/5 border border-white/8 rounded-sm">
+        <div className="mb-4 p-3 glass-premium border border-white/8 rounded-sm">
           <p className="text-[9px] uppercase tracking-[0.15em] text-jpm-gold mb-2">Starts In</p>
           <Countdown startsAtIso={webinar.startsAt} deadlineIso={webinar.deadline} />
         </div>
@@ -84,7 +84,7 @@ function WebinarCard({ webinar }: { webinar: WebinarSummary }) {
         </div>
         {isAlmostFull && (
           <div className="col-span-2">
-            <p className="text-red-400/80 text-[9px] uppercase tracking-[0.18em] font-semibold">⚠ Almost Full</p>
+            <p className="text-red-400/80 text-[10px] uppercase tracking-[0.18em] font-semibold">⚠ Almost Full</p>
           </div>
         )}
       </div>
@@ -108,14 +108,11 @@ export default async function WebinarsPage() {
   const webinars = await listWebinars();
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white">
-      {/* Background glow */}
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto relative">
-        <div className="mb-14">
+    <main className="ifx-page-shell">
+      <div className="ifx-page-container relative">
+        <div className="mb-14 animate-cinematic">
           <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">Event Intelligence</p>
-          <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em]">Institutional Webinars</h1>
+          <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em] text-glow-gold">Institutional Webinars</h1>
           <p className="mt-4 text-sm text-white/45 max-w-2xl leading-relaxed">
             Institutional briefings with transparent agenda design, sponsor tiers, and seat governance.
             All sessions are structured for institutional participants and documented with risk framing.
@@ -123,13 +120,13 @@ export default async function WebinarsPage() {
         </div>
 
         {webinars.length === 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-cinematic" style={{ animationDelay: "0.2s" }}>
             <p className="text-sm text-white/60">
               No webinars are available right now. New institutional sessions will be announced shortly.
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="card border border-white/10 bg-white/3 p-7 animate-pulse">
+                <div key={i} className="glass-premium border border-white/10 p-7 animate-pulse">
                   <div className="flex justify-between mb-6">
                     <div className="h-4 w-16 bg-white/10 rounded-full" />
                     <div className="h-4 w-12 bg-white/10 rounded-full" />
@@ -145,8 +142,10 @@ export default async function WebinarsPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {webinars.map((webinar) => (
-              <WebinarCard key={webinar.id} webinar={webinar} />
+            {webinars.map((webinar, idx) => (
+              <div key={webinar.id} className="animate-cinematic" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
+                <WebinarCard webinar={webinar} />
+              </div>
             ))}
           </div>
         )}

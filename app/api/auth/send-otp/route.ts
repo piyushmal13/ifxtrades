@@ -4,7 +4,6 @@ import { createAndStoreOtp, logOtpEvent, OtpFailure } from "@/lib/otp";
 import { Resend } from "resend";
 import { User } from "@supabase/supabase-js";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 /**
@@ -59,6 +58,8 @@ export async function POST(req: NextRequest) {
         } catch {
             // Non-fatal
         }
+
+        const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy");
 
         // Send email via Resend
         const { error: emailError } = await resend.emails.send({
