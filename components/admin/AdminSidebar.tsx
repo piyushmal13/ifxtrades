@@ -145,7 +145,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: "Commerce",
         icon: <IconCommerce />,
         items: [
-            { href: "/admin/licenses", label: "Licenses", icon: <IconLicense /> },
+            { href: "/admin/crm", label: "Payments & Licenses", icon: <IconLicense /> },
         ],
     },
 ];

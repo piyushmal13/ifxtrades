@@ -32,6 +32,7 @@ export default function CrudManager({
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const initialForm = useMemo(() => {
@@ -92,12 +93,14 @@ export default function CrudManager({
     setForm(next);
     setEditingId(String(item.id));
     setMessage(`Editing record ${item.id}`);
+    setMessageType(null);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
     setMessage(null);
+    setMessageType(null);
 
     const payload = { ...form };
     for (const field of fields) {
@@ -116,6 +119,7 @@ export default function CrudManager({
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
       setMessage(body.error || "Failed to save record.");
+      setMessageType("error");
       setSubmitting(false);
       return;
     }
@@ -130,6 +134,7 @@ export default function CrudManager({
       setMessage("Created successfully.");
     }
 
+    setMessageType("success");
     resetForm();
     setSubmitting(false);
   };
@@ -140,12 +145,14 @@ export default function CrudManager({
 
     setDeletingId(id);
     setMessage(null);
+    setMessageType(null);
 
     const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" });
     const body = await response.json().catch(() => ({}));
 
     if (!response.ok) {
       setMessage(body.error || "Delete failed.");
+      setMessageType("error");
       setDeletingId(null);
       return;
     }
@@ -155,6 +162,7 @@ export default function CrudManager({
       resetForm();
     }
     setMessage("Deleted successfully.");
+    setMessageType("success");
     setDeletingId(null);
   };
 
@@ -172,22 +180,22 @@ export default function CrudManager({
   const submitBusyLabel = editingId ? "Updating..." : "Saving...";
 
   return (
-    <div>
-      <p className="text-xs uppercase tracking-[0.2em] text-jpm-gold mb-2">{title}</p>
-      <h1 className="font-serif text-4xl text-jpm-navy">{title} Management</h1>
-      <p className="mt-4 text-sm text-jpm-muted max-w-3xl">{description}</p>
+    <div className="text-white">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">{title}</p>
+      <h1 className="font-serif text-4xl">{title} Management</h1>
+      <p className="mt-4 text-sm text-white/45 max-w-3xl">{description}</p>
 
-      <form onSubmit={handleSubmit} className="card p-6 mt-8 space-y-4">
-        <h2 className="font-serif text-2xl text-jpm-navy">{heading}</h2>
+      <form onSubmit={handleSubmit} className="card border border-white/10 bg-white/3 p-6 mt-8 space-y-4">
+        <h2 className="font-serif text-2xl">{heading}</h2>
         <div className="grid md:grid-cols-2 gap-4">
           {fields.map((field) => (
             <label key={field.name} className="flex flex-col gap-2">
-              <span className="text-xs uppercase tracking-[0.12em] text-jpm-muted">
+              <span className="text-[10px] uppercase tracking-[0.12em] text-white/35">
                 {field.label}
               </span>
               {field.type === "textarea" ? (
                 <textarea
-                  className="border border-jpm-border rounded-sm px-3 py-2 text-sm"
+                  className="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white"
                   value={form[field.name]}
                   required={field.required}
                   onChange={(event) =>
@@ -204,7 +212,7 @@ export default function CrudManager({
                 />
               ) : field.type === "select" ? (
                 <select
-                  className="border border-jpm-border rounded-sm px-3 py-2 text-sm"
+                  className="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white"
                   value={form[field.name]}
                   required={field.required}
                   onChange={(event) =>
@@ -221,7 +229,7 @@ export default function CrudManager({
               ) : (
                 <input
                   type={field.type || "text"}
-                  className="border border-jpm-border rounded-sm px-3 py-2 text-sm"
+                  className="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white"
                   value={form[field.name]}
                   required={field.required}
                   onChange={(event) =>
@@ -241,14 +249,26 @@ export default function CrudManager({
               Cancel Edit
             </button>
           )}
-          {message && <p className="text-sm text-jpm-muted">{message}</p>}
+          {message && (
+            <p
+              className={`text-sm ${
+                messageType === "error"
+                  ? "text-red-300"
+                  : messageType === "success"
+                    ? "text-emerald-300"
+                    : "text-white/55"
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </div>
       </form>
 
-      <div className="card mt-8 overflow-x-auto">
+      <div className="card border border-white/10 bg-white/3 mt-8 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-jpm-border text-left">
+            <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-[0.15em] text-white/40">
               {columns.map((column) => (
                 <th key={column.key} className="p-4">
                   {column.label}
@@ -260,13 +280,13 @@ export default function CrudManager({
           <tbody>
             {items.length === 0 && !loadingItems ? (
               <tr>
-                <td className="p-4 text-jpm-muted" colSpan={columns.length + 1}>
+                <td className="p-4 text-white/55" colSpan={columns.length + 1}>
                   No records yet.
                 </td>
               </tr>
             ) : (
               items.map((item, index) => (
-                <tr key={item.id ?? index} className="border-b border-jpm-border/70">
+                <tr key={item.id ?? index} className="border-b border-white/5">
                   {columns.map((column) => (
                     <td key={column.key} className="p-4">
                       {renderValue(item[column.key])}

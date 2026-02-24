@@ -40,7 +40,7 @@ export default async function AdminHomePage() {
       <div className="mt-8 grid sm:grid-cols-3 gap-4">
         {[
           { label: "Manage Users", href: "/admin/users", desc: "View, edit, suspend accounts" },
-          { label: "Review Licenses", href: "/admin/licenses", desc: "Active and expiring licenses" },
+          { label: "Review Algorithms", href: "/admin/algos", desc: "Active listings and pricing" },
           { label: "Content Dashboard", href: "/admin/blog", desc: "Blog, webinars, university" },
         ].map((action) => (
           <a

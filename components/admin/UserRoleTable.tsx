@@ -33,10 +33,10 @@ export default function UserRoleTable({ users }: { users: UserRow[] }) {
   };
 
   return (
-    <div className="card overflow-x-auto">
+    <div className="card border border-white/10 bg-white/3 overflow-x-auto text-white">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-jpm-border text-left">
+          <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-[0.15em] text-white/40">
             <th className="p-4">Email</th>
             <th className="p-4">Role</th>
             <th className="p-4">Created</th>
@@ -45,10 +45,10 @@ export default function UserRoleTable({ users }: { users: UserRow[] }) {
         </thead>
         <tbody>
           {rows.map((user) => (
-            <tr key={user.id} className="border-b border-jpm-border/70">
+            <tr key={user.id} className="border-b border-white/5">
               <td className="p-4">{user.email}</td>
-              <td className="p-4 uppercase">{String(user.role)}</td>
-              <td className="p-4">
+              <td className="p-4 uppercase text-jpm-gold">{String(user.role)}</td>
+              <td className="p-4 text-white/70">
                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
               </td>
               <td className="p-4">
