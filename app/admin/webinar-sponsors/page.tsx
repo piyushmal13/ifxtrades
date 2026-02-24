@@ -26,7 +26,7 @@ export default async function AdminWebinarSponsorsPage() {
         },
         { name: "tier", label: "Tier", required: true },
         { name: "name", label: "Sponsor Name", required: true },
-        { name: "logo_url", label: "Sponsor Logo URL" },
+        { name: "logo_url", label: "Sponsor Logo URL", type: "image" },
         { name: "link_url", label: "Sponsor Link URL" },
       ]}
       rows={sponsorRows}

@@ -9,12 +9,13 @@
 
 :root {
   /* ── Brand: Core Palette ─────────────────────────────────────── */
-  --color-bg-primary: #020617;
+  --color-bg-primary: #020205;
+  /* Deepest Midnight */
   /* Deep navy-black */
-  --color-bg-surface: #0d1117;
-  /* Card surface */
-  --color-bg-elevated: #141414;
-  /* Elevated surface (modals, dropdowns) */
+  --color-bg-surface: #0a0a0c;
+  /* Solid Card */
+  --color-bg-elevated: #0f0f12;
+  /* Elevated surface */
   --color-bg-overlay: rgba(2, 6, 23, 0.85);
 
   /* ── Brand: Gold Accent ──────────────────────────────────────── */
@@ -26,11 +27,11 @@
   --color-gold-border-strong: rgba(212, 175, 55, 0.35);
 
   /* ── Semantic: Text ──────────────────────────────────────────── */
-  --color-text-primary: #f1f5f9;
-  /* 13.3:1 on bg-primary */
-  --color-text-secondary: #94a3b8;
-  /* 5.1:1 on bg-primary  */
-  --color-text-muted: #64748b;
+  --color-text-primary: #ffffff;
+  /* Pure White for maximum legibility */
+  --color-text-secondary: #cbd5e1;
+  /* Lighter secondary for readability */
+  --color-text-muted: #94a3b8;
   /* Used for labels only */
   --color-text-disabled: #374151;
   --color-text-inverse: #020617;
@@ -70,10 +71,11 @@
   --space-24: 96px;
 
   /* ── Border Radius ───────────────────────────────────────────── */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 2px;
+  /* Sharper institutional edges */
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --radius-full: 9999px;
 
   /* ── Elevation / Shadows ─────────────────────────────────────── */
@@ -184,8 +186,7 @@ body::before {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Removed excessive backdrop-filter for 'solid bold' look */
 }
 
 .card-elevated {
@@ -193,8 +194,6 @@ body::before {
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 
 .section-spacing {
@@ -223,7 +222,7 @@ body::before {
     radial-gradient(ellipse 60% 45% at 100% 100%, rgba(52, 211, 153, 0.03), transparent 70%);
 }
 
-.ifx-page-shell > * {
+.ifx-page-shell>* {
   position: relative;
   z-index: 1;
 }
@@ -367,11 +366,11 @@ body::before {
   font-size: 0.8rem;
 }
 
-/* Primary: Gold gradient, dark text */
+/* Primary: Solid Gold for Bold Look */
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-gold-dark) 0%, var(--color-gold) 50%, var(--color-gold-light) 100%);
+  background: var(--color-gold);
   color: var(--color-text-inverse);
-  border-color: transparent;
+  border-color: var(--color-gold-dark);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1039,8 +1038,15 @@ body::before {
 
 /* Animations */
 @keyframes cinematic-fade-in {
-  from { opacity: 0; transform: translateY(20px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .animate-cinematic {
@@ -1063,13 +1069,17 @@ body::before {
 }
 
 /* -- Typography Enhancements ---------------------------------- */
-h1, h2, h3, .font-serif {
+h1,
+h2,
+h3,
+.font-serif {
   font-family: var(--font-playfair), "Playfair Display", serif !important;
   letter-spacing: -0.01em;
 }
 
-body, p, .font-sans {
+body,
+p,
+.font-sans {
   font-family: var(--font-inter), "Inter", sans-serif !important;
   letter-spacing: 0.01em;
 }
-

@@ -29,8 +29,15 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 glass-premium border-b border-white/10 shadow-2xl transition-all h-20">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-serif font-bold text-white tracking-tight group">
-          IFX<span className="text-jpm-gold group-hover:text-jpm-gold-light transition-colors">TRADES</span>
+        <Link href="/" className="flex items-center group">
+          <div className="relative">
+            <div className="absolute -inset-1 bg-jpm-gold/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <img
+              src="/logo.png"
+              alt="IFXTrades"
+              className="h-10 w-10 relative object-contain rounded-full"
+            />
+          </div>
         </Link>
 
         {/* Desktop Navigation */}

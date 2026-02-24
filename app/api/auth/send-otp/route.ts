@@ -4,7 +4,7 @@ import { createAndStoreOtp, logOtpEvent, OtpFailure } from "@/lib/otp";
 import { Resend } from "resend";
 import { User } from "@supabase/supabase-js";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { getSiteUrl } from "@/lib/site";
 
 /**
  * POST /api/auth/send-otp
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
             const { data: linkData } = await supabase.auth.admin.generateLink({
                 type: "magiclink",
                 email,
-                options: { redirectTo: `${SITE_URL}/auth/callback?next=/dashboard` },
+                options: { redirectTo: `${getSiteUrl()}/auth/callback?next=/dashboard` },
             });
             fallbackLink = linkData?.properties?.action_link;
         } catch {

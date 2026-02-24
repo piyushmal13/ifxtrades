@@ -6,11 +6,7 @@ import { useAuth } from "@/lib/auth-provider"
 import { useState } from "react"
 import { motion, AnimatePresence, Variants } from "framer-motion"
 
-// Resolves the correct canonical origin regardless of SSR/CSR context
-function siteOrigin(): string {
-  if (typeof window !== "undefined") return window.location.origin
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
-}
+import { getAuthCallbackUrl } from "@/lib/site"
 
 
 export default function LoginClient({
@@ -24,9 +20,6 @@ export default function LoginClient({
 
   const redirectAfterAuth = searchParams.get("redirect") ?? "/dashboard"
 
-  // Build the auth callback URL that Supabase will redirect to after link-click
-  const callbackUrl = (next: string) =>
-    `${siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}`
 
   const [view, setView] = useState<"login" | "signup" | "verify" | "forgotPassword">(initialView)
   const [email, setEmail] = useState("")
@@ -81,7 +74,7 @@ export default function LoginClient({
         data: { full_name: fullName },
         // ✅ FIX: provide a proper emailRedirectTo so the magic-link in the
         //         confirmation email lands on our callback route, not a Supabase URL.
-        emailRedirectTo: callbackUrl(redirectAfterAuth),
+        emailRedirectTo: getAuthCallbackUrl(redirectAfterAuth),
       },
     })
 
@@ -137,7 +130,7 @@ export default function LoginClient({
       type: "signup",
       email,
       options: {
-        emailRedirectTo: callbackUrl(redirectAfterAuth),
+        emailRedirectTo: getAuthCallbackUrl(redirectAfterAuth),
       },
     })
 
@@ -160,7 +153,7 @@ export default function LoginClient({
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       // ✅ FIX: point to our callback so Supabase knows where to land after reset
-      redirectTo: callbackUrl("/dashboard"),
+      redirectTo: getAuthCallbackUrl("/dashboard"),
     })
 
     if (error) {
@@ -180,7 +173,7 @@ export default function LoginClient({
       provider: "google",
       options: {
         // ✅ FIX: use the proper callback URL, not bare origin
-        redirectTo: callbackUrl(redirectAfterAuth),
+        redirectTo: getAuthCallbackUrl(redirectAfterAuth),
       },
     })
   }

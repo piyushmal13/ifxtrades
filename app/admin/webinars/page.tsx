@@ -26,7 +26,7 @@ export default async function AdminWebinarsPage() {
           required: true,
         },
         { name: "starts_at", label: "Webinar Start Date", type: "date" },
-        { name: "hero_image_url", label: "Hero Image URL" },
+        { name: "hero_image_url", label: "Hero Image URL", type: "image" },
         { name: "promo_video_url", label: "Promo Video URL" },
         { name: "is_premium", label: "Premium Webinar", type: "checkbox" },
         { name: "is_published", label: "Published", type: "checkbox" },

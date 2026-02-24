@@ -7,6 +7,8 @@ import { useAuth } from "@/lib/auth-provider";
 import { useToast } from "@/components/ui/Toast";
 import { OTPVerification } from "./OTPVerification";
 
+import { getAuthCallbackUrl } from "@/lib/site";
+
 /* ── Types ─────────────────────────────────────────────────── */
 
 type AuthView = "signin" | "signup" | "otp" | "forgot";
@@ -17,17 +19,6 @@ interface AuthModalProps {
     onClose: () => void;
     initialTab?: AuthTab;
     redirectTo?: string;
-}
-
-/* ── Helpers ────────────────────────────────────────────────── */
-
-function siteOrigin() {
-    if (typeof window !== "undefined") return window.location.origin;
-    return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-}
-
-function callbackUrl(next: string) {
-    return `${siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}`;
 }
 
 /* ── AuthModal ──────────────────────────────────────────────── */
@@ -165,7 +156,7 @@ export function AuthModal({
             password,
             options: {
                 data: { full_name: fullName },
-                emailRedirectTo: callbackUrl(redirectTo),
+                emailRedirectTo: getAuthCallbackUrl(redirectTo),
             },
         });
 
@@ -200,7 +191,7 @@ export function AuthModal({
         }
         setLoading(true);
         await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: callbackUrl("/dashboard"),
+            redirectTo: getAuthCallbackUrl("/dashboard"),
         });
         success("Reset email sent", "Check your inbox for reset instructions.");
         setView("signin");
@@ -218,7 +209,7 @@ export function AuthModal({
     const handleGoogle = async () => {
         await supabase.auth.signInWithOAuth({
             provider: "google",
-            options: { redirectTo: callbackUrl(redirectTo) },
+            options: { redirectTo: getAuthCallbackUrl(redirectTo) },
         });
     };
 
