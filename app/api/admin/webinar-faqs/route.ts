@@ -11,14 +11,19 @@ export async function GET() {
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin
     .from("webinar_faqs")
-    .select("*")
+    .select("*, webinars(title)")
     .order("sort_order", { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ items: data ?? [] });
+  const items = (data ?? []).map((row: any) => ({
+    ...row,
+    webinar_title: row.webinars?.title ?? row.webinar_id,
+  }));
+
+  return NextResponse.json({ items });
 }
 
 export async function POST(request: Request) {
@@ -60,6 +65,16 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.json({ item: data });
-}
+  const { data: hydrated } = await admin
+    .from("webinar_faqs")
+    .select("*, webinars(title)")
+    .eq("id", data.id)
+    .single();
 
+  return NextResponse.json({
+    item: {
+      ...(hydrated ?? data),
+      webinar_title: (hydrated as any)?.webinars?.title ?? data.webinar_id,
+    },
+  });
+}

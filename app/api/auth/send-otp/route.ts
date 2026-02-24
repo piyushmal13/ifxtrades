@@ -3,8 +3,47 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createAndStoreOtp, logOtpEvent, OtpFailure } from "@/lib/otp";
 import { Resend } from "resend";
 import { User } from "@supabase/supabase-js";
+import { getAuthCallbackUrl } from "@/lib/site";
 
-import { getSiteUrl } from "@/lib/site";
+async function findUserByEmail(email: string) {
+    const supabase = createSupabaseAdminClient();
+
+    // Prefer profile lookup when available; avoids scanning large auth user lists.
+    try {
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("id")
+            .ilike("email", email)
+            .limit(1)
+            .maybeSingle();
+
+        if (profile?.id) {
+            const { data: userResult } = await supabase.auth.admin.getUserById(profile.id);
+            if (userResult?.user?.email?.toLowerCase() === email) {
+                return userResult.user;
+            }
+        }
+    } catch {
+        // Fall back to listUsers pagination below.
+    }
+
+    // Fallback for schemas where profile email is unavailable.
+    const perPage = 1000;
+    for (let page = 1; page <= 10; page += 1) {
+        const { data: listData, error } = await supabase.auth.admin.listUsers({
+            page,
+            perPage,
+        });
+
+        if (error) break;
+        const users = listData?.users ?? [];
+        const found = users.find((u: User) => u.email?.toLowerCase() === email);
+        if (found) return found;
+        if (users.length < perPage) break;
+    }
+
+    return null;
+}
 
 /**
  * POST /api/auth/send-otp
@@ -20,10 +59,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
         }
 
-        // Look up user by email via admin list (getUserByEmail not in SDK)
         const supabase = createSupabaseAdminClient();
-        const { data: listData } = await supabase.auth.admin.listUsers({ perPage: 50000 });
-        const authUser = listData?.users?.find((u: User) => u.email?.toLowerCase() === email);
+        const authUser = await findUserByEmail(email);
 
         if (!authUser) {
             // Generic message to prevent user enumeration
@@ -52,7 +89,7 @@ export async function POST(req: NextRequest) {
             const { data: linkData } = await supabase.auth.admin.generateLink({
                 type: "magiclink",
                 email,
-                options: { redirectTo: `${getSiteUrl()}/auth/callback?next=/dashboard` },
+                options: { redirectTo: getAuthCallbackUrl("/dashboard", { request: req }) },
             });
             fallbackLink = linkData?.properties?.action_link;
         } catch {

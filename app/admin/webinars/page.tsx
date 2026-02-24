@@ -3,7 +3,7 @@ import CrudManager from "@/components/admin/CrudManager";
 import { listWebinars } from "@/lib/data/platform";
 
 export default async function AdminWebinarsPage() {
-  const webinars = await listWebinars();
+  const webinars = await listWebinars({ includeUnpublished: true });
 
   return (
     <CrudManager
@@ -31,6 +31,7 @@ export default async function AdminWebinarsPage() {
         { name: "is_premium", label: "Premium Webinar", type: "checkbox" },
         { name: "is_published", label: "Published", type: "checkbox" },
       ]}
+      uploadFolder="webinars"
       rows={webinars.map((item) => ({
         id: item.id,
         title: item.title,
@@ -46,15 +47,18 @@ export default async function AdminWebinarsPage() {
         hero_image_url: item.heroImageUrl ?? "",
         promo_video_url: item.promoVideoUrl ?? "",
         is_premium: item.isPremium,
-        is_published: false,
+        is_published: item.isPublished,
       }))}
       columns={[
         { key: "title", label: "Title" },
         { key: "slug", label: "Slug" },
         { key: "venue", label: "Venue" },
+        { key: "sponsor_tier", label: "Tier" },
         { key: "capacity", label: "Capacity" },
         { key: "price", label: "Price" },
-        { key: "registration_deadline", label: "Deadline" },
+        { key: "registration_deadline", label: "Deadline", type: "date" },
+        { key: "is_published", label: "Published", type: "boolean" },
+        { key: "hero_image_url", label: "Hero", type: "image" },
       ]}
     />
   );

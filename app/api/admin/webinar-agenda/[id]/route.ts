@@ -57,7 +57,18 @@ export async function PATCH(request: Request, { params }: Params) {
     });
   }
 
-  return NextResponse.json({ item: data });
+  const { data: hydrated } = await admin
+    .from("webinar_agenda_items")
+    .select("*, webinars(title)")
+    .eq("id", data.id)
+    .single();
+
+  return NextResponse.json({
+    item: {
+      ...(hydrated ?? data),
+      webinar_title: (hydrated as any)?.webinars?.title ?? data.webinar_id,
+    },
+  });
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
@@ -88,4 +99,3 @@ export async function DELETE(_request: Request, { params }: Params) {
 
   return NextResponse.json({ ok: true, id });
 }
-

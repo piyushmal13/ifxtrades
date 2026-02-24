@@ -45,6 +45,7 @@ export function AuthModal({
     const [loading, setLoading] = useState(false);
     const [emailHint, setEmailHint] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const safeRedirectTo = redirectTo.startsWith("/") ? redirectTo : "/dashboard";
 
     useEffect(() => setMounted(true), []);
 
@@ -141,7 +142,7 @@ export function AuthModal({
         } else {
             success("Signed in", "Welcome back to IFXTrades.");
             onClose();
-            window.location.href = redirectTo;
+            window.location.href = safeRedirectTo;
         }
         setLoading(false);
     };
@@ -156,7 +157,7 @@ export function AuthModal({
             password,
             options: {
                 data: { full_name: fullName },
-                emailRedirectTo: getAuthCallbackUrl(redirectTo),
+                emailRedirectTo: getAuthCallbackUrl(safeRedirectTo),
             },
         });
 
@@ -202,14 +203,14 @@ export function AuthModal({
     const handleOtpSuccess = () => {
         success("Email verified", "Your account is now active. Welcome to IFXTrades!");
         onClose();
-        window.location.href = redirectTo;
+        window.location.href = safeRedirectTo;
     };
 
     /* ── Google OAuth ───────────────────────────────────────────── */
     const handleGoogle = async () => {
         await supabase.auth.signInWithOAuth({
             provider: "google",
-            options: { redirectTo: getAuthCallbackUrl(redirectTo) },
+            options: { redirectTo: getAuthCallbackUrl(safeRedirectTo) },
         });
     };
 

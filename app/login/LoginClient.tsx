@@ -18,7 +18,8 @@ export default function LoginClient({
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const redirectAfterAuth = searchParams.get("redirect") ?? "/dashboard"
+  const redirectParam = searchParams.get("redirect")
+  const redirectAfterAuth = redirectParam && redirectParam.startsWith("/") ? redirectParam : "/dashboard"
 
 
   const [view, setView] = useState<"login" | "signup" | "verify" | "forgotPassword">(initialView)
@@ -49,6 +50,12 @@ export default function LoginClient({
     if (!error) {
       router.push(redirectAfterAuth)
     } else {
+      const message = error.message?.toLowerCase() ?? ""
+      if (message.includes("confirm") || message.includes("verify")) {
+        router.push(`/verify?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirectAfterAuth)}`)
+        setLoading(false)
+        return
+      }
       setMessage({ text: error.message, type: "error" })
     }
     setLoading(false)

@@ -19,6 +19,7 @@ export type WebinarSummary = {
   startsAt: string | null;
   heroImageUrl: string | null;
   promoVideoUrl: string | null;
+  isPublished: boolean;
 };
 
 export type WebinarDetail = WebinarSummary & {
@@ -218,6 +219,7 @@ const FALLBACK_WEBINARS: WebinarSummary[] = [
     startsAt: new Date(Date.now() + 9 * 86400000).toISOString(),
     heroImageUrl: null,
     promoVideoUrl: null,
+    isPublished: true,
   },
   {
     id: "w2",
@@ -236,6 +238,7 @@ const FALLBACK_WEBINARS: WebinarSummary[] = [
     startsAt: new Date(Date.now() + 5 * 86400000).toISOString(),
     heroImageUrl: null,
     promoVideoUrl: null,
+    isPublished: true,
   },
 ];
 
@@ -428,7 +431,7 @@ async function firstSuccessfulCount(
   return 0;
 }
 
-export async function listWebinars() {
+export async function listWebinars(options: { includeUnpublished?: boolean } = {}) {
   const rows = await firstSuccessfulRows(["webinars"], 36);
   if (!rows.length) {
     return enableDemoFallback ? FALLBACK_WEBINARS : [];
@@ -462,11 +465,16 @@ export async function listWebinars() {
         startsAt: asIso(row, ["starts_at", "created_at"]),
         heroImageUrl: asString(row, ["hero_image_url"]) || null,
         promoVideoUrl: asString(row, ["promo_video_url"]) || null,
+        isPublished: asBoolean(row, ["is_published"], true),
       };
     }),
   );
 
-  return mapped.sort((a, b) => {
+  const published = options.includeUnpublished
+    ? mapped
+    : mapped.filter((item) => item.isPublished);
+
+  return published.sort((a, b) => {
     const aDate = a.startsAt ? new Date(a.startsAt).getTime() : 0;
     const bDate = b.startsAt ? new Date(b.startsAt).getTime() : 0;
     return aDate - bDate;

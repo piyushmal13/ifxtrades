@@ -92,11 +92,10 @@ export function Footer() {
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-12">
                 {/* Brand column (2 cols) */}
                 <div className="col-span-1 md:col-span-2">
-                    <Link href="/" className="flex items-center gap-3 mb-5">
+                    <Link href="/" className="inline-flex items-center mb-5">
                         <div className="relative w-10 h-10 backdrop-blur-md bg-black/40 rounded-lg p-1 border border-jpm-gold/20 flex items-center justify-center">
                             <Image src="/logo.png" alt="IFXTrades" width={32} height={32} className="object-contain" />
                         </div>
-                        <span className="text-xl font-serif text-white tracking-tight">IFXTrades</span>
                     </Link>
                     <p className="text-sm text-white/50 max-w-xs leading-relaxed mb-5">
                         Institutional capital intelligence platform providing macro research, executable strategies, and structured education for sophisticated investors.

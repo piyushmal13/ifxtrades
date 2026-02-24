@@ -122,7 +122,9 @@ html {
 
 body {
   overflow-x: hidden;
-  background: var(--color-bg-primary);
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(212, 175, 55, 0.08), transparent 55%),
+    linear-gradient(180deg, #01040f 0%, #030712 55%, #020205 100%);
   color: var(--color-text-primary);
   font-family: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
   font-feature-settings: "cv11", "ss01";
@@ -327,10 +329,10 @@ body::before {
   justify-content: center;
   gap: var(--space-2);
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-family: "Inter", sans-serif;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   line-height: 1;
@@ -424,7 +426,7 @@ body::before {
 
 .input-base {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-primary);

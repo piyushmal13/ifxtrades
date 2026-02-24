@@ -3,7 +3,11 @@ import CrudManager from "@/components/admin/CrudManager";
 import { listWebinarFaqs, listWebinars } from "@/lib/data/platform";
 
 export default async function AdminWebinarFaqPage() {
-  const [faqRows, webinars] = await Promise.all([listWebinarFaqs(), listWebinars()]);
+  const [faqRows, webinars] = await Promise.all([
+    listWebinarFaqs(),
+    listWebinars({ includeUnpublished: true }),
+  ]);
+  const webinarNameById = new Map(webinars.map((webinar) => [webinar.id, webinar.title]));
 
   return (
     <CrudManager
@@ -25,13 +29,15 @@ export default async function AdminWebinarFaqPage() {
         { name: "answer", label: "Answer", type: "textarea", required: true },
         { name: "sort_order", label: "Sort Order", type: "number" },
       ]}
-      rows={faqRows}
+      rows={faqRows.map((row) => ({
+        ...row,
+        webinar_title: webinarNameById.get(row.webinar_id) ?? row.webinar_id,
+      }))}
       columns={[
-        { key: "webinar_id", label: "Webinar ID" },
+        { key: "webinar_title", label: "Webinar" },
         { key: "question", label: "Question" },
         { key: "sort_order", label: "Order" },
       ]}
     />
   );
 }
-

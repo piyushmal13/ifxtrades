@@ -27,6 +27,12 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setIsOpen(false);
+    window.location.href = "/login";
+  };
+
   if (pathname.startsWith("/admin")) {
     return null;
   }
@@ -80,15 +86,12 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto h-14 md:h-16 px-4 md:px-8 flex items-center justify-between">
         {/* Logo — glass morphism frame */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center group">
           <div className="relative w-12 h-12 md:w-14 md:h-14 backdrop-blur-md bg-black/40 rounded-lg p-1.5 
             border border-jpm-gold/20 shadow-[0_0_20px_rgba(212,175,55,0.08)] flex items-center justify-center 
             transition-all hover:border-jpm-gold/40 hover:shadow-[0_0_25px_rgba(212,175,55,0.15)]">
             <Image src="/logo.png" alt="IFXTrades" fill className="object-contain p-1.5" priority />
           </div>
-          <span className="hidden lg:block text-[10px] uppercase tracking-[0.25em] text-jpm-gold/60 font-semibold">
-            IFXTrades
-          </span>
         </Link>
 
         {/* Desktop primary links */}
@@ -132,7 +135,7 @@ export function Navbar() {
           )}
           {session && (
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={handleSignOut}
               className="text-xs font-semibold uppercase tracking-[0.14em] text-red-400/70 hover:text-red-400 transition-colors"
             >
               Sign Out
@@ -197,10 +200,7 @@ export function Navbar() {
               )}
               {session && (
                 <button
-                  onClick={() => {
-                    supabase.auth.signOut();
-                    setIsOpen(false);
-                  }}
+                  onClick={handleSignOut}
                   className="text-left text-xs font-semibold uppercase tracking-[0.14em] text-red-400/70 hover:text-red-400 transition-colors py-2"
                 >
                   Sign Out

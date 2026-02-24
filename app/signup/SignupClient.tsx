@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-provider";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useToast } from "@/components/ui/Toast";
+import { getAuthCallbackUrl } from "@/lib/site";
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 
@@ -63,7 +64,9 @@ export function SignupClient() {
     const [loading, setLoading] = useState(false);
     const { supabase } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { success, error: toastError } = useToast();
+    const redirectAfterAuth = searchParams.get("redirect") ?? "/dashboard";
 
     // Step 1 fields
     const [email, setEmail] = useState("");
@@ -126,7 +129,7 @@ export function SignupClient() {
         if (!validateStep3()) return;
         setLoading(true);
         try {
-            const { error } = await supabase.auth.signUp({
+            const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
@@ -136,17 +139,27 @@ export function SignupClient() {
                         country,
                         investor_type: investorType,
                     },
+                    emailRedirectTo: getAuthCallbackUrl(redirectAfterAuth),
                 },
             });
             if (error) {
                 toastError("Signup failed", error.message);
-                setLoading(false);
                 return;
             }
-            success("Account created", "Check your email to verify your address.");
-            setTimeout(() => router.push("/dashboard"), 1500);
+
+            if (data.session) {
+                success("Account created", "You are now signed in.");
+                router.push(redirectAfterAuth);
+                return;
+            }
+
+            success(
+                "Account created",
+                "Verification email sent. Use the link in your inbox to continue.",
+            );
         } catch {
             toastError("Unexpected error", "Please try again or contact support.");
+        } finally {
             setLoading(false);
         }
     }

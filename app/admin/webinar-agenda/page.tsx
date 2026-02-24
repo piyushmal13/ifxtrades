@@ -5,14 +5,16 @@ import { listWebinarAgendaItems, listWebinars } from "@/lib/data/platform";
 export default async function AdminWebinarAgendaPage() {
   const [agendaItems, webinars] = await Promise.all([
     listWebinarAgendaItems(),
-    listWebinars(),
+    listWebinars({ includeUnpublished: true }),
   ]);
+  const webinarNameById = new Map(webinars.map((webinar) => [webinar.id, webinar.title]));
 
   return (
     <CrudManager
       title="Webinar Agenda"
       description="Manage agenda timeline, speaker names, profile photos, and session ordering."
       endpoint="/api/admin/webinar-agenda"
+      uploadFolder="webinar-agenda"
       fields={[
         {
           name: "webinar_id",
@@ -31,14 +33,17 @@ export default async function AdminWebinarAgendaPage() {
         { name: "speaker_image_url", label: "Speaker Profile Image URL" },
         { name: "sort_order", label: "Sort Order", type: "number" },
       ]}
-      rows={agendaItems}
+      rows={agendaItems.map((row) => ({
+        ...row,
+        webinar_title: webinarNameById.get(row.webinar_id) ?? row.webinar_id,
+      }))}
       columns={[
-        { key: "webinar_id", label: "Webinar ID" },
+        { key: "webinar_title", label: "Webinar" },
         { key: "topic", label: "Topic" },
         { key: "speaker_name", label: "Speaker" },
+        { key: "speaker_image_url", label: "Speaker Image", type: "image" },
         { key: "sort_order", label: "Order" },
       ]}
     />
   );
 }
-
