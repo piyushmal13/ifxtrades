@@ -2,6 +2,7 @@
 -- Migration: 002_rbac_roles
 -- Adds moderator/support role support and performance indexes
 -- Safe to run multiple times (idempotent)
+-- Paste the ENTIRE contents below into Supabase SQL Editor
 -- ============================================================
 
 -- 1. Add `role` column to profiles (TEXT, defaults to 'user')
@@ -55,21 +56,18 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_profiles_role
   ON public.profiles(role);
 
--- profiles: email_verified + role (for dashboard auth + admin checks in one scan)
+-- profiles: email_verified (partial index for unverified users only)
 CREATE INDEX IF NOT EXISTS idx_profiles_email_verified
   ON public.profiles(email_verified)
   WHERE email_verified = false;
 
--- webinar_registrations: user_id (for dashboard queries)
+-- webinar_registrations: user_id
+-- NOTE: run only if this table exists in your schema
 CREATE INDEX IF NOT EXISTS idx_webinar_registrations_user_id
-  ON public.webinar_registrations(user_id)
-  WHERE EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'webinar_registrations'
-  );
+  ON public.webinar_registrations(user_id);
 
--- 4. RLS: allow users to read their own role from profiles
--- (profiles table RLS assumed already enabled from base schema)
+-- 4. RLS: allow users to read/update their own profile row
+-- (assumes RLS is already enabled on the profiles table)
 DROP POLICY IF EXISTS "Users read own profile" ON public.profiles;
 CREATE POLICY "Users read own profile"
   ON public.profiles FOR SELECT
@@ -91,4 +89,5 @@ CREATE POLICY "Users update own profile"
 -- ALTER TABLE public.profiles DROP COLUMN IF EXISTS role;
 -- DROP INDEX IF EXISTS idx_profiles_role;
 -- DROP INDEX IF EXISTS idx_profiles_email_verified;
+-- DROP INDEX IF EXISTS idx_webinar_registrations_user_id;
 -- ============================================================

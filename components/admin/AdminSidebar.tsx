@@ -152,7 +152,12 @@ const NAV_GROUPS: NavGroup[] = [
 
 /* ── AdminSidebar ────────────────────────────────────────────────── */
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+    className?: string;
+    onNavigate?: () => void;
+};
+
+export function AdminSidebar({ className = "", onNavigate }: AdminSidebarProps) {
     const pathname = usePathname();
     const titleId = useId();
 
@@ -175,7 +180,7 @@ export function AdminSidebar() {
 
     return (
         <aside
-            className="w-[240px] min-h-screen flex-shrink-0 flex flex-col"
+            className={`w-[240px] min-h-screen flex-shrink-0 flex flex-col ${className}`}
             style={{
                 background: "var(--color-bg-surface)",
                 borderRight: "1px solid var(--color-border)",
@@ -258,6 +263,7 @@ export function AdminSidebar() {
                                                 <Link
                                                     href={item.href}
                                                     aria-current={active ? "page" : undefined}
+                                                    onClick={() => onNavigate?.()}
                                                     className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[12px] font-medium transition-all duration-150"
                                                     style={{
                                                         color: active ? "var(--color-gold)" : "var(--color-text-secondary)",

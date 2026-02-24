@@ -51,9 +51,8 @@ export default function AdminAccessClient({
   };
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
-      <section className="max-w-2xl mx-auto relative z-10 card p-8 space-y-6">
+    <main className="ifx-page-shell">
+      <section className="ifx-page-container-narrow relative z-10 card p-8 space-y-6">
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">
             Admin Recovery
