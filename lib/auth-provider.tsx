@@ -11,7 +11,11 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { normalizeRole, type PlatformRole } from "@/lib/auth-shared";
+import {
+  normalizeRole,
+  resolveUserRole,
+  type PlatformRole,
+} from "@/lib/auth-shared";
 
 type AuthContextValue = {
   supabase: ReturnType<typeof createSupabaseBrowserClient>;
@@ -38,26 +42,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return "user";
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", currentUser.id)
-        .maybeSingle();
+      // Prefer the server-authenticated role to keep client UI consistent
+      // with route/API guards.
+      try {
+        const response = await fetch("/api/auth/role", {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const body = await response.json().catch(() => ({}));
+          const resolved = normalizeRole(body?.role);
+          setRole(resolved);
+          return resolved;
+        }
+      } catch {
+        // Fall back to client-side lookup.
+      }
 
-      if (profile?.role) {
-        const resolved = normalizeRole(profile.role);
+      const resolved = await resolveUserRole(supabase, currentUser);
+      if (resolved === "admin") {
         setRole(resolved);
         return resolved;
       }
-
-      const metadataRole = normalizeRole(
-        currentUser.app_metadata?.role ?? currentUser.user_metadata?.role,
-      );
-      if (metadataRole === "admin") {
-        setRole("admin");
-        return "admin";
-      }
-
       setRole("user");
       return "user";
     },

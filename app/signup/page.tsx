@@ -1,18 +1,20 @@
 import { Suspense } from "react";
-import LoginClient from "@/app/login/LoginClient";
+import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
+import { SignupClient } from "./SignupClient";
 
 export const dynamic = "force-dynamic";
-export const metadata = buildMetadata({
-  title: "Signup",
-  description: "Create an IFXTrades account to access webinars, algorithm licensing, and university programs.",
+export const metadata: Metadata = buildMetadata({
+  title: "Open Your Account",
+  description:
+    "Create your IFXTrades institutional account. Access webinars, algorithm licensing, macro research, and university programs.",
   path: "/signup",
 });
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="p-20">Loading...</div>}>
-      <LoginClient initialView="signup" />
+    <Suspense>
+      <SignupClient />
     </Suspense>
   );
 }

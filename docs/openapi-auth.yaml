@@ -1,0 +1,164 @@
+openapi: "3.1.0"
+info:
+  title: IFXTrades Auth API
+  version: "1.0.0"
+  description: |
+    Authentication and verification endpoints for the IFXTrades platform.
+    All endpoints return JSON. Errors follow `{ error: string }` format.
+    Feature flag: NEXT_PUBLIC_AUTH_V1_ENABLED=true required.
+servers:
+  - url: https://www.ifxtrades.com/api
+    description: Production
+  - url: http://localhost:3000/api
+    description: Local development
+
+paths:
+  /auth/check-email:
+    post:
+      summary: Check whether an email address is registered
+      description: >
+        Used by AuthModal to auto-detect Sign In vs. Create Account tab.
+        Never reveals verification status or account details.
+      operationId: checkEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Always returns 200 to prevent user enumeration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exists:
+                    type: boolean
+
+  /auth/send-otp:
+    post:
+      summary: Send a 6-digit OTP verification code via email
+      description: >
+        Generates a cryptographically random 6-digit code, hashes with bcrypt,
+        stores in the otps table (10 min TTL), and sends via transactional email.
+        Rate-limited to 5 sends per email per hour. Returns exponential resend cooldown.
+      operationId: sendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: OTP sent (or anti-enumeration message if not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resendCooldownSeconds:
+                    type: integer
+                    description: Seconds to wait before resend is allowed
+                    example: 30
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /auth/verify-otp:
+    post:
+      summary: Verify a 6-digit OTP code
+      description: >
+        Validates the code hash, TTL, and attempt count. On success sets
+        profiles.email_verified=true and invalidates the OTP (single-use).
+        Max 5 incorrect attempts before the OTP is invalidated.
+      operationId: verifyOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email:
+                  type: string
+                  format: email
+                code:
+                  type: string
+                  pattern: "^\\d{6}$"
+                  description: 6-digit numeric OTP
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email_verified:
+                    type: boolean
+                    example: true
+                  userId:
+                    type: string
+                    format: uuid
+                  message:
+                    type: string
+        "400":
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Max attempts exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+  responses:
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  securitySchemes:
+    supabaseSession:
+      type: http
+      scheme: bearer
+      description: Supabase JWT session token via HttpOnly cookie

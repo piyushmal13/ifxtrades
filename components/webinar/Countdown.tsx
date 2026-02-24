@@ -40,28 +40,28 @@ export default function Countdown({
   }, [targetIso]);
 
   if (!targetIso || !remaining) {
-    return <p className="text-sm text-jpm-muted">Countdown unavailable.</p>;
+    return <p className="text-sm text-white/30 italic">Countdown unavailable.</p>;
   }
 
   if (remaining.isComplete) {
-    return <p className="text-sm text-jpm-muted">This webinar window is now live or closed.</p>;
+    return <p className="text-sm text-jpm-gold/80 italic">Registration closed.</p>;
   }
 
   return (
-    <div className="grid grid-cols-4 gap-3 text-center">
+    <div className="grid grid-cols-4 gap-2 text-center">
       <TimeBox label="Days" value={remaining.days} />
-      <TimeBox label="Hours" value={remaining.hours} />
-      <TimeBox label="Minutes" value={remaining.minutes} />
-      <TimeBox label="Seconds" value={remaining.seconds} />
+      <TimeBox label="Hrs" value={remaining.hours} />
+      <TimeBox label="Min" value={remaining.minutes} />
+      <TimeBox label="Sec" value={remaining.seconds} />
     </div>
   );
 }
 
 function TimeBox({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border border-jpm-border rounded-sm py-3 px-2 bg-white">
-      <p className="font-serif text-xl text-jpm-navy">{String(value).padStart(2, "0")}</p>
-      <p className="text-[10px] uppercase tracking-[0.12em] text-jpm-muted">{label}</p>
+    <div className="border border-white/10 rounded-sm py-2 px-1 bg-black/40 backdrop-blur-sm">
+      <p className="font-serif text-lg text-white tabular-nums">{String(value).padStart(2, "0")}</p>
+      <p className="text-[8px] uppercase tracking-[0.1em] text-white/30">{label}</p>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { normalizeRole } from "@/lib/auth-shared";
 
 type Row = Record<string, any>;
 
@@ -854,7 +855,7 @@ export async function listCrmUsers(limit = 100): Promise<CrmUser[]> {
   return rows.map((row): CrmUser => ({
     id: asString(row, ["id"], ""),
     email: asString(row, ["email"], "unknown@ifxtrades.com"),
-    role: asString(row, ["role"], "USER"),
+    role: normalizeRole(row.role ?? row.user_role ?? row.is_admin),
     createdAt: asIso(row, ["created_at"]),
   }));
 }

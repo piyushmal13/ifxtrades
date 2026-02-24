@@ -45,70 +45,83 @@ export default async function AlgoDetailPage({ params }: Params) {
   });
 
   return (
-    <main className="min-h-screen bg-jpm-cream pt-28 pb-20 px-6">
+    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-6xl mx-auto">
-        <p className="text-xs uppercase tracking-[0.2em] text-jpm-gold mb-2">
-          Strategy Detail
+
+      {/* Background glow */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
+          Strategy Engine
         </p>
-        <h1 className="font-serif text-4xl md:text-5xl text-jpm-navy">{algo.name}</h1>
-        <p className="mt-6 text-sm text-jpm-muted leading-relaxed max-w-4xl">
+        <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em]">{algo.name}</h1>
+        <p className="mt-6 text-sm text-white/50 leading-relaxed max-w-4xl">
           {algo.description}
         </p>
 
-        <div className="grid md:grid-cols-3 gap-4 mt-10">
-          <Metric label="Risk Class" value={algo.riskClass} />
-          <Metric label="Monthly ROI" value={`${algo.monthlyRoi.toFixed(2)}%`} />
-          <Metric label="Minimum Capital" value={`$${algo.minCapital.toLocaleString()}`} />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-10">
+          <Metric label="Risk Classification" value={algo.riskClass} />
+          <Metric label="Baseline ROI" value={`${algo.monthlyRoi.toFixed(2)}%`} />
+          <Metric label="Min Deployment" value={`$${algo.minCapital.toLocaleString()}`} />
         </div>
 
-        <div className="card p-8 mt-8">
-          <p className="text-xs uppercase tracking-[0.14em] text-jpm-gold mb-3">
-            Compliance Disclaimer
+        <div className="card border border-white/10 bg-white/3 backdrop-blur-md p-8 mt-8">
+          <p className="text-[10px] uppercase tracking-[0.14em] text-jpm-gold/80 mb-3">
+            Institutional Compliance & Risk Disclosure
           </p>
-          <p className="text-sm text-jpm-muted leading-relaxed">{algo.complianceDisclaimer}</p>
-          <p className="mt-6 font-serif text-3xl text-jpm-navy">
-            ${algo.price.toLocaleString()}
-          </p>
-          <p className="mt-2 text-xs text-jpm-muted uppercase tracking-[0.12em]">
-            License fee
-          </p>
-          <BuyLicenseButton algoId={algo.id} algoSlug={algo.slug} price={algo.price} />
+          <p className="text-sm text-white/45 leading-relaxed italic">{algo.complianceDisclaimer}</p>
+
+          <div className="mt-8 pt-8 border-t border-white/10 flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.12em] text-white/30 mb-1">
+                Annual License Fee
+              </p>
+              <p className="font-serif text-4xl text-white tracking-tight">
+                ${algo.price.toLocaleString()}
+              </p>
+            </div>
+            <BuyLicenseButton algoId={algo.id} algoSlug={algo.slug} price={algo.price} />
+          </div>
         </div>
 
-        <section className="mt-10">
-          <h2 className="font-serif text-2xl text-jpm-navy mb-4">
+        <section className="mt-12">
+          <h2 className="font-serif text-2xl text-white mb-6">
             Performance Snapshots
           </h2>
           {algo.snapshots.length === 0 ? (
-            <p className="text-sm text-jpm-muted">
-              Performance data will be published by the research team.
-            </p>
+            <div className="card border border-white/10 bg-white/3 backdrop-blur-md p-8 text-center">
+              <p className="text-sm text-white/30 italic">
+                Verified performance data is currently being audited by the research team.
+              </p>
+            </div>
           ) : (
-            <div className="overflow-x-auto card">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-jpm-border text-left">
-                    <th className="p-4">Period</th>
-                    <th className="p-4">ROI</th>
-                    <th className="p-4">Drawdown</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {algo.snapshots.map((snapshot) => (
-                    <tr key={snapshot.id} className="border-b border-jpm-border/60">
-                      <td className="p-4">
-                        {snapshot.periodStart} to {snapshot.periodEnd}
-                      </td>
-                      <td className="p-4">{snapshot.roiPct.toFixed(2)}%</td>
-                      <td className="p-4">{snapshot.drawdownPct.toFixed(2)}%</td>
+            <div className="overflow-hidden card border border-white/10 bg-white/3 backdrop-blur-md">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-[0.2em] text-white/30">
+                      <th className="p-5 font-semibold">Audit Period</th>
+                      <th className="p-5 font-semibold">Realized ROI</th>
+                      <th className="p-5 font-semibold">Max Drawdown</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {algo.snapshots.map((snapshot) => (
+                      <tr key={snapshot.id} className="border-b border-white/5 hover:bg-white/2 transition-colors">
+                        <td className="p-5 text-white/70">
+                          {snapshot.periodStart} to {snapshot.periodEnd}
+                        </td>
+                        <td className="p-5 text-emerald-400 font-medium font-serif">+{snapshot.roiPct.toFixed(2)}%</td>
+                        <td className="p-5 text-red-400 font-medium font-serif">-{snapshot.drawdownPct.toFixed(2)}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </section>
@@ -119,9 +132,9 @@ export default async function AlgoDetailPage({ params }: Params) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="card p-5">
-      <p className="text-xs uppercase tracking-[0.14em] text-jpm-muted">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-jpm-navy">{value}</p>
+    <div className="card border border-white/10 bg-white/3 backdrop-blur-md p-5">
+      <p className="text-[10px] uppercase tracking-[0.18em] text-white/30">{label}</p>
+      <p className="mt-2 font-serif text-xl text-white tracking-tight">{value}</p>
     </div>
   );
 }

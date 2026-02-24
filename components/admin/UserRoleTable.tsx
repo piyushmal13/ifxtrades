@@ -5,7 +5,7 @@ import { useState } from "react";
 type UserRow = {
   id: string;
   email: string;
-  role: string;
+  role: "user" | "admin" | string;
   createdAt: string | null;
 };
 
@@ -13,17 +13,20 @@ export default function UserRoleTable({ users }: { users: UserRow[] }) {
   const [rows, setRows] = useState(users);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const updateRole = async (userId: string, role: "USER" | "ADMIN") => {
+  const updateRole = async (userId: string, role: "user" | "admin") => {
     setLoadingId(userId);
     const response = await fetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, role }),
     });
+    const body = await response.json().catch(() => ({}));
 
     if (response.ok) {
+      const nextRole =
+        typeof body?.item?.role === "string" ? body.item.role : role;
       setRows((current) =>
-        current.map((row) => (row.id === userId ? { ...row, role } : row)),
+        current.map((row) => (row.id === userId ? { ...row, role: nextRole } : row)),
       );
     }
     setLoadingId(null);
@@ -44,7 +47,7 @@ export default function UserRoleTable({ users }: { users: UserRow[] }) {
           {rows.map((user) => (
             <tr key={user.id} className="border-b border-jpm-border/70">
               <td className="p-4">{user.email}</td>
-              <td className="p-4 uppercase">{user.role}</td>
+              <td className="p-4 uppercase">{String(user.role)}</td>
               <td className="p-4">
                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
               </td>
@@ -54,7 +57,7 @@ export default function UserRoleTable({ users }: { users: UserRow[] }) {
                     type="button"
                     className="btn-outline"
                     disabled={loadingId === user.id}
-                    onClick={() => updateRole(user.id, "USER")}
+                    onClick={() => updateRole(user.id, "user")}
                   >
                     USER
                   </button>
@@ -62,7 +65,7 @@ export default function UserRoleTable({ users }: { users: UserRow[] }) {
                     type="button"
                     className="btn-primary"
                     disabled={loadingId === user.id}
-                    onClick={() => updateRole(user.id, "ADMIN")}
+                    onClick={() => updateRole(user.id, "admin")}
                   >
                     ADMIN
                   </button>
