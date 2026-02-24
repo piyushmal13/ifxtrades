@@ -27,6 +27,10 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -40,6 +44,8 @@ export function Navbar() {
       links.push({ label: "Dashboard", href: "/dashboard" });
       if (role === "admin") {
         links.push({ label: "Admin", href: "/admin" });
+      } else {
+        links.push({ label: "Admin Access", href: "/admin-access" });
       }
     } else {
       links.push({ label: "Login", href: "/login" });
@@ -50,54 +56,67 @@ export function Navbar() {
 
   const getLinkClass = (href: string, mobile = false) => {
     const isActive = pathname === href;
-    const base = "text-xs font-semibold uppercase tracking-[0.14em] transition-colors";
+    const base = "text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-200 relative";
     if (mobile) {
-      return `${base} block py-3 ${
-        isActive ? "text-jpm-gold" : "text-jpm-navy hover:text-jpm-gold"
-      }`;
+      return `${base} block py-3 border-b border-jpm-gold/10 ${isActive
+        ? "text-jpm-gold"
+        : "text-white/70 hover:text-jpm-gold"
+        }`;
     }
     if (isActive) {
       return `${base} text-jpm-gold`;
     }
     return scrolled
-      ? `${base} text-jpm-navy hover:text-jpm-gold`
-      : `${base} text-white hover:text-jpm-gold`;
+      ? `${base} text-white/80 hover:text-jpm-gold`
+      : `${base} text-white/80 hover:text-jpm-gold`;
   };
-
-  const utilityClass = scrolled
-    ? "text-xs font-semibold uppercase tracking-[0.14em] text-jpm-navy hover:text-jpm-gold transition-colors"
-    : "text-xs font-semibold uppercase tracking-[0.14em] text-white hover:text-jpm-gold transition-colors";
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-jpm-cream/95 border-b border-jpm-border backdrop-blur-md py-2 shadow-jpm"
-          : "bg-transparent py-4"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+        ? "bg-[#020617]/90 border-b border-jpm-gold/10 backdrop-blur-xl py-2 shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
+        : "bg-gradient-to-b from-[#020617]/70 to-transparent py-4"
+        }`}
     >
       <div className="max-w-7xl mx-auto h-14 md:h-16 px-4 md:px-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="relative w-9 h-9 md:w-10 md:h-10">
-            <Image src="/logo.png" alt="IFXTrades Logo" fill className="object-contain" priority />
+        {/* Logo — glass morphism frame */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative w-12 h-12 md:w-14 md:h-14 backdrop-blur-md bg-black/40 rounded-lg p-1.5 
+            border border-jpm-gold/20 shadow-[0_0_20px_rgba(212,175,55,0.08)] flex items-center justify-center 
+            transition-all hover:border-jpm-gold/40 hover:shadow-[0_0_25px_rgba(212,175,55,0.15)]">
+            <Image src="/logo.png" alt="IFXTrades" fill className="object-contain p-1.5" priority />
           </div>
+          <span className="hidden lg:block text-[10px] uppercase tracking-[0.25em] text-jpm-gold/60 font-semibold">
+            IFXTrades
+          </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop primary links */}
+        <div className="hidden md:flex items-center gap-7">
           {PRIMARY_LINKS.map((item) => (
             <Link key={item.href} href={item.href} className={getLinkClass(item.href)}>
               {item.label}
+              {pathname === item.href && (
+                <motion.div
+                  layoutId="nav-underline"
+                  className="absolute -bottom-0.5 left-0 right-0 h-px bg-jpm-gold"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
             </Link>
           ))}
         </div>
 
+        {/* Desktop utility links */}
         <div className="hidden md:flex items-center gap-4">
           {utilityLinks.map((item) =>
             item.href === "/signup" ? (
               <Link
                 key={item.href}
                 href={item.href}
-                className="bg-jpm-navy text-white px-5 py-2.5 rounded-sm text-xs font-semibold uppercase tracking-[0.14em] hover:bg-jpm-navy-light transition-colors"
+                className="bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617]
+                  px-5 py-2.5 rounded-sm text-xs font-bold uppercase tracking-[0.14em]
+                  hover:shadow-[0_0_20px_rgba(212,175,55,0.45)] transition-all duration-300 hover:-translate-y-px"
               >
                 {item.label}
               </Link>
@@ -105,7 +124,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={utilityClass}
+                className={getLinkClass(item.href)}
               >
                 {item.label}
               </Link>
@@ -114,29 +133,34 @@ export function Navbar() {
           {session && (
             <button
               onClick={() => supabase.auth.signOut()}
-              className="text-xs font-semibold uppercase tracking-[0.14em] text-red-700 hover:text-red-800 transition-colors"
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-red-400/70 hover:text-red-400 transition-colors"
             >
               Sign Out
             </button>
           )}
         </div>
 
+        {/* Mobile hamburger */}
         <button
-          className={`md:hidden p-2 ${scrolled ? "text-jpm-navy" : "text-white"}`}
-          onClick={() => setIsOpen((state) => !state)}
+          className="md:hidden p-2 text-white/80 hover:text-jpm-gold transition-colors"
+          onClick={() => setIsOpen((s) => !s)}
           aria-label="Toggle navigation"
         >
-          {isOpen ? "X" : "="}
+          <motion.div animate={isOpen ? { rotate: 45 } : { rotate: 0 }} className="w-5 h-0.5 bg-current mb-1.5" />
+          <motion.div animate={isOpen ? { opacity: 0 } : { opacity: 1 }} className="w-5 h-0.5 bg-current mb-1.5" />
+          <motion.div animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }} className="w-5 h-0.5 bg-current" />
         </button>
       </div>
 
+      {/* Mobile menu — dark glass */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="md:hidden bg-white border-t border-jpm-border shadow-jpm-md px-6 py-4"
+            transition={{ duration: 0.2 }}
+            className="md:hidden bg-[#020617]/98 backdrop-blur-xl border-t border-jpm-gold/10 px-6 py-4"
           >
             {PRIMARY_LINKS.map((item) => (
               <Link
@@ -148,27 +172,41 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
-            {utilityLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={getLinkClass(item.href, true)}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            {session && (
-              <button
-                onClick={() => {
-                  supabase.auth.signOut();
-                  setIsOpen(false);
-                }}
-                className="mt-3 w-full text-left text-xs font-semibold uppercase tracking-[0.14em] text-red-700 hover:text-red-800 transition-colors"
-              >
-                Sign Out
-              </button>
-            )}
+            <div className="mt-4 pt-4 border-t border-jpm-gold/10 flex flex-col gap-3">
+              {utilityLinks.map((item) =>
+                item.href === "/signup" ? (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617]
+                      px-5 py-3 rounded-sm text-xs font-bold uppercase tracking-[0.14em] text-center"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={getLinkClass(item.href, true)}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
+              {session && (
+                <button
+                  onClick={() => {
+                    supabase.auth.signOut();
+                    setIsOpen(false);
+                  }}
+                  className="text-left text-xs font-semibold uppercase tracking-[0.14em] text-red-400/70 hover:text-red-400 transition-colors py-2"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

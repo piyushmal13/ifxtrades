@@ -14,16 +14,16 @@ export function Navbar() {
 
   const navLinks = [
     { name: "University", href: "/university" },
-    { name: "Products", href: "/products" },
     { name: "Algo Arena", href: "/algos" },
     { name: "Webinars", href: "/webinars" },
-    { name: "About Us", href: "/about" },
+    { name: "Reviews", href: "/reviews" },
+    { name: "Insights", href: "/blog" },
   ]
 
   const authLinks = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Test Strategy", href: "/test-strategy" },
-    { name: "Explore", href: "/blogs" },
+    { name: "Licenses", href: "/dashboard/licenses" },
+    { name: "Courses", href: "/dashboard/courses" },
   ]
 
   return (

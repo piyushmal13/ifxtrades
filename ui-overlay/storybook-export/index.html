@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" class="ifx-ui-overlay" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IFX UI Overlay v1 - Static Preview</title>
+    <script>
+      window.__IFX_FEATURE_FLAGS__ = { "feature/ui_overlay_v1": true };
+      window.__IFX_UI_OVERLAY_SETTINGS__ = { theme: "dark", motion: "auto" };
+    </script>
+    <link rel="stylesheet" href="../tokens.css">
+    <link rel="stylesheet" href="../overlay.css">
+    <script defer src="../overlay.js"></script>
+  </head>
+  <body class="ifx-ui-overlay" style="padding: 32px;">
+    <main class="ifx-u-container ifx-u-stack-lg">
+      <section class="ifx-hero" data-testid="ifx-overlay-hero">
+        <div data-ifx-hero-reveal class="ifx-u-stack">
+          <span class="ifx-hero__eyebrow">IFXTrades Institutional</span>
+          <h1>Premium UI overlay for institutional confidence.</h1>
+          <p>Non-destructive theming and interaction enhancements gated by feature flag.</p>
+          <div class="ifx-u-cluster">
+            <button class="ifx-btn ifx-btn--primary">Primary CTA</button>
+            <button class="ifx-btn ifx-btn--secondary">Secondary CTA</button>
+            <button class="ifx-btn ifx-btn--ghost">Ghost</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ifx-u-grid-2">
+        <article class="ifx-card ifx-card--e1 ifx-u-stack">
+          <h3>Form Controls</h3>
+          <div class="ifx-form-field">
+            <label for="preview-email">Email</label>
+            <input id="preview-email" type="email" placeholder="name@firm.com" required>
+            <span class="ifx-help-text" data-ifx-help-for="preview-email">Corporate email required.</span>
+          </div>
+          <button class="ifx-btn ifx-btn--primary" data-ifx-modal-open="demo-modal">Open Modal</button>
+        </article>
+
+        <article class="ifx-card ifx-card--e2 ifx-u-stack">
+          <h3>Table Surface</h3>
+          <div class="ifx-table-wrap">
+            <table class="ifx-table">
+              <thead>
+                <tr>
+                  <th data-ifx-sortable>Instrument</th>
+                  <th data-ifx-sortable>Score</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>FX Momentum</td><td>0.84</td><td>Live</td></tr>
+                <tr><td>Rates Curve</td><td>0.72</td><td>Watch</td></tr>
+                <tr><td>Credit Spread</td><td>0.69</td><td>Review</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <section data-ifx-modal="demo-modal" aria-label="Demo modal">
+      <div class="ifx-u-stack">
+        <h3>Request Demo</h3>
+        <p>Modal helper adds focus trap, Escape handling, and overlay transition.</p>
+        <div class="ifx-u-cluster">
+          <button class="ifx-btn ifx-btn--primary" onclick="window.IFXOverlay && window.IFXOverlay.toast('Demo request sent', { type: 'success' })">Submit</button>
+          <button class="ifx-btn ifx-btn--ghost" data-ifx-modal-close>Close</button>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
+

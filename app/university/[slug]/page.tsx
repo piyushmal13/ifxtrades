@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+
 import { buildMetadata, courseJsonLd } from "@/lib/seo";
 import { getCourseBySlug } from "@/lib/data/platform";
 
@@ -43,17 +44,21 @@ export default async function CourseDetailPage({ params }: Params) {
   });
 
   return (
-    <main className="min-h-screen bg-jpm-cream pt-28 pb-20 px-6">
+    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-6xl mx-auto">
-        <p className="text-xs uppercase tracking-[0.2em] text-jpm-gold mb-2">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto relative">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
           Course Detail
         </p>
-        <h1 className="font-serif text-4xl md:text-5xl text-jpm-navy">{course.title}</h1>
-        <p className="mt-5 text-sm text-jpm-muted leading-relaxed max-w-4xl">
+        <h1 className="font-serif text-4xl md:text-5xl tracking-[-0.01em]">
+          {course.title}
+        </h1>
+        <p className="mt-4 text-sm text-white/45 leading-relaxed max-w-4xl">
           {course.description}
         </p>
 
@@ -63,24 +68,26 @@ export default async function CourseDetailPage({ params }: Params) {
           <Metric label="Plan Required" value={course.planRequired} />
         </div>
 
-        <section className="card p-8 mt-8">
-          <h2 className="font-serif text-2xl text-jpm-navy mb-5">Syllabus</h2>
+        <section className="card border border-white/10 bg-white/3 p-8 mt-8">
+          <h2 className="font-serif text-2xl mb-5">Syllabus</h2>
           {course.lessons.length === 0 ? (
-            <p className="text-sm text-jpm-muted">Lessons will be published shortly.</p>
+            <p className="text-sm text-white/55">Lessons will be published shortly.</p>
           ) : (
             <ol className="space-y-4">
               {course.lessons.map((lesson, index) => (
-                <li key={lesson.id} className="border border-jpm-border rounded-sm p-4">
+                <li key={lesson.id} className="border border-white/10 rounded-sm p-4 bg-white/2">
                   <div className="flex items-center justify-between gap-4">
-                    <p className="font-semibold text-jpm-navy">
+                    <p className="font-semibold">
                       {index + 1}. {lesson.title}
                     </p>
-                    <p className="text-xs uppercase tracking-[0.12em] text-jpm-gold">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-jpm-gold">
                       {lesson.isFree ? "Free" : "Locked"}
                     </p>
                   </div>
-                  <p className="mt-2 text-xs text-jpm-muted uppercase tracking-[0.12em]">
-                    {lesson.durationMinutes ? `${lesson.durationMinutes} minutes` : "Duration TBA"}
+                  <p className="mt-2 text-[10px] text-white/35 uppercase tracking-[0.12em]">
+                    {lesson.durationMinutes
+                      ? `${lesson.durationMinutes} minutes`
+                      : "Duration TBA"}
                   </p>
                 </li>
               ))}
@@ -94,9 +101,9 @@ export default async function CourseDetailPage({ params }: Params) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="card p-4">
-      <p className="text-xs uppercase tracking-[0.14em] text-jpm-muted">{label}</p>
-      <p className="mt-2 font-semibold text-jpm-navy">{value}</p>
+    <div className="card border border-white/10 bg-white/3 p-4">
+      <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">{label}</p>
+      <p className="mt-2 font-semibold text-white">{value}</p>
     </div>
   );
 }
