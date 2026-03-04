@@ -1,9 +1,0 @@
-{
-  "featureFlag": "feature/ui_overlay_v1",
-  "theme": "dark",
-  "motion": "auto",
-  "enableHeroReveal": true,
-  "enableModalA11y": true,
-  "enableToasts": true
-}
-
