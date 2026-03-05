@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createAndStoreOtp, logOtpEvent, OtpFailure } from "@/lib/otp";
 import { Resend } from "resend";
 import { User } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 import { getSiteUrl } from "@/lib/site";
 
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (emailError) {
-            console.error("[send-otp] Email delivery failed:", emailError);
+            logger.error("[send-otp] Email delivery failed:", emailError);
             await logOtpEvent(email, userId, "failed", { emailError: String(emailError) });
             return NextResponse.json(
                 { error: "Failed to send verification email. Please try again." },
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ resendCooldownSeconds: cooldownSeconds }, { status: 200 });
     } catch (err) {
-        console.error("[send-otp] Unhandled error:", err);
+        logger.error("[send-otp] Unhandled error:", err);
         return NextResponse.json({ error: "Internal server error." }, { status: 500 });
     }
 }

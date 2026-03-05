@@ -63,7 +63,7 @@ function HeroSection() {
         <FloatingBar style={{ top: "80%", left: "28%" }} delay={4} duration={16} rotate={15} />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-28 grid gap-16 lg:grid-cols-[1.1fr_1fr] items-center w-full z-10">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28 grid gap-10 lg:gap-16 lg:grid-cols-[1.1fr_1fr] items-center w-full z-10">
         {/* ── Left Copy ── */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -71,34 +71,34 @@ function HeroSection() {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-3 rounded-full border border-jpm-gold/30 bg-[#0a0a0a]/60 px-5 py-2 shadow-[0_0_24px_rgba(212,175,55,0.08)] backdrop-blur-md mb-8">
-            <span className="relative flex h-2 w-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-jpm-gold/30 bg-[#0a0a0a]/60 px-3 sm:px-5 py-1.5 sm:py-2 shadow-[0_0_24px_rgba(212,175,55,0.08)] backdrop-blur-md mb-6 sm:mb-8 max-w-full overflow-hidden">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jpm-gold opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-jpm-gold" />
             </span>
-            <span className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold font-semibold">
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.28em] text-jpm-gold font-semibold truncate">
               Institutional Capital Intelligence
             </span>
           </div>
 
-          <h1 className="font-serif text-7xl lg:text-8xl leading-[1.05] text-white tracking-[-0.02em] font-medium">
+          <h1 className="font-serif hero-headline leading-[1.05] text-white tracking-[-0.02em] font-medium">
             Precision forex
-            <span className="block mt-2 bg-gradient-to-r from-white via-jpm-gold-light to-jpm-gold bg-clip-text text-transparent italic text-glow-gold">
+            <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-white via-jpm-gold-light to-jpm-gold bg-clip-text text-transparent italic text-glow-gold">
               intelligence built
             </span>
             <span className="block mt-1 text-white/90">for institutional flow.</span>
           </h1>
 
-          <p className="mt-8 text-white/55 text-lg md:text-xl max-w-xl leading-relaxed font-light tracking-wide">
+          <p className="mt-5 sm:mt-8 text-white/55 text-base sm:text-lg md:text-xl max-w-xl leading-relaxed font-light tracking-wide">
             IFXTrades aligns macro research, licensed algorithmic systems, and institutional execution education
             into a single, uncompromising environment.
           </p>
 
           {/* CTAs */}
-          <div className="mt-10 flex flex-wrap items-center gap-5">
+          <div className="mt-7 sm:mt-10 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-5">
             <Link
               href="/signup"
-              className="group relative overflow-hidden rounded-sm bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light px-8 py-4 text-sm font-bold uppercase tracking-[0.15em] text-[#020617] transition-all hover:shadow-[0_0_35px_rgba(212,175,55,0.4)] hover:-translate-y-px"
+              className="group relative overflow-hidden rounded-sm bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold uppercase tracking-[0.15em] text-[#020617] transition-all hover:shadow-[0_0_35px_rgba(212,175,55,0.4)] hover:-translate-y-px text-center"
             >
               <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
                 <div className="relative h-full w-8 bg-white/30" />
@@ -107,7 +107,7 @@ function HeroSection() {
             </Link>
             <Link
               href="/webinars"
-              className="group flex items-center gap-2 px-6 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/70 transition-all hover:text-jpm-gold"
+              className="group flex items-center justify-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/70 transition-all hover:text-jpm-gold border border-white/10 sm:border-0 rounded-sm sm:rounded-none"
             >
               Explore the Platform
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
@@ -115,10 +115,10 @@ function HeroSection() {
           </div>
 
           {/* Enterprise trust signals */}
-          <div className="mt-10 flex flex-wrap items-center gap-5 py-5 border-y border-white/6">
+          <div className="mt-7 sm:mt-10 flex flex-wrap items-center gap-3 sm:gap-5 py-4 sm:py-5 border-y border-white/6">
             {[
               { icon: "🔒", text: "256-bit SSL" },
-              { icon: "✅", text: "KYC/AML Compliant" },
+              { icon: "✅", text: "KYC/AML" },
               { icon: "🛡️", text: "ISO 27001" },
               { icon: "📋", text: "Audit Logs" },
             ].map((item) => (
@@ -130,21 +130,19 @@ function HeroSection() {
           </div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 md:gap-8 border-t border-white/10 pt-8">
+          <div className="mt-8 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 border-t border-white/10 pt-6 sm:pt-8">
             <V3Stat label="Daily Volume" value={4.2} suffix="B+" />
-            <div className="w-px h-8 bg-jpm-gold/20 self-center" />
             <V3Stat label="Global Nodes" value={14} />
-            <div className="w-px h-8 bg-jpm-gold/20 self-center" />
-            <V3Stat label="Institutional SLA" value={99.99} suffix="%" />
+            <V3Stat label="SLA Uptime" value={99.99} suffix="%" />
           </div>
         </motion.div>
 
-        {/* ── Right Globe ── */}
+        {/* ── Right Globe — hidden on mobile, shown lg+ ── */}
         <motion.div
           initial={{ opacity: 0, scale: 0.88 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.3, ease: "easeOut", delay: 0.2 }}
-          className="relative flex justify-center items-center h-[520px]"
+          className="hidden lg:flex relative justify-center items-center h-[520px]"
         >
           {/* Glow layers */}
           <div className="absolute w-[280px] h-[280px] bg-jpm-gold/15 rounded-full blur-[100px] mix-blend-screen" />
@@ -233,15 +231,15 @@ function LiveClock() {
 // ─── Trust Strip ─────────────────────────────────────────────────────────────
 function TrustStrip() {
   return (
-    <section className="border-y border-white/10 bg-[#020617] px-6 py-5">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs md:text-sm text-white/55">
+    <section className="border-y border-white/10 bg-[#020617] px-4 sm:px-6 py-4 sm:py-5">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-3 sm:gap-4 text-xs text-white/55">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
           <p className="uppercase tracking-[0.2em] font-semibold text-white/70">Risk Governance</p>
         </div>
-        <p className="max-w-xl leading-relaxed">
+        <p className="max-w-xl leading-relaxed text-[11px] sm:text-xs">
           IFXTrades is an institutional-focused platform with controls designed around process, documentation,
-          and risk transparency. All trading activity involves risk and may not be suitable for every participant.
+          and risk transparency. All trading activity involves risk.
         </p>
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-jpm-gold/70">
           <span className="h-px w-8 bg-jpm-gold/30" />
@@ -255,7 +253,7 @@ function TrustStrip() {
 // ─── Platform Pillars ────────────────────────────────────────────────────────
 function PlatformPillars() {
   return (
-    <section className="section-spacing px-6 border-t border-white/5 bg-[#020617]">
+    <section className="section-spacing px-4 sm:px-6 border-t border-white/5 bg-[#020617]">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -310,7 +308,7 @@ function PlatformPillars() {
 // ─── Research Section ────────────────────────────────────────────────────────
 function ResearchSection({ posts }: { posts: Post[] }) {
   return (
-    <section className="section-spacing px-6 bg-[#060a14]">
+    <section className="section-spacing px-4 sm:px-6 bg-[#060a14]">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between gap-4 mb-10">
           <div>
@@ -354,7 +352,12 @@ function ResearchSection({ posts }: { posts: Post[] }) {
                 {post.featuredImageUrl && (
                   <div className="w-full h-36 rounded-md overflow-hidden mb-5 -mx-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={post.featuredImageUrl} alt={post.title} className="w-full h-full object-cover" />
+                    <img
+                      src={post.featuredImageUrl}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).closest('div')!.style.display = 'none' }}
+                    />
                   </div>
                 )}
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-jpm-gold/0 via-jpm-gold/60 to-jpm-gold/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -381,7 +384,7 @@ function ResearchSection({ posts }: { posts: Post[] }) {
 // ─── Reviews Section ─────────────────────────────────────────────────────────
 function ReviewsSection({ reviews }: { reviews: Review[] }) {
   return (
-    <section className="section-spacing px-6 bg-[#020617] border-y border-white/5 relative overflow-hidden">
+    <section className="section-spacing px-4 sm:px-6 bg-[#020617] border-y border-white/5 relative overflow-hidden">
       <div className="pointer-events-none absolute top-0 right-0 w-[700px] h-[700px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.04),_transparent_65%)]" />
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -459,7 +462,7 @@ function ReviewsSection({ reviews }: { reviews: Review[] }) {
 // ─── CTA Section ─────────────────────────────────────────────────────────────
 function CTASection() {
   return (
-    <section className="px-6 py-20 bg-gradient-to-b from-[#020617] via-[#040b1a] to-[#020617] text-white">
+    <section className="px-4 sm:px-6 py-16 sm:py-20 bg-gradient-to-b from-[#020617] via-[#040b1a] to-[#020617] text-white">
       <div className="max-w-7xl mx-auto grid gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -474,16 +477,16 @@ function CTASection() {
           <p className="mt-4 text-sm text-white/60 max-w-xl leading-relaxed">
             Request structured access, review sample documentation, and evaluate governance before any capital is deployed.
           </p>
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-4">
             <Link
               href="/signup"
-              className="btn-accent bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:-translate-y-0.5"
+              className="btn-accent bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:-translate-y-0.5 text-center"
             >
               Request Access
             </Link>
             <Link
               href="/login"
-              className="btn-outline border-white/25 text-white/70 hover:text-white hover:border-white/50 transition-all duration-300"
+              className="btn-outline border-white/25 text-white/70 hover:text-white hover:border-white/50 transition-all duration-300 text-center"
             >
               Existing Members
             </Link>
@@ -513,7 +516,7 @@ function CTASection() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function SiteFooter() {
   return (
-    <footer className="border-t border-white/8 bg-[#020617] px-6 py-16">
+    <footer className="border-t border-white/8 bg-[#020617] px-4 sm:px-6 py-12 sm:py-16">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Brand */}
         <div className="col-span-1 md:col-span-2">

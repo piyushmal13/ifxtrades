@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-provider";
 import { Navbar } from "@/components/navbar";
@@ -26,6 +26,13 @@ const SITE_URL = "https://www.ifxtrades.com";
 const SITE_TITLE = "IFXTrades - Institutional Capital Intelligence";
 const SITE_DESCRIPTION =
   "Institutional capital intelligence platform for webinars, algorithm licensing, structured education, and macro research.";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#020617",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

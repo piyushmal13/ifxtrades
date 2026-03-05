@@ -11,6 +11,7 @@
 
 import bcrypt from "bcryptjs";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const OTP_TTL_MINUTES = 10;
 const OTP_DIGITS = 6;
@@ -230,7 +231,7 @@ export async function logOtpEvent(
         });
     } catch {
         // Never throw from logging
-        console.error("[OTP] Failed to log event:", eventType, email);
+        logger.error("[OTP] Failed to log event:", eventType, email);
     }
 }
 

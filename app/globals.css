@@ -1083,3 +1083,96 @@ p,
   font-family: var(--font-inter), "Inter", sans-serif !important;
   letter-spacing: 0.01em;
 }
+/* ═══════════════════════════════════════════════════════════════
+   Mobile & Touch Fixes
+   Ensures proper rendering on all phone browsers
+═══════════════════════════════════════════════════════════════ */
+
+/* Remove tap highlight flash on iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent horizontal scroll on all pages */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Smooth scrolling with momentum on iOS */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text size adjustment after orientation change on iOS */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Make all images responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Hero headline — fluid responsive size (no breakpoints needed) ── */
+.hero-headline {
+  font-size: clamp(2.2rem, 9vw, 6rem) !important;
+  line-height: 1.05 !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+/* ── Safe area insets for notched phones (iPhone X+) ──────────── */
+@supports (padding: env(safe-area-inset-bottom)) {
+  footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ── Mobile-first section padding ─────────────────────────────── */
+@media (max-width: 640px) {
+  .ifx-page-shell {
+    padding: 5.5rem 1rem 3rem !important;
+  }
+
+  .section-spacing {
+    padding-top: clamp(2.5rem, 6vw, 4rem) !important;
+    padding-bottom: clamp(2.5rem, 6vw, 4rem) !important;
+  }
+
+  /* Prevent any heading from overflowing on phone */
+  h1, h2, h3 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  h1.font-serif,
+  h1[class*="font-serif"] {
+    font-size: clamp(2rem, 9vw, 3rem) !important;
+  }
+
+  h2.font-serif,
+  h2[class*="font-serif"] {
+    font-size: clamp(1.4rem, 6vw, 2rem) !important;
+  }
+
+  /* Ensure cards don't overflow on mobile */
+  .card,
+  .card-elevated,
+  .glass-premium,
+  .glass-gold {
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  /* Ensure no element wider than screen */
+  section, main, div {
+    max-width: 100vw;
+  }
+}
