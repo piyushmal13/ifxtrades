@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyOtp, logOtpEvent, type OtpFailure } from "@/lib/otp";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/verify-otp
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
             { status: 200 },
         );
     } catch (err) {
-        console.error("[verify-otp] Unhandled error:", err);
+        logger.error("[verify-otp] Unhandled error:", err);
         return NextResponse.json({ error: "Internal server error." }, { status: 500 });
     }
 }

@@ -7,3 +7,9 @@ tsconfig.tsbuildinfo
 
 .vercel
 .env*.local
+
+# Block env files anywhere in the project tree (not just root)
+**/.env
+**/.env.local
+**/.env*.local
+*.env

@@ -66,7 +66,7 @@ export default async function WebinarDetailPage({ params }: Params) {
   });
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white">
+    <main className="min-h-screen bg-[#020617] pt-20 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -90,6 +90,7 @@ export default async function WebinarDetailPage({ params }: Params) {
               src={webinar.heroImageUrl}
               alt={`${webinar.title} hero`}
               className="h-full w-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
             />
           </div>
         )}
@@ -168,11 +169,22 @@ export default async function WebinarDetailPage({ params }: Params) {
                     </p>
                     <div className="mt-2 flex items-center gap-4">
                       {item.speakerImageUrl ? (
-                        <img
-                          src={item.speakerImageUrl}
-                          alt={item.speakerName}
-                          className="h-12 w-12 rounded-full object-cover border border-white/10"
-                        />
+                        <>
+                          <img
+                            src={item.speakerImageUrl}
+                            alt={item.speakerName}
+                            className="h-12 w-12 rounded-full object-cover border border-white/10"
+                            onError={(e) => {
+                              const el = e.currentTarget as HTMLImageElement
+                              el.style.display = 'none'
+                              const fallback = el.nextElementSibling as HTMLElement | null
+                              if (fallback) fallback.style.display = 'flex'
+                            }}
+                          />
+                          <div className="h-12 w-12 rounded-full border border-white/10 bg-white/5 items-center justify-center text-xs text-white/40" style={{ display: 'none' }}>
+                            {item.speakerName.slice(0, 2).toUpperCase()}
+                          </div>
+                        </>
                       ) : (
                         <div className="h-12 w-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-xs text-white/40">
                           {item.speakerName.slice(0, 2).toUpperCase()}
@@ -234,6 +246,7 @@ export default async function WebinarDetailPage({ params }: Params) {
                         src={sponsor.logoUrl}
                         alt={`${sponsor.name} logo`}
                         className="h-full w-full object-contain object-left"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).closest('div')!.style.display = 'none' }}
                       />
                     </div>
                   )}

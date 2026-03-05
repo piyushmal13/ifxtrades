@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-provider";
+import { getLogoUrl } from "@/lib/storage";
 
 type LinkItem = {
   label: string;
@@ -90,7 +91,7 @@ export function Navbar() {
           <div className="relative w-12 h-12 md:w-14 md:h-14 backdrop-blur-md bg-black/40 rounded-lg p-1.5 
             border border-jpm-gold/20 shadow-[0_0_20px_rgba(212,175,55,0.08)] flex items-center justify-center 
             transition-all hover:border-jpm-gold/40 hover:shadow-[0_0_25px_rgba(212,175,55,0.15)]">
-            <Image src="/logo.png" alt="IFXTrades" fill className="object-contain p-1.5" priority />
+            <Image src={getLogoUrl({ width: 56, height: 56 })} alt="IFXTrades" fill className="object-contain p-1.5" priority unoptimized />
           </div>
         </Link>
 

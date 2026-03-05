@@ -114,7 +114,7 @@ export default async function AlgosPage() {
   const algos = await listAlgos();
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white">
+    <main className="min-h-screen bg-[#020617] pt-20 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 text-white">
       {/* Background glow */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
 

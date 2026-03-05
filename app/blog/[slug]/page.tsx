@@ -48,7 +48,7 @@ export default async function BlogPostPage({ params }: Params) {
   });
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 text-white text-selection-gold">
+    <main className="min-h-screen bg-[#020617] pt-20 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 text-white text-selection-gold">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -73,6 +73,7 @@ export default async function BlogPostPage({ params }: Params) {
               src={post.featuredImageUrl}
               alt={post.title}
               className="h-full w-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).closest('div')!.style.display = 'none' }}
             />
           </div>
         )}
