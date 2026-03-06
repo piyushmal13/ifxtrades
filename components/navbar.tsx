@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-provider";
-import { getLogoUrl } from "@/lib/storage";
+import { IntelligenceOverlay } from "./ui/IntelligenceOverlay";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type LinkItem = {
   label: string;
@@ -27,6 +28,40 @@ export function Navbar() {
   const { session, supabase, role } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isIntelligenceOpen, setIsIntelligenceOpen] = useState(false);
+  const [latestPosts, setLatestPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch latest posts for the HUD
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch("/api/blog/latest");
+        if (!response.ok) throw new Error("Failed to fetch");
+        const posts = await response.json();
+        setLatestPosts(posts);
+      } catch (err) {
+        console.error("Failed to fetch posts for HUD:", err);
+      }
+    };
+    fetchPosts();
+
+    // Subscribe to real-time updates for blog_posts
+    const supabaseBrowser = createSupabaseBrowserClient();
+    const channel = supabaseBrowser
+      .channel("blog-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blog_posts" },
+        () => {
+          fetchPosts(); // Refetch on any change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabaseBrowser.removeChannel(channel);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -34,16 +69,14 @@ export function Navbar() {
     window.location.href = "/login";
   };
 
-  if (pathname.startsWith("/admin")) {
-    return null;
-  }
-
+  // All hooks must run before any conditional return (Rules of Hooks)
   useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [pathname]);
 
   const utilityLinks = useMemo(() => {
     const links: LinkItem[] = [];
@@ -60,6 +93,11 @@ export function Navbar() {
     }
     return links;
   }, [session, role]);
+
+  // Guard renders (after all hooks)
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const getLinkClass = (href: string, mobile = false) => {
     const isActive = pathname === href;
@@ -88,10 +126,10 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto h-14 md:h-16 px-4 md:px-8 flex items-center justify-between">
         {/* Logo — glass morphism frame */}
         <Link href="/" className="flex items-center group">
-          <div className="relative w-12 h-12 md:w-14 md:h-14 backdrop-blur-md bg-black/40 rounded-lg p-1.5 
+          <div className="relative w-12 h-12 md:w-14 md:h-14 bg-white rounded-lg p-1.5 
             border border-jpm-gold/20 shadow-[0_0_20px_rgba(212,175,55,0.08)] flex items-center justify-center 
             transition-all hover:border-jpm-gold/40 hover:shadow-[0_0_25px_rgba(212,175,55,0.15)]">
-            <Image src={getLogoUrl({ width: 56, height: 56 })} alt="IFXTrades" fill className="object-contain p-1.5" priority unoptimized />
+            <Image src="/logo.png" alt="IFXTrades" fill className="object-contain p-1.5" priority />
           </div>
         </Link>
 
@@ -109,6 +147,17 @@ export function Navbar() {
               )}
             </Link>
           ))}
+          {/* Intelligence Toggle */}
+          <button
+            onClick={() => setIsIntelligenceOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-jpm-gold/20 bg-jpm-gold/5 text-jpm-gold hover:bg-jpm-gold/10 transition-all group"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jpm-gold opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-jpm-gold"></span>
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">Intelligence</span>
+          </button>
         </div>
 
         {/* Desktop utility links */}
@@ -211,6 +260,12 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+
+      <IntelligenceOverlay
+        isOpen={isIntelligenceOpen}
+        onClose={() => setIsIntelligenceOpen(false)}
+        latestPosts={latestPosts}
+      />
+    </nav >
   );
 }
