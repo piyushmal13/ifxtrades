@@ -1,17 +1,23 @@
-import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import {
+  fromSupabaseError,
+  jsonError,
+  jsonItem,
+  resolveAdminContext,
+} from "@/lib/admin/api";
 
 export async function PATCH(request: Request) {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-  const payload = await request.json();
+  const payload = await request.json().catch(() => null);
+  if (!payload || typeof payload !== "object") {
+    return jsonError("Invalid request body.");
+  }
   if (!payload?.licenseId) {
-    return NextResponse.json({ error: "licenseId is required." }, { status: 400 });
+    return jsonError("licenseId is required.");
   }
 
-  const update: Record<string, any> = {};
+  const update: Record<string, unknown> = {};
   if (payload.expiresAt) {
     update.expires_at = new Date(payload.expiresAt).toISOString();
   }
@@ -20,10 +26,10 @@ export async function PATCH(request: Request) {
   }
 
   if (!Object.keys(update).length) {
-    return NextResponse.json({ error: "No update fields supplied." }, { status: 400 });
+    return jsonError("No update fields supplied.");
   }
 
-  const admin = createSupabaseAdminClient();
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("algo_licenses")
     .update(update)
@@ -32,8 +38,8 @@ export async function PATCH(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  return NextResponse.json({ item: data });
+  return jsonItem(data);
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +6,7 @@ import { buildMetadata, eventJsonLd } from "@/lib/seo";
 import { getWebinarBySlug } from "@/lib/data/platform";
 import RegisterButton from "@/components/webinar/RegisterButton";
 import Countdown from "@/components/webinar/Countdown";
+import { ExternalLink } from "@/components/ExternalLink";
 
 type Params = {
   params: Promise<{ slug: string }>;
@@ -76,7 +76,7 @@ export default async function WebinarDetailPage({ params }: Params) {
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">
           Event Intelligence
         </p>
         <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em]">{webinar.title}</h1>
@@ -112,7 +112,7 @@ export default async function WebinarDetailPage({ params }: Params) {
         <div className="card border border-white/10 bg-white/3 backdrop-blur-md p-7 mt-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.14em] text-jpm-gold/80 mb-1">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-ifx-gold/80 mb-1">
                 Admission
               </p>
               <p className="font-serif text-3xl text-white">
@@ -128,24 +128,20 @@ export default async function WebinarDetailPage({ params }: Params) {
                 disabled={!registrationOpen || !hasSeats}
               />
               {googleCalendarLink && (
-                <Link
+                <ExternalLink
                   href={googleCalendarLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-sm text-[10px] font-bold uppercase tracking-[0.16em] text-white/60 hover:text-white transition-all"
                 >
                   Add to Calendar
-                </Link>
+                </ExternalLink>
               )}
               {webinar.promoVideoUrl && (
-                <Link
+                <ExternalLink
                   href={webinar.promoVideoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-sm text-[10px] font-bold uppercase tracking-[0.16em] text-white/60 hover:text-white transition-all"
                 >
                   Watch Promo
-                </Link>
+                </ExternalLink>
               )}
             </div>
           </div>
@@ -163,8 +159,8 @@ export default async function WebinarDetailPage({ params }: Params) {
             ) : (
               <ul className="space-y-6">
                 {webinar.agenda.map((item) => (
-                  <li key={item.id} className="border-l-2 border-jpm-gold/40 pl-5">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-jpm-gold/70">
+                  <li key={item.id} className="border-l-2 border-ifx-gold/40 pl-5">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-ifx-gold/70">
                       {item.time ? new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "TBA"}
                     </p>
                     <div className="mt-2 flex items-center gap-4">
@@ -194,14 +190,12 @@ export default async function WebinarDetailPage({ params }: Params) {
                         <p className="font-semibold text-white tracking-tight">{item.topic}</p>
                         <p className="text-sm text-white/50">{item.speakerName}</p>
                         {item.speakerLinkedin && (
-                          <Link
+                          <ExternalLink
                             href={item.speakerLinkedin}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-jpm-gold/60 hover:text-jpm-gold hover:underline transition-colors"
+                            className="text-[10px] text-ifx-gold/60 hover:text-ifx-gold hover:underline transition-colors"
                           >
                             LinkedIn Profile ↗
-                          </Link>
+                          </ExternalLink>
                         )}
                       </div>
                     </div>
@@ -236,7 +230,7 @@ export default async function WebinarDetailPage({ params }: Params) {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {webinar.sponsors.map((sponsor) => (
                 <div key={sponsor.id} className="border border-white/10 rounded-sm p-5 bg-white/5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-jpm-gold/80">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-ifx-gold/80">
                     {sponsor.tier} Partner
                   </p>
                   <p className="font-semibold text-white mt-1">{sponsor.name}</p>
@@ -251,14 +245,12 @@ export default async function WebinarDetailPage({ params }: Params) {
                     </div>
                   )}
                   {sponsor.linkUrl && (
-                    <Link
+                    <ExternalLink
                       href={sponsor.linkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] text-jpm-gold/50 hover:text-jpm-gold hover:underline mt-4 inline-block transition-colors"
+                      className="text-[10px] text-ifx-gold/50 hover:text-ifx-gold hover:underline mt-4 inline-block transition-colors"
                     >
                       Institutional Profile ↗
-                    </Link>
+                    </ExternalLink>
                   )}
                 </div>
               ))}

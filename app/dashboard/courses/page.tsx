@@ -9,7 +9,7 @@ export default async function DashboardCoursesPage() {
 
   return (
     <div className="text-white">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">Courses</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-ifx-gold mb-2">Courses</p>
       <h1 className="font-serif text-4xl">Learning Progress</h1>
       <p className="mt-4 text-sm text-white/45 max-w-2xl">
         Track lesson completion and enrollment momentum across structured
@@ -24,7 +24,7 @@ export default async function DashboardCoursesPage() {
         <ul className="mt-8 space-y-3">
           {progress.map((row) => (
             <li key={row.lessonId} className="card border border-white/10 bg-white/3 p-5">
-              <p className="text-[10px] uppercase tracking-[0.12em] text-jpm-gold">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-ifx-gold">
                 {row.courseTitle}
               </p>
               <p className="font-semibold mt-1">{row.lessonTitle}</p>

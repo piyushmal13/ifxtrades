@@ -3,7 +3,11 @@ import CrudManager from "@/components/admin/CrudManager";
 import { listCourseLessons, listCourses } from "@/lib/data/platform";
 
 export default async function AdminCourseLessonsPage() {
-  const [lessonRows, courses] = await Promise.all([listCourseLessons(), listCourses()]);
+  const [lessonRows, courses] = await Promise.all([
+    listCourseLessons(),
+    listCourses({ includeUnpublished: true }),
+  ]);
+  const courseNameById = new Map(courses.map((course) => [course.id, course.title]));
 
   return (
     <CrudManager
@@ -25,9 +29,12 @@ export default async function AdminCourseLessonsPage() {
         { name: "pdf_url", label: "PDF URL" },
         { name: "is_free", label: "Free Lesson", type: "checkbox" },
       ]}
-      rows={lessonRows}
+      rows={lessonRows.map((row) => ({
+        ...row,
+        course_title: courseNameById.get(row.course_id) ?? row.course_id,
+      }))}
       columns={[
-        { key: "course_id", label: "Course ID" },
+        { key: "course_title", label: "Course" },
         { key: "title", label: "Title" },
         { key: "sort_order", label: "Order" },
         { key: "is_free", label: "Free" },
@@ -35,4 +42,3 @@ export default async function AdminCourseLessonsPage() {
     />
   );
 }
-

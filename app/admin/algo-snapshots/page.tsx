@@ -7,6 +7,7 @@ export default async function AdminAlgoSnapshotsPage() {
     listAlgoSnapshots(),
     listAlgos({ includeInactive: true }),
   ]);
+  const algoNameById = new Map(algos.map((algo) => [algo.id, algo.name]));
 
   return (
     <CrudManager
@@ -26,9 +27,12 @@ export default async function AdminAlgoSnapshotsPage() {
         { name: "roi_pct", label: "ROI (%)", type: "number", required: true },
         { name: "drawdown_pct", label: "Drawdown (%)", type: "number", required: true },
       ]}
-      rows={snapshotRows}
+      rows={snapshotRows.map((row) => ({
+        ...row,
+        algo_name: algoNameById.get(row.algo_id) ?? row.algo_id,
+      }))}
       columns={[
-        { key: "algo_id", label: "Algo ID" },
+        { key: "algo_name", label: "Algorithm" },
         { key: "period_start", label: "Start" },
         { key: "period_end", label: "End" },
         { key: "roi_pct", label: "ROI" },

@@ -1,7 +1,6 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 import { getDashboardSummary } from "@/lib/data/platform";
 import { requireVerified } from "@/lib/auth";
-import Link from "next/link";
 
 export default async function DashboardPage() {
   const { user } = await requireVerified("/dashboard");
@@ -9,7 +8,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="text-white">
-      <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">Your Account</p>
+      <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">Your Account</p>
       <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em]">Dashboard</h1>
       <p className="mt-4 text-sm text-white/45 max-w-2xl leading-relaxed">
         Monitor webinar engagement, algorithm license status, and learning progress from a single operational view.
@@ -17,10 +16,10 @@ export default async function DashboardPage() {
 
       {/* KPI row */}
       <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mt-10">
-        <Kpi label="Webinar Registrations" value={summary.webinarRegistrations} icon="📡" color="text-sky-400" />
-        <Kpi label="Active Licenses" value={summary.activeLicenses} icon="⚡" color="text-jpm-gold" />
-        <Kpi label="Completed Lessons" value={summary.completedLessons} icon="✓" color="text-emerald-400" />
-        <Kpi label="Tracked Lessons" value={summary.totalLessonsTracked} icon="📚" color="text-white/60" />
+        <Kpi label="Webinar Registrations" value={summary.webinarRegistrations} icon="WB" color="text-sky-400" />
+        <Kpi label="Active Licenses" value={summary.activeLicenses} icon="AL" color="text-ifx-gold" />
+        <Kpi label="Completed Lessons" value={summary.completedLessons} icon="CL" color="text-emerald-400" />
+        <Kpi label="Tracked Lessons" value={summary.totalLessonsTracked} icon="TL" color="text-white/60" />
       </div>
 
       {/* Progress to completion */}
@@ -58,10 +57,10 @@ export default async function DashboardPage() {
           <a
             key={link.href}
             href={link.href}
-            className="card border border-white/8 bg-white/3 p-5 hover:border-jpm-gold/35 hover:-translate-y-0.5 transition-all duration-300 group"
+            className="card border border-white/8 bg-white/3 p-5 hover:border-ifx-gold/35 hover:-translate-y-0.5 transition-all duration-300 group"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-jpm-gold group-hover:text-white transition-colors">
-              {link.label} →
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ifx-gold group-hover:text-white transition-colors">
+              {link.label} {"->"}
             </p>
             <p className="mt-1.5 text-xs text-white/35">{link.desc}</p>
           </a>
@@ -73,7 +72,7 @@ export default async function DashboardPage() {
 
 function Kpi({ label, value, icon, color }: { label: string; value: number; icon: string; color: string }) {
   return (
-    <article className="card relative overflow-hidden border border-white/8 bg-white/3 p-6 group hover:border-jpm-gold/25 transition-all duration-300">
+    <article className="card relative overflow-hidden border border-white/8 bg-white/3 p-6 group hover:border-ifx-gold/25 transition-all duration-300">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.04),_transparent_60%)]" />
       <div className="flex items-start justify-between mb-3">
         <p className="text-[9px] uppercase tracking-[0.2em] text-white/35">{label}</p>

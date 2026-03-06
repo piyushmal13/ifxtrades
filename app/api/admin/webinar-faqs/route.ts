@@ -1,45 +1,43 @@
-import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { logAdminAction } from "@/lib/admin/audit";
+import {
+  fetchByIdWithWebinarTitle,
+  fromSupabaseError,
+  jsonItem,
+  jsonItems,
+  logMutation,
+  parseJsonBody,
+  resolveAdminContext,
+  withWebinarTitle,
+} from "@/lib/admin/api";
 import { webinarFaqCreateSchema } from "@/lib/validation/admin";
 
 export async function GET() {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-  const admin = createSupabaseAdminClient();
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("webinar_faqs")
     .select("*, webinars(title)")
     .order("sort_order", { ascending: true });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  const items = (data ?? []).map((row: any) => ({
-    ...row,
-    webinar_title: row.webinars?.title ?? row.webinar_id,
-  }));
+  const items = (data ?? []).map((row: any) => withWebinarTitle(row));
 
-  return NextResponse.json({ items });
+  return jsonItems(items);
 }
 
 export async function POST(request: Request) {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-  const payload = webinarFaqCreateSchema.safeParse(await request.json());
-  if (!payload.success) {
-    return NextResponse.json(
-      { error: payload.error.issues[0]?.message ?? "Invalid request body." },
-      { status: 400 },
-    );
-  }
+  const parsed = await parseJsonBody(request, webinarFaqCreateSchema);
+  if ("error" in parsed) return parsed.error;
 
-  const input = payload.data;
-  const admin = createSupabaseAdminClient();
+  const input = parsed.data;
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("webinar_faqs")
     .insert({
@@ -52,29 +50,23 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  if (guard.auth?.user?.id && data?.id) {
-    await logAdminAction(admin, {
-      actorId: guard.auth.user.id,
-      action: "create",
-      entity: "webinar_faqs",
-      entityId: data.id,
-      payload: input,
-    });
-  }
-
-  const { data: hydrated } = await admin
-    .from("webinar_faqs")
-    .select("*, webinars(title)")
-    .eq("id", data.id)
-    .single();
-
-  return NextResponse.json({
-    item: {
-      ...(hydrated ?? data),
-      webinar_title: (hydrated as any)?.webinars?.title ?? data.webinar_id,
-    },
+  await logMutation(resolved.context, {
+    action: "create",
+    entity: "webinar_faqs",
+    entityId: data?.id,
+    payload: input,
   });
+
+  const item =
+    (await fetchByIdWithWebinarTitle(
+      admin,
+      "webinar_faqs",
+      String(data?.id ?? ""),
+      data?.webinar_id ?? null,
+    )) ?? data;
+
+  return jsonItem(item);
 }

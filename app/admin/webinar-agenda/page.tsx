@@ -30,7 +30,11 @@ export default async function AdminWebinarAgendaPage() {
         { name: "topic", label: "Topic", required: true },
         { name: "speaker_name", label: "Speaker Name", required: true },
         { name: "speaker_linkedin", label: "Speaker LinkedIn URL" },
-        { name: "speaker_image_url", label: "Speaker Profile Image URL" },
+        {
+          name: "speaker_image_url",
+          label: "Speaker Profile Image URL",
+          type: "image",
+        },
         { name: "sort_order", label: "Sort Order", type: "number" },
       ]}
       rows={agendaItems.map((row) => ({

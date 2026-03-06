@@ -3,7 +3,7 @@ import CrudManager from "@/components/admin/CrudManager";
 import { listCourses } from "@/lib/data/platform";
 
 export default async function AdminUniversityPage() {
-  const courses = await listCourses();
+  const courses = await listCourses({ includeUnpublished: true });
 
   return (
     <CrudManager
@@ -26,8 +26,8 @@ export default async function AdminUniversityPage() {
         category: item.category,
         description: item.description,
         plan_required: item.planRequired,
-        sort_order: 0,
-        is_published: false,
+        sort_order: item.sortOrder,
+        is_published: item.isPublished,
       }))}
       columns={[
         { key: "title", label: "Title" },

@@ -17,7 +17,7 @@ export default async function UniversityPage() {
     <main className="ifx-page-shell">
       <div className="ifx-page-container relative">
         <div className="animate-cinematic">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
+          <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">
             Education System
           </p>
           <h1 className="font-serif text-4xl md:text-5xl tracking-[-0.01em] text-glow-gold">
@@ -38,12 +38,12 @@ export default async function UniversityPage() {
             {courses.map((course, idx) => (
               <Link key={course.id} href={`/university/${course.slug}`} className="group block animate-cinematic" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
                 <article
-                  className="glass-premium relative overflow-hidden h-full border border-white/8 p-7 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:border-jpm-gold/40 hover:shadow-[0_20px_50px_rgba(212,175,55,0.12)]"
+                  className="glass-premium relative overflow-hidden h-full border border-white/8 p-7 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:border-ifx-gold/40 hover:shadow-[0_20px_50px_rgba(212,175,55,0.12)]"
                 >
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-jpm-gold mb-3">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-ifx-gold mb-3">
                     {course.category}
                   </p>
-                  <h2 className="font-serif text-2xl leading-snug group-hover:text-jpm-gold transition-colors">{course.title}</h2>
+                  <h2 className="font-serif text-2xl leading-snug group-hover:text-ifx-gold transition-colors">{course.title}</h2>
                   <p className="mt-3 text-sm text-white/50 leading-relaxed flex-1">
                     {course.description}
                   </p>
@@ -52,7 +52,7 @@ export default async function UniversityPage() {
                       <p>Lessons: {course.lessonCount}</p>
                       <p>Plan: {course.planRequired}</p>
                     </div>
-                    <span className="text-jpm-gold/70 group-hover:text-jpm-gold transition-colors">
+                    <span className="text-ifx-gold/70 group-hover:text-ifx-gold transition-colors">
                       View Syllabus →
                     </span>
                   </div>

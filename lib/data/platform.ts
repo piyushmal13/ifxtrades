@@ -78,6 +78,8 @@ export type CourseSummary = {
   description: string;
   lessonCount: number;
   planRequired: string;
+  sortOrder: number;
+  isPublished: boolean;
 };
 
 export type CourseDetail = CourseSummary & {
@@ -102,6 +104,8 @@ export type BlogPostSummary = {
   publishedAt: string | null;
   authorName: string;
   featuredImageUrl: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
 };
 
 export type ReviewSummary = {
@@ -285,6 +289,8 @@ const FALLBACK_COURSES: CourseSummary[] = [
       "Core framework for rates, inflation, and currency transmission dynamics.",
     lessonCount: 14,
     planRequired: "free",
+    sortOrder: 0,
+    isPublished: true,
   },
   {
     id: "c2",
@@ -295,6 +301,8 @@ const FALLBACK_COURSES: CourseSummary[] = [
       "Execution logic, risk architecture, and portfolio-level governance for institutional deployment.",
     lessonCount: 22,
     planRequired: "premium",
+    sortOrder: 1,
+    isPublished: true,
   },
 ];
 
@@ -310,6 +318,8 @@ const FALLBACK_BLOG: BlogPostSummary[] = [
     publishedAt: new Date().toISOString(),
     authorName: "IFX Research Desk",
     featuredImageUrl: null,
+    metaTitle: null,
+    metaDescription: null,
   },
   {
     id: "b2",
@@ -322,6 +332,8 @@ const FALLBACK_BLOG: BlogPostSummary[] = [
     publishedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
     authorName: "IFX Research Desk",
     featuredImageUrl: null,
+    metaTitle: null,
+    metaDescription: null,
   },
 ];
 
@@ -438,37 +450,53 @@ export async function listWebinars(options: { includeUnpublished?: boolean } = {
   }
 
   const supabase = await createSupabaseServerClient();
-  const mapped = await Promise.all(
-    rows.map(async (row): Promise<WebinarSummary> => {
-      const id = asString(row, ["id"], crypto.randomUUID());
-      const capacity = asNumber(row, ["capacity"], 0);
-      const { count } = await supabase
-        .from("webinar_registrations")
-        .select("*", { head: true, count: "exact" })
-        .eq("webinar_id", id)
-        .eq("status", "confirmed");
+  const webinarIds = rows
+    .map((row) => asString(row, ["id"], ""))
+    .filter(Boolean);
 
-      const registrations = count ?? 0;
-      return {
-        id,
-        slug: asString(row, ["slug"], id),
-        title: asString(row, ["title"], "Institutional Webinar"),
-        description: asString(row, ["description"], "Institutional event."),
-        venue: asString(row, ["venue"], "TBA"),
-        sponsorTier: asString(row, ["sponsor_tier"], "GOLD"),
-        hotelSponsor: asString(row, ["hotel_sponsor"]) || null,
-        capacity,
-        seatsRemaining: Math.max(capacity - registrations, 0),
-        price: asNumber(row, ["price"], 0),
-        isPremium: asBoolean(row, ["is_premium"], false),
-        deadline: asIso(row, ["registration_deadline"]),
-        startsAt: asIso(row, ["starts_at", "created_at"]),
-        heroImageUrl: asString(row, ["hero_image_url"]) || null,
-        promoVideoUrl: asString(row, ["promo_video_url"]) || null,
-        isPublished: asBoolean(row, ["is_published"], true),
-      };
-    }),
-  );
+  const registrationsByWebinarId = new Map<string, number>();
+  if (webinarIds.length > 0) {
+    const { data: registrationRows, error: registrationsError } = await supabase
+      .from("webinar_registrations")
+      .select("webinar_id")
+      .in("webinar_id", webinarIds)
+      .eq("status", "confirmed");
+
+    if (!registrationsError && Array.isArray(registrationRows)) {
+      for (const registration of registrationRows) {
+        const webinarId = asString(registration as Row, ["webinar_id"], "");
+        if (!webinarId) continue;
+        registrationsByWebinarId.set(
+          webinarId,
+          (registrationsByWebinarId.get(webinarId) ?? 0) + 1,
+        );
+      }
+    }
+  }
+
+  const mapped = rows.map((row): WebinarSummary => {
+    const id = asString(row, ["id"], crypto.randomUUID());
+    const capacity = asNumber(row, ["capacity"], 0);
+    const registrations = registrationsByWebinarId.get(id) ?? 0;
+    return {
+      id,
+      slug: asString(row, ["slug"], id),
+      title: asString(row, ["title"], "Institutional Webinar"),
+      description: asString(row, ["description"], "Institutional event."),
+      venue: asString(row, ["venue"], "TBA"),
+      sponsorTier: asString(row, ["sponsor_tier"], "GOLD"),
+      hotelSponsor: asString(row, ["hotel_sponsor"]) || null,
+      capacity,
+      seatsRemaining: Math.max(capacity - registrations, 0),
+      price: asNumber(row, ["price"], 0),
+      isPremium: asBoolean(row, ["is_premium"], false),
+      deadline: asIso(row, ["registration_deadline"]),
+      startsAt: asIso(row, ["starts_at", "created_at"]),
+      heroImageUrl: asString(row, ["hero_image_url"]) || null,
+      promoVideoUrl: asString(row, ["promo_video_url"]) || null,
+      isPublished: asBoolean(row, ["is_published"], true),
+    };
+  });
 
   const published = options.includeUnpublished
     ? mapped
@@ -653,7 +681,9 @@ export async function getAlgoBySlug(slug: string): Promise<AlgoDetail | null> {
   };
 }
 
-export async function listCourses() {
+export async function listCourses(
+  options: { includeUnpublished?: boolean } = {},
+) {
   const courseRows = await firstSuccessfulRows(["university_courses"], 40);
   if (!courseRows.length) {
     return enableDemoFallback ? FALLBACK_COURSES : [];
@@ -666,7 +696,7 @@ export async function listCourses() {
     lessonCount.set(key, (lessonCount.get(key) ?? 0) + 1);
   }
 
-  return courseRows.map((course): CourseSummary => {
+  const mapped = courseRows.map((course): CourseSummary => {
     const id = asString(course, ["id"], crypto.randomUUID());
     return {
       id,
@@ -676,7 +706,20 @@ export async function listCourses() {
       description: asString(course, ["description"], "Structured syllabus."),
       lessonCount: lessonCount.get(id) ?? 0,
       planRequired: asString(course, ["plan_required"], "free"),
+      sortOrder: asNumber(course, ["sort_order"], 0),
+      isPublished: asBoolean(course, ["is_published"], true),
     };
+  });
+
+  const filtered = options.includeUnpublished
+    ? mapped
+    : mapped.filter((item) => item.isPublished);
+
+  return filtered.sort((a, b) => {
+    if (a.sortOrder !== b.sortOrder) {
+      return a.sortOrder - b.sortOrder;
+    }
+    return a.title.localeCompare(b.title);
   });
 }
 
@@ -740,6 +783,8 @@ export async function listBlogPosts(category = "all") {
       publishedAt: asIso(row, ["published_at", "created_at"]),
       authorName: asString(row, ["author_name"], "IFX Research Desk"),
       featuredImageUrl: asString(row, ["featured_image_url", "featured_image"]) || null,
+      metaTitle: asString(row, ["meta_title"]) || null,
+      metaDescription: asString(row, ["meta_description"]) || null,
     }),
   );
 
@@ -773,6 +818,8 @@ export async function getBlogPostBySlug(slug: string) {
       publishedAt: asIso(data, ["published_at", "created_at"]),
       authorName: asString(data, ["author_name"], "IFX Research Desk"),
       featuredImageUrl: asString(data, ["featured_image_url", "featured_image"]) || null,
+      metaTitle: asString(data, ["meta_title"]) || null,
+      metaDescription: asString(data, ["meta_description"]) || null,
     } as BlogPostSummary;
   }
 

@@ -37,9 +37,9 @@ function AlgoCard({ algo }: { algo: AlgoSummary }) {
   const risk = RISK_CONFIG[algo.riskClass] ?? RISK_CONFIG.MEDIUM;
 
   return (
-    <article className="card group relative overflow-hidden border border-white/8 bg-white/3 p-7 flex flex-col transition-all duration-300 hover:-translate-y-1.5 hover:border-jpm-gold/35 hover:shadow-[0_20px_50px_rgba(212,175,55,0.08)] backdrop-blur-md">
+    <article className="card group relative overflow-hidden border border-white/8 bg-white/3 p-7 flex flex-col transition-all duration-300 hover:-translate-y-1.5 hover:border-ifx-gold/35 hover:shadow-[0_20px_50px_rgba(212,175,55,0.08)] backdrop-blur-md">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.05),_transparent_60%)]" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-jpm-gold/0 via-jpm-gold/50 to-jpm-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-ifx-gold/0 via-ifx-gold/50 to-ifx-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Risk badge */}
       <div className="flex items-center justify-between mb-5">
@@ -65,7 +65,7 @@ function AlgoCard({ algo }: { algo: AlgoSummary }) {
             <p className={`text-lg font-semibold font-serif ${risk.text}`}>+{algo.monthlyRoi.toFixed(2)}%</p>
             <Sparkline color={risk.text} />
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-jpm-gold/20 to-transparent translate-x-full group-hover/metric:translate-x-0 transition-transform duration-500" />
+          <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-ifx-gold/20 to-transparent translate-x-full group-hover/metric:translate-x-0 transition-transform duration-500" />
         </div>
         <div className="bg-white/3 border border-white/8 rounded-lg p-4">
           <p className="text-[9px] uppercase tracking-[0.18em] text-white/35 mb-1">Min Capital</p>
@@ -92,11 +92,11 @@ function AlgoCard({ algo }: { algo: AlgoSummary }) {
       <div className="mt-6 flex items-center justify-between">
         <div>
           <p className="text-[9px] uppercase tracking-[0.15em] text-white/30 mb-0.5">License Price</p>
-          <p className="font-serif text-2xl text-jpm-gold">${algo.price.toLocaleString()}</p>
+          <p className="font-serif text-2xl text-ifx-gold">${algo.price.toLocaleString()}</p>
         </div>
         <Link
           href={`/algos/${algo.slug}`}
-          className="bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617] px-5 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.16em] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] transition-all duration-300 hover:-translate-y-px"
+          className="bg-gradient-to-r from-ifx-gold-muted via-ifx-gold to-ifx-gold text-[#020617] px-5 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.16em] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] transition-all duration-300 hover:-translate-y-px"
         >
           License Now →
         </Link>
@@ -121,7 +121,7 @@ export default async function AlgosPage() {
       <div className="max-w-7xl mx-auto relative">
         {/* Page header */}
         <div className="mb-14">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">License Engine</p>
+          <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">License Engine</p>
           <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em]">Institutional Algorithms</h1>
           <p className="mt-4 text-sm text-white/45 max-w-2xl leading-relaxed">
             Strategy access is structured through controlled licensing with transparent risk descriptors,

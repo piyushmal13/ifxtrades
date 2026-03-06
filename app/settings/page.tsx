@@ -12,7 +12,7 @@ export default function SettingsPage() {
 
             <div className="max-w-3xl mx-auto relative z-10">
                 {/* Header */}
-                <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-2">Configuration</p>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-2">Configuration</p>
                 <h1 className="font-serif text-4xl text-white tracking-tight mb-1">Account Settings</h1>
                 <p className="text-sm text-white/40 mb-10">
                     Manage your profile, security preferences, and notification settings.
@@ -48,7 +48,7 @@ export default function SettingsPage() {
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" defaultChecked={item.defaultOn} className="sr-only peer" aria-label={item.label} />
-                                        <div className="w-10 h-5 bg-white/10 peer-focus-visible:ring-[3px] peer-focus-visible:ring-jpm-gold/50 rounded-full peer peer-checked:bg-jpm-gold/80 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5 transition-all" />
+                                        <div className="w-10 h-5 bg-white/10 peer-focus-visible:ring-[3px] peer-focus-visible:ring-ifx-gold/50 rounded-full peer peer-checked:bg-ifx-gold/80 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5 transition-all" />
                                     </label>
                                 </div>
                             ))}
@@ -104,7 +104,7 @@ function SettingsSection({
             <div className="pb-4 border-b border-white/8">
                 <h2
                     id={`section-${title.toLowerCase().replace(/\s+/g, "-")}`}
-                    className={`text-sm font-semibold uppercase tracking-[0.12em] ${danger ? "text-red-400" : "text-jpm-gold"}`}
+                    className={`text-sm font-semibold uppercase tracking-[0.12em] ${danger ? "text-red-400" : "text-ifx-gold"}`}
                 >
                     {title}
                 </h2>

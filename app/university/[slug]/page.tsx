@@ -52,7 +52,7 @@ export default async function CourseDetailPage({ params }: Params) {
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
-        <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">
           Course Detail
         </p>
         <h1 className="font-serif text-4xl md:text-5xl tracking-[-0.01em]">
@@ -80,7 +80,7 @@ export default async function CourseDetailPage({ params }: Params) {
                     <p className="font-semibold">
                       {index + 1}. {lesson.title}
                     </p>
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-jpm-gold">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-ifx-gold">
                       {lesson.isFree ? "Free" : "Locked"}
                     </p>
                   </div>

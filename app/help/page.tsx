@@ -38,7 +38,7 @@ export default function HelpPage() {
             <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.05),transparent)] pointer-events-none" />
 
             <div className="max-w-3xl mx-auto relative z-10">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-2">Support</p>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-2">Support</p>
                 <h1 className="font-serif text-4xl text-white tracking-tight mb-2">Help Centre</h1>
                 <p className="text-sm text-white/40 max-w-lg mb-14">
                     Answers to common questions about accounts, licensing, webinars, and platform security.
@@ -46,7 +46,7 @@ export default function HelpPage() {
 
                 {/* FAQ Accordion */}
                 <section aria-label="Frequently asked questions" className="mb-16">
-                    <h2 className="text-xs uppercase tracking-[0.2em] text-jpm-gold mb-6">Frequently Asked Questions</h2>
+                    <h2 className="text-xs uppercase tracking-[0.2em] text-ifx-gold mb-6">Frequently Asked Questions</h2>
                     <div className="divide-y divide-white/8">
                         {FAQS.map((faq, i) => (
                             <div key={i} className="accordion-item">
@@ -82,7 +82,7 @@ export default function HelpPage() {
 
                 {/* Contact section */}
                 <section aria-labelledby="contact-heading" className="card border border-white/10 bg-white/3 p-8">
-                    <h2 id="contact-heading" className="text-xs uppercase tracking-[0.2em] text-jpm-gold mb-2">
+                    <h2 id="contact-heading" className="text-xs uppercase tracking-[0.2em] text-ifx-gold mb-2">
                         Still Need Help?
                     </h2>
                     <p className="text-sm text-white/45 mb-6 leading-relaxed">

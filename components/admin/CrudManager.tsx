@@ -1,11 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+type FieldType =
+  | "text"
+  | "number"
+  | "textarea"
+  | "date"
+  | "checkbox"
+  | "select"
+  | "image";
 
 type Field = {
   name: string;
   label: string;
-  type?: "text" | "number" | "textarea" | "date" | "checkbox" | "select" | "image";
+  type?: FieldType;
   required?: boolean;
   options?: Array<{ label: string; value: string }>;
 };
@@ -16,17 +25,37 @@ type Column = {
   type?: "text" | "date" | "boolean" | "image";
 };
 
+type CrudRecord = Record<string, unknown>;
+
 type CrudManagerProps = {
   title: string;
   description: string;
   endpoint: string;
   fields: Field[];
-  rows: Record<string, any>[];
+  rows: CrudRecord[];
   columns: Column[];
   uploadFolder?: string;
 };
 
-const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif"];
+type ApiListResponse = {
+  items?: CrudRecord[];
+  error?: string;
+};
+
+type ApiMutationResponse = {
+  item?: CrudRecord;
+  error?: string;
+};
+
+const IMAGE_EXTENSIONS = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".gif",
+  ".svg",
+  ".avif",
+];
 
 function isLikelyImageUrl(value: string) {
   const lower = value.toLowerCase();
@@ -57,14 +86,141 @@ function formatCell(column: Column, value: unknown) {
 
   if (typeof value === "string" && isIsoLikeDate(value)) {
     const date = new Date(value);
-    if (!Number.isNaN(date.getTime())) return date.toLocaleString();
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleString();
+    }
   }
 
   if (typeof value === "object") {
-    return JSON.stringify(value);
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "[object]";
+    }
   }
 
   return String(value);
+}
+
+function buildInitialForm(fields: Field[]) {
+  const start: CrudRecord = {};
+  for (const field of fields) {
+    start[field.name] = field.type === "checkbox" ? false : "";
+  }
+  return start;
+}
+
+function toDateInputValue(value: unknown) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(String(value));
+  if (!Number.isNaN(date.getTime())) {
+    return date.toISOString().slice(0, 10);
+  }
+  return String(value).slice(0, 10);
+}
+
+function mapRowToForm(fields: Field[], row: CrudRecord) {
+  const next: CrudRecord = {};
+  for (const field of fields) {
+    const rawValue = row[field.name];
+    if (field.type === "checkbox") {
+      next[field.name] = Boolean(rawValue);
+      continue;
+    }
+    if (field.type === "date") {
+      next[field.name] = toDateInputValue(rawValue);
+      continue;
+    }
+    next[field.name] = rawValue ?? "";
+  }
+  return next;
+}
+
+function trimString(value: unknown) {
+  return typeof value === "string" ? value.trim() : value;
+}
+
+function maybeToNumber(value: unknown) {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return value;
+}
+
+function normalizeImageSrc(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+/**
+ * Keeps create/update payloads predictable:
+ * - create: omit optional empty fields so server defaults can apply
+ * - update: send optional empties as null so admins can intentionally clear values
+ */
+function buildPayload(
+  form: CrudRecord,
+  fields: Field[],
+  mode: "create" | "update",
+) {
+  const payload: CrudRecord = {};
+
+  for (const field of fields) {
+    const raw = form[field.name];
+
+    if (field.type === "checkbox") {
+      payload[field.name] = Boolean(raw);
+      continue;
+    }
+
+    if (field.type === "number") {
+      if (raw === "" || raw === null || raw === undefined) {
+        if (field.required) {
+          payload[field.name] = "";
+        } else if (mode === "update") {
+          payload[field.name] = null;
+        }
+        continue;
+      }
+      payload[field.name] = maybeToNumber(raw);
+      continue;
+    }
+
+    const normalized = trimString(raw);
+    if (normalized === "" || normalized === null || normalized === undefined) {
+      if (field.required) {
+        payload[field.name] = "";
+      } else if (mode === "update") {
+        payload[field.name] = null;
+      }
+      continue;
+    }
+
+    payload[field.name] = normalized;
+  }
+
+  return payload;
+}
+
+async function safeReadJson(
+  response: Response,
+): Promise<Record<string, unknown>> {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
 }
 
 export default function CrudManager({
@@ -76,7 +232,7 @@ export default function CrudManager({
   columns,
   uploadFolder = "admin",
 }: CrudManagerProps) {
-  const [items, setItems] = useState(rows);
+  const [items, setItems] = useState<CrudRecord[]>(rows);
   const [loadingItems, setLoadingItems] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -84,44 +240,81 @@ export default function CrudManager({
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(
+    null,
+  );
 
-  const initialForm = useMemo(() => {
-    const start: Record<string, any> = {};
-    for (const field of fields) {
-      start[field.name] = field.type === "checkbox" ? false : "";
-    }
-    return start;
-  }, [fields]);
-
-  const [form, setForm] = useState<Record<string, any>>(initialForm);
+  const initialForm = useMemo(() => buildInitialForm(fields), [fields]);
+  const [form, setForm] = useState<CrudRecord>(initialForm);
 
   useEffect(() => {
     setItems(rows);
   }, [rows]);
 
   useEffect(() => {
-    const loadItems = async () => {
-      setLoadingItems(true);
+    setForm(initialForm);
+    setEditingId(null);
+  }, [initialForm]);
+
+  const setStatus = useCallback(
+    (nextMessage: string, type: "success" | "error" | null) => {
+      setMessage(nextMessage);
+      setMessageType(type);
+    },
+    [],
+  );
+
+  const loadItems = useCallback(
+    async (options?: { showLoader?: boolean; showError?: boolean }) => {
+      const showLoader = options?.showLoader ?? true;
+      const showError = options?.showError ?? true;
+
+      if (showLoader) {
+        setLoadingItems(true);
+      }
+
       try {
         const response = await fetch(endpoint, { cache: "no-store" });
-        const body = await response.json().catch(() => ({}));
-        if (response.ok && Array.isArray(body.items)) {
-          setItems(body.items);
-        }
-      } finally {
-        setLoadingItems(false);
-      }
-    };
+        const body = (await safeReadJson(response)) as ApiListResponse;
 
-    loadItems();
-  }, [endpoint]);
+        if (!response.ok || !Array.isArray(body.items)) {
+          if (showError) {
+            setStatus(body.error ?? "Failed to load records.", "error");
+          }
+          return false;
+        }
+
+        setItems(body.items);
+        return true;
+      } catch {
+        if (showError) {
+          setStatus("Failed to load records due to network error.", "error");
+        }
+        return false;
+      } finally {
+        if (showLoader) {
+          setLoadingItems(false);
+        }
+      }
+    },
+    [endpoint, setStatus],
+  );
+
+  useEffect(() => {
+    void loadItems({ showLoader: true, showError: false });
+  }, [loadItems]);
 
   const filteredItems = useMemo(() => {
     const term = search.trim().toLowerCase();
-    if (!term) return items;
+    if (!term) {
+      return items;
+    }
     return items.filter((item) =>
-      columns.some((column) => String(item[column.key] ?? "").toLowerCase().includes(term)),
+      columns.some((column) =>
+        String(item[column.key] ?? "")
+          .toLowerCase()
+          .includes(term),
+      ),
     );
   }, [items, columns, search]);
 
@@ -130,38 +323,23 @@ export default function CrudManager({
   const submitLabel = editingId ? "Update" : "Save";
   const submitBusyLabel = editingId ? "Updating..." : "Saving...";
 
-  const resetForm = () => {
+  const setFieldValue = useCallback((name: string, value: unknown) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const resetForm = useCallback(() => {
     setForm(initialForm);
     setEditingId(null);
-  };
+  }, [initialForm]);
 
-  const beginEdit = (item: Record<string, any>) => {
-    const next: Record<string, any> = {};
-    for (const field of fields) {
-      const rawValue = item[field.name];
-      if (field.type === "checkbox") {
-        next[field.name] = Boolean(rawValue);
-        continue;
-      }
-      if (field.type === "date") {
-        if (!rawValue) {
-          next[field.name] = "";
-        } else {
-          const asDate = new Date(rawValue);
-          next[field.name] = Number.isNaN(asDate.getTime())
-            ? String(rawValue).slice(0, 10)
-            : asDate.toISOString().slice(0, 10);
-        }
-        continue;
-      }
-      next[field.name] = rawValue ?? "";
-    }
-
-    setForm(next);
-    setEditingId(String(item.id));
-    setMessage(`Editing record ${item.id}`);
-    setMessageType(null);
-  };
+  const beginEdit = useCallback(
+    (item: CrudRecord) => {
+      setForm(mapRowToForm(fields, item));
+      setEditingId(String(item.id ?? ""));
+      setStatus(`Editing record ${item.id ?? ""}`, null);
+    },
+    [fields, setStatus],
+  );
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -169,74 +347,86 @@ export default function CrudManager({
     setMessage(null);
     setMessageType(null);
 
-    const payload = { ...form };
-    for (const field of fields) {
-      if (field.type === "number" && payload[field.name] !== "") {
-        payload[field.name] = Number(payload[field.name]);
-      }
-    }
-
+    const mode = editingId ? "update" : "create";
+    const payload = buildPayload(form, fields, mode);
     const target = editingId ? `${endpoint}/${editingId}` : endpoint;
-    const response = await fetch(target, {
-      method: editingId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
 
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      setMessage(body.error || "Failed to save record.");
-      setMessageType("error");
-      setSubmitting(false);
-      return;
-    }
+    try {
+      const response = await fetch(target, {
+        method: editingId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (editingId) {
-      setItems((prev) =>
-        prev.map((item) => (String(item.id) === editingId ? (body.item ?? item) : item)),
+      const body = (await safeReadJson(response)) as ApiMutationResponse;
+      if (!response.ok) {
+        setStatus(body.error ?? "Failed to save record.", "error");
+        return;
+      }
+
+      if (body.item) {
+        if (editingId) {
+          setItems((prev) =>
+            prev.map((item) =>
+              String(item.id) === editingId ? body.item ?? item : item,
+            ),
+          );
+        } else {
+          setItems((prev) => [body.item as CrudRecord, ...prev]);
+        }
+      }
+
+      // Pull canonical server rows after mutation so relation labels stay accurate.
+      await loadItems({ showLoader: false, showError: false });
+
+      setStatus(
+        editingId ? "Updated successfully." : "Created successfully.",
+        "success",
       );
-      setMessage("Updated successfully.");
-    } else {
-      setItems((prev) => [body.item ?? payload, ...prev]);
-      setMessage("Created successfully.");
+      resetForm();
+    } catch {
+      setStatus("Failed to save record due to network error.", "error");
+    } finally {
+      setSubmitting(false);
     }
-
-    setMessageType("success");
-    resetForm();
-    setSubmitting(false);
   };
 
   const handleDelete = async (id: string) => {
     const confirmed = window.confirm("Delete this record permanently?");
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     setDeletingId(id);
     setMessage(null);
     setMessageType(null);
 
-    const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" });
-    const body = await response.json().catch(() => ({}));
+    try {
+      const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" });
+      const body = (await safeReadJson(response)) as ApiMutationResponse;
 
-    if (!response.ok) {
-      setMessage(body.error || "Delete failed.");
-      setMessageType("error");
+      if (!response.ok) {
+        setStatus(body.error ?? "Delete failed.", "error");
+        return;
+      }
+
+      setItems((prev) => prev.filter((item) => String(item.id) !== id));
+      if (editingId === id) {
+        resetForm();
+      }
+
+      await loadItems({ showLoader: false, showError: false });
+      setStatus("Deleted successfully.", "success");
+    } catch {
+      setStatus("Delete failed due to network error.", "error");
+    } finally {
       setDeletingId(null);
-      return;
     }
-
-    setItems((prev) => prev.filter((item) => String(item.id) !== id));
-    if (editingId === id) {
-      resetForm();
-    }
-    setMessage("Deleted successfully.");
-    setMessageType("success");
-    setDeletingId(null);
   };
 
   const uploadImage = async (fieldName: string, file: File) => {
     if (!file.type.startsWith("image/")) {
-      setMessage("Only image files are allowed.");
-      setMessageType("error");
+      setStatus("Only image files are allowed.", "error");
       return;
     }
 
@@ -253,19 +443,16 @@ export default function CrudManager({
         method: "POST",
         body: formData,
       });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok || !body?.url) {
-        setMessage(body.error || "Image upload failed.");
-        setMessageType("error");
+      const body = (await safeReadJson(response)) as { url?: string; error?: string };
+      if (!response.ok || !body.url) {
+        setStatus(body.error ?? "Image upload failed.", "error");
         return;
       }
 
-      setForm((prev) => ({ ...prev, [fieldName]: body.url }));
-      setMessage("Image uploaded successfully.");
-      setMessageType("success");
+      setFieldValue(fieldName, body.url);
+      setStatus("Image uploaded successfully.", "success");
     } catch {
-      setMessage("Image upload failed due to network error.");
-      setMessageType("error");
+      setStatus("Image upload failed due to network error.", "error");
     } finally {
       setUploadingField(null);
     }
@@ -273,24 +460,31 @@ export default function CrudManager({
 
   return (
     <div className="text-white">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">{title}</p>
+      <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-jpm-gold">
+        {title}
+      </p>
       <h1 className="font-serif text-4xl">{title} Management</h1>
-      <p className="mt-4 text-sm text-white/45 max-w-3xl">{description}</p>
+      <p className="mt-4 max-w-3xl text-sm text-white/45">{description}</p>
 
-      <form onSubmit={handleSubmit} className="card border border-white/10 bg-white/3 p-6 mt-8 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="card mt-8 space-y-4 border border-white/10 bg-white/3 p-6"
+      >
         <h2 className="font-serif text-2xl">{heading}</h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           {fields.map((field) => (
             <div key={field.name} className="flex flex-col gap-2">
-              <span className="text-[10px] uppercase tracking-[0.12em] text-white/35">{field.label}</span>
+              <span className="text-[10px] uppercase tracking-[0.12em] text-white/35">
+                {field.label}
+              </span>
 
               {field.type === "textarea" && (
                 <textarea
                   className="input-base min-h-[110px]"
-                  value={form[field.name]}
+                  value={String(form[field.name] ?? "")}
                   required={field.required}
                   onChange={(event) =>
-                    setForm((prev) => ({ ...prev, [field.name]: event.target.value }))
+                    setFieldValue(field.name, event.target.value)
                   }
                 />
               )}
@@ -299,9 +493,9 @@ export default function CrudManager({
                 <label className="inline-flex items-center gap-2 text-sm text-white/70">
                   <input
                     type="checkbox"
-                    checked={!!form[field.name]}
+                    checked={Boolean(form[field.name])}
                     onChange={(event) =>
-                      setForm((prev) => ({ ...prev, [field.name]: event.target.checked }))
+                      setFieldValue(field.name, event.target.checked)
                     }
                   />
                   Enabled
@@ -311,10 +505,10 @@ export default function CrudManager({
               {field.type === "select" && (
                 <select
                   className="input-base"
-                  value={form[field.name]}
+                  value={String(form[field.name] ?? "")}
                   required={field.required}
                   onChange={(event) =>
-                    setForm((prev) => ({ ...prev, [field.name]: event.target.value }))
+                    setFieldValue(field.name, event.target.value)
                   }
                 >
                   <option value="">Select</option>
@@ -328,35 +522,61 @@ export default function CrudManager({
 
               {field.type === "image" && (
                 <div className="space-y-3">
-                  <div className="relative group w-full h-32 bg-white/5 border border-white/15 rounded-sm overflow-hidden flex items-center justify-center">
-                    {form[field.name] ? (
+                  {(() => {
+                    const previewSrc = normalizeImageSrc(form[field.name]);
+
+                    return (
+                  <div className="group relative flex h-32 w-full items-center justify-center overflow-hidden rounded-sm border border-white/15 bg-white/5">
+                    {previewSrc ? (
                       <>
                         <img
-                          src={form[field.name]}
+                          src={previewSrc}
                           alt="Preview"
-                          className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
+                          className="h-full w-full object-cover opacity-85 transition-opacity group-hover:opacity-100"
                         />
                         <button
                           type="button"
-                          className="absolute top-2 right-2 bg-red-500/80 hover:bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => setForm((prev) => ({ ...prev, [field.name]: "" }))}
+                          className="absolute right-2 top-2 rounded-full bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                          onClick={() => setFieldValue(field.name, "")}
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg
+                            className="h-3.5 w-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
                           </svg>
                         </button>
                       </>
                     ) : (
-                      <div className="text-white/20 flex flex-col items-center gap-1">
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <div className="flex flex-col items-center gap-1 text-white/20">
+                        <svg
+                          className="h-8 w-8"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
                         </svg>
                         <span className="text-[10px] uppercase">No Image</span>
                       </div>
                     )}
                   </div>
+                    );
+                  })()}
 
-                  <label className="inline-flex items-center justify-center btn-base btn-sm btn-outline cursor-pointer">
+                  <label className="btn-base btn-sm btn-outline inline-flex cursor-pointer items-center justify-center">
                     <input
                       type="file"
                       accept="image/*"
@@ -365,35 +585,40 @@ export default function CrudManager({
                       onChange={(event) => {
                         const file = event.target.files?.[0];
                         if (file) {
-                          uploadImage(field.name, file);
+                          void uploadImage(field.name, file);
                         }
                         event.currentTarget.value = "";
                       }}
                     />
-                    {uploadingField === field.name ? "Uploading..." : "Upload Image"}
+                    {uploadingField === field.name
+                      ? "Uploading..."
+                      : "Upload Image"}
                   </label>
 
                   <input
                     type="text"
                     className="input-base"
                     placeholder="Or paste image URL"
-                    value={form[field.name]}
+                    value={String(form[field.name] ?? "")}
                     required={field.required}
                     onChange={(event) =>
-                      setForm((prev) => ({ ...prev, [field.name]: event.target.value }))
+                      setFieldValue(field.name, event.target.value)
                     }
                   />
                 </div>
               )}
 
-              {(!field.type || field.type === "text" || field.type === "number" || field.type === "date") && (
+              {(!field.type ||
+                field.type === "text" ||
+                field.type === "number" ||
+                field.type === "date") && (
                 <input
                   type={field.type || "text"}
                   className="input-base"
-                  value={form[field.name]}
+                  value={String(form[field.name] ?? "")}
                   required={field.required}
                   onChange={(event) =>
-                    setForm((prev) => ({ ...prev, [field.name]: event.target.value }))
+                    setFieldValue(field.name, event.target.value)
                   }
                 />
               )}
@@ -401,23 +626,29 @@ export default function CrudManager({
           ))}
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex flex-wrap items-center gap-3">
           <button disabled={isBusy} className="btn-base btn-md btn-primary">
             {submitting ? submitBusyLabel : submitLabel}
           </button>
           {editingId && (
-            <button type="button" className="btn-base btn-md btn-outline" onClick={resetForm} disabled={isBusy}>
+            <button
+              type="button"
+              className="btn-base btn-md btn-outline"
+              onClick={resetForm}
+              disabled={isBusy}
+            >
               Cancel Edit
             </button>
           )}
           {message && (
             <p
-              className={`text-sm ${messageType === "error"
-                ? "text-red-300"
-                : messageType === "success"
-                  ? "text-emerald-300"
-                  : "text-white/55"
-                }`}
+              className={`text-sm ${
+                messageType === "error"
+                  ? "text-red-300"
+                  : messageType === "success"
+                    ? "text-emerald-300"
+                    : "text-white/55"
+              }`}
             >
               {message}
             </p>
@@ -425,19 +656,36 @@ export default function CrudManager({
         </div>
       </form>
 
-      <div className="card border border-white/10 bg-white/3 mt-8 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+      <div className="card mt-8 border border-white/10 bg-white/3 p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-white/50">
-            Showing <span className="text-white/80 font-semibold">{filteredItems.length}</span> of{" "}
-            <span className="text-white/80 font-semibold">{items.length}</span> records
+            Showing{" "}
+            <span className="font-semibold text-white/80">
+              {filteredItems.length}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-white/80">{items.length}</span>{" "}
+            records
           </p>
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search table..."
-            className="input-base max-w-[260px]"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search table..."
+              className="input-base max-w-[260px]"
+            />
+            <button
+              type="button"
+              className="btn-base btn-sm btn-outline"
+              disabled={isBusy || loadingItems}
+              onClick={() =>
+                void loadItems({ showLoader: true, showError: true })
+              }
+            >
+              {loadingItems ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -471,23 +719,39 @@ export default function CrudManager({
 
               {!loadingItems &&
                 filteredItems.map((item, index) => (
-                  <tr key={item.id ?? index} className="border-b border-white/5 align-top">
+                  <tr key={String(item.id ?? index)} className="border-b border-white/5 align-top">
                     {columns.map((column) => {
                       const raw = item[column.key];
+                      const imageSrc = normalizeImageSrc(raw);
                       const asText = raw == null ? "" : String(raw);
                       const showImage =
-                        column.type === "image" ||
-                        (typeof raw === "string" && asText.startsWith("http") && isLikelyImageUrl(asText));
+                        !!imageSrc &&
+                        (column.type === "image" ||
+                          (imageSrc.startsWith("http") &&
+                            isLikelyImageUrl(imageSrc)));
 
                       return (
-                        <td key={column.key} className="p-4 max-w-[280px]">
-                          {showImage && typeof raw === "string" ? (
-                            <a href={raw} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2">
-                              <img src={raw} alt={column.label} className="w-10 h-10 rounded-sm object-cover border border-white/15" />
-                              <span className="text-xs text-jpm-gold/80 hover:text-jpm-gold">Open</span>
+                        <td key={column.key} className="max-w-[280px] p-4">
+                          {showImage && imageSrc ? (
+                            <a
+                              href={imageSrc}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2"
+                            >
+                              <img
+                                src={imageSrc}
+                                alt={column.label}
+                                className="h-10 w-10 rounded-sm border border-white/15 object-cover"
+                              />
+                              <span className="text-xs text-jpm-gold/80 hover:text-jpm-gold">
+                                Open
+                              </span>
                             </a>
                           ) : (
-                            <span className="line-clamp-3 break-words">{formatCell(column, raw)}</span>
+                            <span className="line-clamp-3 break-words">
+                              {formatCell(column, raw)}
+                            </span>
                           )}
                         </td>
                       );
@@ -505,7 +769,7 @@ export default function CrudManager({
                         <button
                           type="button"
                           className="btn-base btn-sm btn-danger"
-                          onClick={() => handleDelete(String(item.id))}
+                          onClick={() => void handleDelete(String(item.id))}
                           disabled={isBusy || deletingId === String(item.id)}
                         >
                           {deletingId === String(item.id) ? "Deleting..." : "Delete"}

@@ -7,7 +7,7 @@ export default async function AdminCrmPage() {
 
   return (
     <div className="text-white">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">CRM</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-ifx-gold mb-2">CRM</p>
       <h1 className="font-serif text-4xl">User and Revenue Operations</h1>
       <p className="mt-4 text-sm text-white/45 max-w-3xl">
         Export-ready operational data for user lifecycle, payment flow, and
@@ -45,7 +45,7 @@ export default async function AdminCrmPage() {
             {users.map((user) => (
               <tr key={user.id} className="border-b border-white/5">
                 <td className="p-4">{user.email}</td>
-                <td className="p-4 uppercase text-jpm-gold">{user.role}</td>
+                <td className="p-4 uppercase text-ifx-gold">{user.role}</td>
                 <td className="p-4 text-white/70">
                   {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
                 </td>
@@ -62,7 +62,7 @@ function Kpi({ label, value }: { label: string; value: number }) {
   return (
     <article className="card border border-white/10 bg-white/3 p-5">
       <p className="text-[10px] uppercase tracking-[0.14em] text-white/40">{label}</p>
-      <p className="mt-2 font-serif text-3xl text-jpm-gold">{value.toLocaleString()}</p>
+      <p className="mt-2 font-serif text-3xl text-ifx-gold">{value.toLocaleString()}</p>
     </article>
   );
 }

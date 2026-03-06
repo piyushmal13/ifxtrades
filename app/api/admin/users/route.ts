@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { normalizeRole } from "@/lib/auth-shared";
-import { logAdminAction } from "@/lib/admin/audit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { jsonError, jsonItem, logMutation } from "@/lib/admin/api";
 
 const COLUMN_MISSING_PATTERN = /column|schema cache|does not exist/i;
 
@@ -52,12 +51,12 @@ export async function PATCH(request: Request) {
 
   const payload = await request.json().catch(() => ({}));
   if (!payload?.userId || !payload?.role) {
-    return NextResponse.json({ error: "userId and role are required." }, { status: 400 });
+    return jsonError("userId and role are required.");
   }
 
   const normalized = normalizeRole(payload.role);
   if (normalized !== "user" && normalized !== "admin") {
-    return NextResponse.json({ error: "Invalid role." }, { status: 400 });
+    return jsonError("Invalid role.");
   }
   const role: "user" | "admin" = normalized;
 
@@ -69,23 +68,27 @@ export async function PATCH(request: Request) {
       error instanceof Error
         ? error.message
         : "Missing Supabase admin client environment variables.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonError(message, 500);
   }
 
   const updateResult = await updateUserRole(admin, String(payload.userId), role);
   if (!updateResult.ok) {
-    return NextResponse.json({ error: updateResult.error }, { status: 400 });
+    return jsonError(updateResult.error);
   }
 
-  if (guard.auth?.user?.id) {
-    await logAdminAction(admin, {
-      actorId: guard.auth.user.id,
+  await logMutation(
+    {
+      admin,
+      auth: guard.auth!,
+      actorId: guard.auth?.user?.id ?? null,
+    },
+    {
       action: "update",
       entity: "profiles",
       entityId: String(payload.userId),
       payload: { role },
-    });
-  }
+    },
+  );
 
-  return NextResponse.json({ item: { id: String(payload.userId), role } });
+  return jsonItem({ id: String(payload.userId), role });
 }

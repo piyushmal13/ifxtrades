@@ -18,7 +18,7 @@ export default async function ReviewsPage() {
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
-        <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">
           Authority Engine
         </p>
         <h1 className="font-serif text-4xl md:text-5xl tracking-[-0.01em]">
@@ -38,9 +38,9 @@ export default async function ReviewsPage() {
             {reviews.map((review) => (
               <article
                 key={review.id}
-                className="card relative overflow-hidden border border-white/8 bg-white/3 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-jpm-gold/35"
+                className="card relative overflow-hidden border border-white/8 bg-white/3 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-ifx-gold/35"
               >
-                <p className="text-[10px] uppercase tracking-[0.14em] text-jpm-gold mb-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-ifx-gold mb-3">
                   {review.isFeatured ? "Featured Review" : "Review"}
                 </p>
                 <h2 className="font-serif text-2xl leading-snug">{review.companyName}</h2>

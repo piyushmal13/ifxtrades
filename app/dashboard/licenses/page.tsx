@@ -9,7 +9,7 @@ export default async function DashboardLicensesPage() {
 
   return (
     <div className="text-white">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">Licenses</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-ifx-gold mb-2">Licenses</p>
       <h1 className="font-serif text-4xl">Algorithm Licenses</h1>
       <p className="mt-4 text-sm text-white/45 max-w-2xl">
         License validity is enforced server-side and synchronized with expiry and
@@ -35,7 +35,7 @@ export default async function DashboardLicensesPage() {
               {licenses.map((license) => (
                 <tr key={license.id} className="border-b border-white/5">
                   <td className="p-4">{license.algoName}</td>
-                  <td className="p-4 uppercase text-jpm-gold">{license.status}</td>
+                  <td className="p-4 uppercase text-ifx-gold">{license.status}</td>
                   <td className="p-4 text-white/70">
                     {license.startsAt
                       ? new Date(license.startsAt).toLocaleDateString()

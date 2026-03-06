@@ -27,8 +27,8 @@ export default async function AdminBlogPage() {
         excerpt: item.excerpt,
         body: item.body,
         category: item.category,
-        meta_title: item.title,
-        meta_description: item.excerpt,
+        meta_title: item.metaTitle ?? "",
+        meta_description: item.metaDescription ?? "",
         published_at: item.publishedAt ?? "",
       }))}
       columns={[

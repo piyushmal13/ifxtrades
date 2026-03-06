@@ -55,7 +55,7 @@ export default async function AlgoDetailPage({ params }: Params) {
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(212,175,55,0.06),transparent)] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">
           Strategy Engine
         </p>
         <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em]">{algo.name}</h1>
@@ -70,7 +70,7 @@ export default async function AlgoDetailPage({ params }: Params) {
         </div>
 
         <div className="card border border-white/10 bg-white/3 backdrop-blur-md p-8 mt-8">
-          <p className="text-[10px] uppercase tracking-[0.14em] text-jpm-gold/80 mb-3">
+          <p className="text-[10px] uppercase tracking-[0.14em] text-ifx-gold/80 mb-3">
             Institutional Compliance & Risk Disclosure
           </p>
           <p className="text-sm text-white/45 leading-relaxed italic">{algo.complianceDisclaimer}</p>

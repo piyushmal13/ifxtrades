@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   resolveUserRole,
   resolveUserRoleById,
   type PlatformRole,
 } from "@/lib/auth-shared";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type ServerAuthContext = {
   supabase: SupabaseClient;
@@ -24,7 +24,7 @@ async function resolveServerRole(
     return "admin";
   }
 
-  // Fallback for environments where profile reads are RLS-restricted for auth users.
+  // Fallback when profile reads are RLS-restricted for auth users.
   try {
     const adminClient = createSupabaseAdminClient();
     const elevatedRole = await resolveUserRoleById(adminClient, user.id);
@@ -56,22 +56,48 @@ export async function requireUser(redirectTo = "/dashboard") {
   return auth;
 }
 
-/** Require that the user is logged in AND has verified their email. */
-export async function requireVerified(redirectTo = "/dashboard") {
-  const auth = await requireUser(redirectTo);
+async function markProfileVerifiedBestEffort(auth: ServerAuthContext) {
+  if (!auth.user) return;
+
+  try {
+    await auth.supabase
+      .from("profiles")
+      .update({ email_verified: true })
+      .eq("id", auth.user.id)
+      .eq("email_verified", false);
+  } catch {
+    // Ignore profile sync failures. Auth user state remains source-of-truth.
+  }
+}
+
+async function isEmailVerified(auth: ServerAuthContext): Promise<boolean> {
+  const user = auth.user;
+  if (!user) return false;
+
+  // Supabase auth user confirmation is the primary source-of-truth.
+  if (Boolean(user.email_confirmed_at)) {
+    await markProfileVerifiedBestEffort(auth);
+    return true;
+  }
+
+  // Backward compatibility for legacy OTP/profile flows.
   const { data: profile } = await auth.supabase
     .from("profiles")
     .select("email_verified")
-    .eq("id", auth.user!.id)
+    .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile?.email_verified) {
+  return Boolean(profile?.email_verified);
+}
+
+export async function requireVerified(redirectTo = "/dashboard") {
+  const auth = await requireUser(redirectTo);
+  if (!(await isEmailVerified(auth))) {
     redirect(`/verify?redirect=${encodeURIComponent(redirectTo)}`);
   }
   return auth;
 }
 
-/** API variant — returns 403 instead of redirect */
 export async function requireVerifiedApi() {
   const auth = await getServerAuthContext();
   if (!auth.user) {
@@ -81,13 +107,7 @@ export async function requireVerifiedApi() {
     };
   }
 
-  const { data: profile } = await auth.supabase
-    .from("profiles")
-    .select("email_verified")
-    .eq("id", auth.user.id)
-    .maybeSingle();
-
-  if (!profile?.email_verified) {
+  if (!(await isEmailVerified(auth))) {
     return {
       error: NextResponse.json(
         { error: "Email not verified.", code: "EMAIL_NOT_VERIFIED" },
@@ -101,8 +121,8 @@ export async function requireVerifiedApi() {
 }
 
 export async function requireAdmin(redirectTo = "/dashboard") {
-  // NOTE: pass redirectTo (not "/admin") to requireUser so unauthenticated
-  // users get sent to login, not into an infinite /admin redirect loop.
+  // Pass redirectTo (not "/admin") so unauthenticated users go to login,
+  // not an /admin redirect loop.
   const auth = await requireUser(redirectTo);
   if (auth.role !== "admin") {
     redirect(redirectTo);

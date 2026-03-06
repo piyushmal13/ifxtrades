@@ -38,33 +38,33 @@ function WebinarCard({ webinar }: { webinar: WebinarSummary }) {
   const isAlmostFull = webinar.seatsRemaining <= Math.ceil(webinar.capacity * 0.15);
   const riskColorMap: Record<string, string> = {
     PLATINUM: "text-sky-300 border-sky-400/30 bg-sky-400/8",
-    GOLD: "text-jpm-gold border-jpm-gold/30 bg-jpm-gold/8",
+    GOLD: "text-ifx-gold border-ifx-gold/30 bg-ifx-gold/8",
     SILVER: "text-white/60 border-white/20 bg-white/5",
   };
   const tierClass = riskColorMap[webinar.sponsorTier] ?? riskColorMap.SILVER;
 
   return (
-    <article className="glass-premium group relative overflow-hidden border border-white/8 p-7 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:border-jpm-gold/35 hover:shadow-[0_20px_60px_rgba(212,175,55,0.12)]">
+    <article className="glass-premium group relative overflow-hidden border border-white/8 p-7 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:border-ifx-gold/35 hover:shadow-[0_20px_60px_rgba(212,175,55,0.12)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.05),_transparent_60%)]" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-jpm-gold/0 via-jpm-gold/50 to-jpm-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-ifx-gold/0 via-ifx-gold/50 to-ifx-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <div className="flex items-start justify-between gap-3 mb-4">
         <span className={`text-[10px] uppercase tracking-[0.2em] font-semibold border px-2.5 py-1 rounded-full ${tierClass}`}>
           {webinar.sponsorTier}
         </span>
         {webinar.isPremium && (
-          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold border border-jpm-gold/40 bg-jpm-gold/10 text-jpm-gold px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold border border-ifx-gold/40 bg-ifx-gold/10 text-ifx-gold px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.2)]">
             Premium Access
           </span>
         )}
       </div>
 
-      <h2 className="font-serif text-xl text-white leading-snug mb-2 group-hover:text-jpm-gold transition-colors">{webinar.title}</h2>
+      <h2 className="font-serif text-xl text-white leading-snug mb-2 group-hover:text-ifx-gold transition-colors">{webinar.title}</h2>
       <p className="text-sm text-white/45 leading-relaxed mb-4 line-clamp-2">{webinar.description}</p>
 
       {webinar.startsAt && (
         <div className="mb-4 p-3 glass-premium border border-white/8 rounded-sm">
-          <p className="text-[9px] uppercase tracking-[0.15em] text-jpm-gold mb-2">Starts In</p>
+          <p className="text-[9px] uppercase tracking-[0.15em] text-ifx-gold mb-2">Starts In</p>
           <Countdown startsAtIso={webinar.startsAt} deadlineIso={webinar.deadline} />
         </div>
       )}
@@ -78,7 +78,7 @@ function WebinarCard({ webinar }: { webinar: WebinarSummary }) {
         </div>
         <div>
           <p className="text-white/25 mb-0.5">Price</p>
-          <p className={`font-semibold ${webinar.price > 0 ? "text-jpm-gold" : "text-emerald-400"}`}>
+          <p className={`font-semibold ${webinar.price > 0 ? "text-ifx-gold" : "text-emerald-400"}`}>
             {webinar.price > 0 ? `$${webinar.price.toLocaleString()}` : "Free"}
           </p>
         </div>
@@ -95,7 +95,7 @@ function WebinarCard({ webinar }: { webinar: WebinarSummary }) {
         </p>
         <Link
           href={`/webinars/${webinar.slug}`}
-          className="bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617] px-5 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.16em] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] transition-all duration-300 hover:-translate-y-px"
+          className="bg-gradient-to-r from-ifx-gold-muted via-ifx-gold to-ifx-gold text-[#020617] px-5 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.16em] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] transition-all duration-300 hover:-translate-y-px"
         >
           Register →
         </Link>
@@ -111,7 +111,7 @@ export default async function WebinarsPage() {
     <main className="ifx-page-shell">
       <div className="ifx-page-container relative">
         <div className="mb-14 animate-cinematic">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-3">Event Intelligence</p>
+          <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-3">Event Intelligence</p>
           <h1 className="font-serif text-4xl md:text-5xl text-white tracking-[-0.01em] text-glow-gold">Institutional Webinars</h1>
           <p className="mt-4 text-sm text-white/45 max-w-2xl leading-relaxed">
             Institutional briefings with transparent agenda design, sponsor tiers, and seat governance.

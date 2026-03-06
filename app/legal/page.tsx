@@ -14,7 +14,7 @@ export default function LegalPage() {
 
             <div className="max-w-3xl mx-auto relative z-10">
                 {/* Header */}
-                <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/70 mb-2">Legal & Compliance</p>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/70 mb-2">Legal & Compliance</p>
                 <h1 className="font-serif text-4xl text-white tracking-tight mb-2">Legal Documentation</h1>
                 <p className="text-sm text-white/40 mb-10">
                     Last updated: 23 February 2026. All documentation is binding upon use of the IFXTrades platform.
@@ -30,7 +30,7 @@ export default function LegalPage() {
                             aria-controls={`tabpanel-${tab.replace(/\s+/g, "-")}`}
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-2.5 text-[11px] uppercase tracking-[0.1em] font-semibold rounded-sm transition-all duration-[200ms] ${activeTab === tab
-                                    ? "bg-jpm-gold/10 text-jpm-gold border border-jpm-gold/25"
+                                    ? "bg-ifx-gold/10 text-ifx-gold border border-ifx-gold/25"
                                     : "text-white/40 hover:text-white/70"
                                 }`}
                         >

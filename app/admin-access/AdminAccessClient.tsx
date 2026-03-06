@@ -54,7 +54,7 @@ export default function AdminAccessClient({
     <main className="ifx-page-shell">
       <section className="ifx-page-container-narrow relative z-10 card p-8 space-y-6">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ifx-gold mb-2">
             Admin Recovery
           </p>
           <h1 className="font-serif text-3xl text-white">Admin Access</h1>
@@ -80,14 +80,14 @@ export default function AdminAccessClient({
         ) : (
           <div className="space-y-4">
             <label className="flex flex-col gap-2">
-              <span className="text-xs uppercase tracking-[0.12em] text-jpm-muted">
+              <span className="text-xs uppercase tracking-[0.12em] text-ifx-text-muted">
                 Bootstrap Token (Optional)
               </span>
               <input
                 value={token}
                 onChange={(event) => setToken(event.target.value)}
                 placeholder="IFX_ADMIN_BOOTSTRAP_TOKEN"
-                className="border border-jpm-border rounded-sm px-3 py-2 text-sm bg-white/5"
+                className="border border-border rounded-sm px-3 py-2 text-sm bg-white/5"
               />
             </label>
 

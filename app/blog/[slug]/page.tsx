@@ -60,11 +60,11 @@ export default async function BlogPostPage({ params }: Params) {
       <article className="max-w-4xl mx-auto relative z-10">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/30 mb-8">
-          <Link href="/" className="hover:text-jpm-gold transition-colors">Intelligence</Link>
+          <Link href="/" className="hover:text-ifx-gold transition-colors">Intelligence</Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-jpm-gold transition-colors">Briefings</Link>
+          <Link href="/blog" className="hover:text-ifx-gold transition-colors">Briefings</Link>
           <span>/</span>
-          <span className="text-jpm-gold/60">{post.category}</span>
+          <span className="text-ifx-gold/60">{post.category}</span>
         </nav>
 
         {post.featuredImageUrl && (
@@ -79,12 +79,12 @@ export default async function BlogPostPage({ params }: Params) {
         )}
 
         <div className="mb-10">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold/80 mb-4">{post.category}</p>
+          <p className="text-[10px] uppercase tracking-[0.28em] text-ifx-gold/80 mb-4">{post.category}</p>
           <h1 className="font-serif text-4xl md:text-6xl text-white tracking-[-0.01em] leading-[1.1] mb-6">
             {post.title}
           </h1>
           <div className="flex items-center gap-4 py-6 border-y border-white/10">
-            <div className="h-10 w-10 rounded-full bg-jpm-gold/10 border border-jpm-gold/20 flex items-center justify-center text-jpm-gold text-xs font-bold">
+            <div className="h-10 w-10 rounded-full bg-ifx-gold/10 border border-ifx-gold/20 flex items-center justify-center text-ifx-gold text-xs font-bold">
               {post.authorName.slice(0, 2).toUpperCase()}
             </div>
             <div>
@@ -101,7 +101,7 @@ export default async function BlogPostPage({ params }: Params) {
         </div>
 
         <div className="mt-20 pt-10 border-t border-white/10 flex items-center justify-between">
-          <Link href="/blog" className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold/60 hover:text-jpm-gold transition-colors flex items-center gap-2">
+          <Link href="/blog" className="text-[10px] uppercase tracking-[0.2em] text-ifx-gold/60 hover:text-ifx-gold transition-colors flex items-center gap-2">
             ← Operational Briefings
           </Link>
           <div className="flex gap-4">

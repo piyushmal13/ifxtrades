@@ -44,12 +44,12 @@ test("admin modules expose id-based PATCH/DELETE route handlers", () => {
   }
 });
 
-test("admin modules log mutations via logAdminAction", () => {
+test("admin modules log mutations via shared helper or direct audit call", () => {
   for (const mod of modules) {
     const basePath = path.join(process.cwd(), "app", "api", "admin", mod);
     const collectionSource = fs.readFileSync(path.join(basePath, "route.ts"), "utf8");
     const detailSource = fs.readFileSync(path.join(basePath, "[id]", "route.ts"), "utf8");
-    assert.match(collectionSource, /logAdminAction/);
-    assert.match(detailSource, /logAdminAction/);
+    assert.match(collectionSource, /logMutation|logAdminAction/);
+    assert.match(detailSource, /logMutation|logAdminAction/);
   }
 });

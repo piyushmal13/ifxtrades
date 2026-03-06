@@ -1,35 +1,35 @@
-import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { logAdminAction } from "@/lib/admin/audit";
+import {
+  assignIfPresent,
+  fromSupabaseError,
+  getRouteId,
+  jsonDeleteOk,
+  jsonItem,
+  logMutation,
+  parseJsonBody,
+  resolveAdminContext,
+  type RouteParams,
+} from "@/lib/admin/api";
 import { universityUpdateSchema } from "@/lib/validation/admin";
 
-type Params = { params: Promise<{ id: string }> };
+export async function PATCH(request: Request, { params }: RouteParams) {
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-export async function PATCH(request: Request, { params }: Params) {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+  const id = await getRouteId(params);
+  const parsed = await parseJsonBody(request, universityUpdateSchema);
+  if ("error" in parsed) return parsed.error;
 
-  const { id } = await params;
-  const payload = universityUpdateSchema.safeParse(await request.json());
-  if (!payload.success) {
-    return NextResponse.json(
-      { error: payload.error.issues[0]?.message ?? "Invalid request body." },
-      { status: 400 },
-    );
-  }
-
-  const input = payload.data;
+  const input = parsed.data as Record<string, unknown>;
   const update: Record<string, unknown> = {};
-  if ("title" in input) update.title = input.title;
-  if ("slug" in input) update.slug = input.slug;
-  if ("category" in input) update.category = input.category;
-  if ("description" in input) update.description = input.description;
-  if ("plan_required" in input) update.plan_required = input.plan_required;
-  if ("sort_order" in input) update.sort_order = input.sort_order;
-  if ("is_published" in input) update.is_published = input.is_published;
+  assignIfPresent(update, input, "title");
+  assignIfPresent(update, input, "slug");
+  assignIfPresent(update, input, "category");
+  assignIfPresent(update, input, "description");
+  assignIfPresent(update, input, "plan_required");
+  assignIfPresent(update, input, "sort_order");
+  assignIfPresent(update, input, "is_published");
 
-  const admin = createSupabaseAdminClient();
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("university_courses")
     .update(update)
@@ -38,28 +38,25 @@ export async function PATCH(request: Request, { params }: Params) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  if (guard.auth?.user?.id && data?.id) {
-    await logAdminAction(admin, {
-      actorId: guard.auth.user.id,
-      action: "update",
-      entity: "university_courses",
-      entityId: data.id,
-      payload: update,
-    });
-  }
+  await logMutation(resolved.context, {
+    action: "update",
+    entity: "university_courses",
+    entityId: data?.id,
+    payload: update,
+  });
 
-  return NextResponse.json({ item: data });
+  return jsonItem(data);
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+export async function DELETE(_request: Request, { params }: RouteParams) {
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-  const { id } = await params;
-  const admin = createSupabaseAdminClient();
+  const id = await getRouteId(params);
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("university_courses")
     .delete()
@@ -68,18 +65,14 @@ export async function DELETE(_request: Request, { params }: Params) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  if (guard.auth?.user?.id && data?.id) {
-    await logAdminAction(admin, {
-      actorId: guard.auth.user.id,
-      action: "delete",
-      entity: "university_courses",
-      entityId: data.id,
-    });
-  }
+  await logMutation(resolved.context, {
+    action: "delete",
+    entity: "university_courses",
+    entityId: data?.id,
+  });
 
-  return NextResponse.json({ ok: true, id });
+  return jsonDeleteOk(id);
 }
-

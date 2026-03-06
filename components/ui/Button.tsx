@@ -21,7 +21,7 @@ const variantClasses: Record<Variant, string> = {
     ghost: "btn-ghost",
     outline: "btn-outline",
     danger: "btn-danger",
-    link: "text-jpm-gold underline-offset-4 hover:underline text-sm font-medium",
+    link: "text-ifx-gold underline-offset-4 hover:underline text-sm font-medium",
 };
 
 const sizeClasses: Record<Size, string> = {

@@ -11,7 +11,7 @@ export const metadata = buildMetadata({
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="p-20 text-jpm-muted">Loading...</div>}>
+    <Suspense fallback={<div className="p-20 text-ifx-text-muted">Loading...</div>}>
       <LoginClient />
     </Suspense>
   )

@@ -8,7 +8,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="text-white">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-jpm-gold mb-2">Users</p>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-ifx-gold mb-2">Users</p>
       <h1 className="font-serif text-4xl">User Access Control</h1>
       <p className="mt-4 text-sm text-white/45 max-w-3xl">
         Manage roles directly from the control panel. Access changes apply to

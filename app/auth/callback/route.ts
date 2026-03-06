@@ -1,14 +1,14 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
-import { NextResponse } from "next/server"
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get("code")
-  // `next` carries the original destination; default to /dashboard
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard"
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next") ?? "/dashboard";
 
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,35 +16,53 @@ export async function GET(request: Request) {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
           try {
-            cookieStore.set({ name, value, ...options })
+            cookieStore.set({ name, value, ...options });
           } catch {
-            // Best-effort in middleware/route handlers
+            // Best effort in route handlers.
           }
         },
         remove(name: string, options: any) {
           try {
-            cookieStore.set({ name, value: "", ...options })
-          } catch {}
+            cookieStore.set({ name, value: "", ...options });
+          } catch {
+            // Best effort in route handlers.
+          }
         },
       },
-    }
-  )
+    },
+  );
 
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      // Exchange failed — redirect to login with an error hint
       return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error.message)}`, requestUrl.origin)
-      )
+        new URL(`/login?error=${encodeURIComponent(error.message)}`, requestUrl.origin),
+      );
+    }
+
+    // Keep legacy profile flag aligned with Supabase auth confirmation state.
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user?.id && user.email_confirmed_at) {
+        const admin = createSupabaseAdminClient();
+        await admin
+          .from("profiles")
+          .update({ email_verified: true })
+          .eq("id", user.id)
+          .eq("email_verified", false);
+      }
+    } catch {
+      // Ignore profile sync errors to avoid blocking auth callback completion.
     }
   }
 
-  // Sanitise `next`: only allow relative paths (no open-redirect)
-  const safeNext = next.startsWith("/") ? next : "/dashboard"
-  return NextResponse.redirect(new URL(safeNext, requestUrl.origin))
+  const safeNext = next.startsWith("/") ? next : "/dashboard";
+  return NextResponse.redirect(new URL(safeNext, requestUrl.origin));
 }

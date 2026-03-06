@@ -1,271 +1,293 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/lib/auth-provider";
-import { IntelligenceOverlay } from "./ui/IntelligenceOverlay";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useAuth } from '@/lib/auth-provider';
+import { marketStatus, primaryNavLinks } from '@/lib/design-tokens';
 
-type LinkItem = {
+type UtilityLink = {
   label: string;
   href: string;
+  strong?: boolean;
 };
 
-const PRIMARY_LINKS: LinkItem[] = [
-  { label: "Home", href: "/" },
-  { label: "Webinars", href: "/webinars" },
-  { label: "Algos", href: "/algos" },
-  { label: "University", href: "/university" },
-  { label: "Blog", href: "/blog" },
-  { label: "Reviews", href: "/reviews" },
-];
+function NavLinkComponent({ href, label, active }: { href: string; label: string; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      className="relative text-sm font-medium tracking-wide group"
+      style={{ color: active ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+    >
+      {label}
+      <motion.span
+        className="absolute -bottom-1 left-0 h-0.5 rounded-full"
+        style={{ background: 'var(--gold-pure)' }}
+        initial={{ width: active ? '100%' : '0%' }}
+        animate={{ width: active ? '100%' : '0%' }}
+        whileHover={{ width: '100%' }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      />
+    </Link>
+  );
+}
 
-export function Navbar() {
+const NavLink = memo(NavLinkComponent);
+NavLink.displayName = 'NavLink';
+
+function NavbarComponent() {
   const pathname = usePathname();
-  const { session, supabase, role } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const { session, role, supabase } = useAuth();
   const [scrolled, setScrolled] = useState(false);
-  const [isIntelligenceOpen, setIsIntelligenceOpen] = useState(false);
-  const [latestPosts, setLatestPosts] = useState<any[]>([]);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
-    // Fetch latest posts for the HUD
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch("/api/blog/latest");
-        if (!response.ok) throw new Error("Failed to fetch");
-        const posts = await response.json();
-        setLatestPosts(posts);
-      } catch (err) {
-        console.error("Failed to fetch posts for HUD:", err);
-      }
-    };
-    fetchPosts();
+    if (pathname.startsWith('/admin')) {
+      return;
+    }
 
-    // Subscribe to real-time updates for blog_posts
-    const supabaseBrowser = createSupabaseBrowserClient();
-    const channel = supabaseBrowser
-      .channel("blog-updates")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "blog_posts" },
-        () => {
-          fetchPosts(); // Refetch on any change
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabaseBrowser.removeChannel(channel);
-    };
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setIsOpen(false);
-    window.location.href = "/login";
-  };
-
-  // All hooks must run before any conditional return (Rules of Hooks)
-  useEffect(() => {
-    if (pathname.startsWith("/admin")) return;
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, [pathname]);
 
-  const utilityLinks = useMemo(() => {
-    const links: LinkItem[] = [];
-    if (session) {
-      links.push({ label: "Dashboard", href: "/dashboard" });
-      if (role === "admin") {
-        links.push({ label: "Admin", href: "/admin" });
-      } else {
-        links.push({ label: "Admin Access", href: "/admin-access" });
-      }
-    } else {
-      links.push({ label: "Login", href: "/login" });
-      links.push({ label: "Signup", href: "/signup" });
-    }
-    return links;
-  }, [session, role]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
-  // Guard renders (after all hooks)
-  if (pathname.startsWith("/admin")) {
+  const utilityLinks = useMemo<UtilityLink[]>(() => {
+    if (!session) {
+      return [
+        { label: 'LOGIN', href: '/login' },
+        { label: 'SIGNUP', href: '/signup', strong: true },
+      ];
+    }
+
+    const links: UtilityLink[] = [{ label: 'DASHBOARD', href: '/dashboard' }];
+
+    if (role === 'admin') {
+      links.push({ label: 'ADMIN', href: '/admin' });
+    } else {
+      links.push({ label: 'ADMIN ACCESS', href: '/admin-access' });
+    }
+
+    return links;
+  }, [role, session]);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await supabase.auth.signOut();
+      setMobileOpen(false);
+      window.location.href = '/login';
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
+  if (pathname.startsWith('/admin')) {
     return null;
   }
 
-  const getLinkClass = (href: string, mobile = false) => {
-    const isActive = pathname === href;
-    const base = "text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-200 relative";
-    if (mobile) {
-      return `${base} block py-3 border-b border-jpm-gold/10 ${isActive
-        ? "text-jpm-gold"
-        : "text-white/70 hover:text-jpm-gold"
-        }`;
-    }
-    if (isActive) {
-      return `${base} text-jpm-gold`;
-    }
-    return scrolled
-      ? `${base} text-white/80 hover:text-jpm-gold`
-      : `${base} text-white/80 hover:text-jpm-gold`;
-  };
-
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-        ? "bg-[#020617]/90 border-b border-jpm-gold/10 backdrop-blur-xl py-2 shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
-        : "bg-gradient-to-b from-[#020617]/70 to-transparent py-4"
-        }`}
-    >
-      <div className="max-w-7xl mx-auto h-14 md:h-16 px-4 md:px-8 flex items-center justify-between">
-        {/* Logo — glass morphism frame */}
-        <Link href="/" className="flex items-center group">
-          <div className="relative w-12 h-12 md:w-14 md:h-14 bg-white rounded-lg p-1.5 
-            border border-jpm-gold/20 shadow-[0_0_20px_rgba(212,175,55,0.08)] flex items-center justify-center 
-            transition-all hover:border-jpm-gold/40 hover:shadow-[0_0_25px_rgba(212,175,55,0.15)]">
-            <Image src="/logo.png" alt="IFXTrades" fill className="object-contain p-1.5" priority />
-          </div>
-        </Link>
-
-        {/* Desktop primary links */}
-        <div className="hidden md:flex items-center gap-7">
-          {PRIMARY_LINKS.map((item) => (
-            <Link key={item.href} href={item.href} className={getLinkClass(item.href)}>
-              {item.label}
-              {pathname === item.href && (
-                <motion.div
-                  layoutId="nav-underline"
-                  className="absolute -bottom-0.5 left-0 right-0 h-px bg-jpm-gold"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              )}
-            </Link>
-          ))}
-          {/* Intelligence Toggle */}
-          <button
-            onClick={() => setIsIntelligenceOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-jpm-gold/20 bg-jpm-gold/5 text-jpm-gold hover:bg-jpm-gold/10 transition-all group"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jpm-gold opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-jpm-gold"></span>
+    <>
+      <motion.nav
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+        animate={{
+          background: scrolled ? 'rgba(5,8,15,0.95)' : 'transparent',
+          borderBottomColor: scrolled ? 'rgba(201,168,76,0.2)' : 'transparent',
+          borderBottomWidth: '1px',
+          borderBottomStyle: 'solid',
+        }}
+        style={{
+          backdropFilter: scrolled ? 'blur(40px) saturate(200%)' : 'none',
+          boxShadow: scrolled ? '0 0 40px rgba(201,168,76,0.08), 0 4px 32px rgba(0,0,0,0.4)' : 'none',
+        }}
+      >
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+          <Link href="/" className="relative group flex items-center gap-3" aria-label="IFXTrades home">
+            <span className="relative w-10 h-10">
+              <span className="absolute inset-0 rounded-xl gradient-border" style={{ animation: 'border-spin 3s linear infinite' }} />
+              <span
+                className="relative w-full h-full rounded-xl flex items-center justify-center text-sm font-black z-10"
+                style={{
+                  background: 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'Playfair Display',
+                }}
+              >
+                IFX
+              </span>
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest">Intelligence</span>
+          </Link>
+
+          <div className="hidden lg:flex items-center gap-8">
+            {primaryNavLinks.map((link) => (
+              <NavLink key={link.href} href={link.href} label={link.label} active={pathname === link.href} />
+            ))}
+
+            <Link
+              href="/blog"
+              className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300"
+              style={{ border: '1px solid var(--border-gold)', background: 'var(--gold-glow)' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--gold-bright)' }} />
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--gold-pure)' }}>
+                Intelligence
+              </span>
+            </Link>
+
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: marketStatus.color }} />
+              <span className="text-xs font-mono font-bold tracking-wide" style={{ color: marketStatus.color }}>
+                {marketStatus.label}
+              </span>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-4">
+            {utilityLinks.map((link) =>
+              link.strong ? (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="relative group px-6 py-2.5 rounded-xl text-sm font-bold tracking-widest uppercase overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--gold-muted), var(--gold-bright))',
+                    color: '#0D0A00',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  <span className="relative z-10">{link.label}</span>
+                  <span
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                      backgroundSize: '200% auto',
+                      animation: 'gold-shimmer 1.5s linear infinite',
+                    }}
+                  />
+                </Link>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-semibold tracking-wide transition-colors duration-200"
+                  style={{ color: pathname === link.href ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
+
+            {session && (
+              <button
+                type="button"
+                className="text-xs font-semibold tracking-wide uppercase transition-colors"
+                style={{ color: 'var(--text-secondary)' }}
+                onClick={handleSignOut}
+                disabled={signingOut}
+              >
+                {signingOut ? 'SIGNING OUT' : 'SIGN OUT'}
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="lg:hidden p-2"
+            onClick={() => setMobileOpen((value) => !value)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+          >
+            <span className="space-y-1.5 block">
+              {[0, 1, 2].map((index) => (
+                <motion.span
+                  key={`hamburger-${index}`}
+                  className="h-0.5 rounded-full block"
+                  style={{ background: 'var(--gold-pure)', width: index === 1 ? 20 : 28 }}
+                  animate={
+                    mobileOpen
+                      ? {
+                          rotate: index === 0 ? 45 : index === 2 ? -45 : 0,
+                          y: index === 0 ? 8 : index === 2 ? -8 : 0,
+                          opacity: index === 1 ? 0 : 1,
+                        }
+                      : { rotate: 0, y: 0, opacity: 1 }
+                  }
+                  transition={{ duration: 0.3 }}
+                />
+              ))}
+            </span>
           </button>
         </div>
+      </motion.nav>
 
-        {/* Desktop utility links */}
-        <div className="hidden md:flex items-center gap-4">
-          {utilityLinks.map((item) =>
-            item.href === "/signup" ? (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617]
-                  px-5 py-2.5 rounded-sm text-xs font-bold uppercase tracking-[0.14em]
-                  hover:shadow-[0_0_20px_rgba(212,175,55,0.45)] transition-all duration-300 hover:-translate-y-px"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={getLinkClass(item.href)}
-              >
-                {item.label}
-              </Link>
-            ),
-          )}
-          {session && (
-            <button
-              onClick={handleSignOut}
-              className="text-xs font-semibold uppercase tracking-[0.14em] text-red-400/70 hover:text-red-400 transition-colors"
-            >
-              Sign Out
-            </button>
-          )}
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-2 text-white/80 hover:text-jpm-gold transition-colors"
-          onClick={() => setIsOpen((s) => !s)}
-          aria-label="Toggle navigation"
-        >
-          <motion.div animate={isOpen ? { rotate: 45 } : { rotate: 0 }} className="w-5 h-0.5 bg-current mb-1.5" />
-          <motion.div animate={isOpen ? { opacity: 0 } : { opacity: 1 }} className="w-5 h-0.5 bg-current mb-1.5" />
-          <motion.div animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }} className="w-5 h-0.5 bg-current" />
-        </button>
-      </div>
-
-      {/* Mobile menu — dark glass */}
       <AnimatePresence>
-        {isOpen && (
+        {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden bg-[#020617]/98 backdrop-blur-xl border-t border-jpm-gold/10 px-6 py-4"
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-y-0 right-0 z-40 w-80 glass-3 flex flex-col pt-24 px-8"
           >
-            {PRIMARY_LINKS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={getLinkClass(item.href, true)}
-                onClick={() => setIsOpen(false)}
+            {primaryNavLinks.map((link, index) => (
+              <motion.div
+                key={link.href}
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.07 + 0.1 }}
               >
-                {item.label}
-              </Link>
+                <Link
+                  href={link.href}
+                  className="block py-4 text-xl font-semibold"
+                  style={{
+                    fontFamily: 'Playfair Display',
+                    color: 'var(--text-primary)',
+                    borderBottom: '1px solid var(--border-subtle)',
+                  }}
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
             ))}
-            <div className="mt-4 pt-4 border-t border-jpm-gold/10 flex flex-col gap-3">
-              {utilityLinks.map((item) =>
-                item.href === "/signup" ? (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className="bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light text-[#020617]
-                      px-5 py-3 rounded-sm text-xs font-bold uppercase tracking-[0.14em] text-center"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={getLinkClass(item.href, true)}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ),
-              )}
+
+            <div className="mt-8 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+              {utilityLinks.map((link) => (
+                <Link
+                  key={`mobile-${link.href}`}
+                  href={link.href}
+                  className="block py-3 text-sm font-semibold tracking-[0.14em] uppercase"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  {link.label}
+                </Link>
+              ))}
               {session && (
                 <button
+                  type="button"
+                  className="py-3 text-sm font-semibold tracking-[0.14em] uppercase"
+                  style={{ color: 'var(--text-secondary)' }}
                   onClick={handleSignOut}
-                  className="text-left text-xs font-semibold uppercase tracking-[0.14em] text-red-400/70 hover:text-red-400 transition-colors py-2"
+                  disabled={signingOut}
                 >
-                  Sign Out
+                  {signingOut ? 'SIGNING OUT' : 'SIGN OUT'}
                 </button>
               )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <IntelligenceOverlay
-        isOpen={isIntelligenceOpen}
-        onClose={() => setIsIntelligenceOpen(false)}
-        latestPosts={latestPosts}
-      />
-    </nav >
+    </>
   );
 }
+
+export const Navbar = memo(NavbarComponent);
+Navbar.displayName = 'Navbar';

@@ -4,6 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-provider";
 
+function formatUsd(amount?: number) {
+  if (typeof amount !== "number" || Number.isNaN(amount)) return "";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  }).format(amount);
+}
+
 export default function RegisterButton({
   webinarId,
   webinarSlug,
@@ -23,7 +32,7 @@ export default function RegisterButton({
   const [message, setMessage] = useState<string | null>(null);
 
   const startCheckout = async () => {
-    const checkoutResponse = await fetch("/api/checkout/webinar", {
+    const response = await fetch("/api/checkout/webinar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -32,24 +41,26 @@ export default function RegisterButton({
         cancelPath: `/webinars/${webinarSlug}`,
       }),
     });
-    const checkoutBody = await checkoutResponse.json().catch(() => ({}));
 
-    if (!checkoutResponse.ok) {
-      setMessage(checkoutBody.error || "Unable to initialize checkout.");
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setMessage(body.error || "Unable to initialize checkout.");
       return false;
     }
 
-    if (checkoutBody.checkoutUrl) {
-      window.location.assign(checkoutBody.checkoutUrl);
+    if (body.checkoutUrl) {
+      window.location.assign(body.checkoutUrl);
       return true;
     }
 
-    if (checkoutBody.ok) {
+    if (body.ok) {
       setMessage("Registration confirmed.");
       router.refresh();
       return true;
     }
 
+    setMessage("Unable to complete registration right now.");
     return false;
   };
 
@@ -62,32 +73,38 @@ export default function RegisterButton({
     setLoading(true);
     setMessage(null);
 
-    if (requiresPayment) {
-      await startCheckout();
-      setLoading(false);
-      return;
-    }
-
-    const response = await fetch(`/api/webinars/${webinarId}/register`, {
-      method: "POST",
-    });
-    const body = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      if (response.status === 402 && body.checkoutRequired) {
+    try {
+      if (requiresPayment) {
         await startCheckout();
-        setLoading(false);
         return;
       }
-      setMessage(body.error || "Unable to register at this time.");
-      setLoading(false);
-      return;
-    }
 
-    setMessage("Registration confirmed.");
-    setLoading(false);
-    router.refresh();
+      const response = await fetch(`/api/webinars/${webinarId}/register`, {
+        method: "POST",
+      });
+
+      const body = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        if (response.status === 402 && body.checkoutRequired) {
+          await startCheckout();
+          return;
+        }
+
+        setMessage(body.error || "Unable to register at this time.");
+        return;
+      }
+
+      setMessage("Registration confirmed.");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const ctaLabel = requiresPayment
+    ? `Secure Checkout ${formatUsd(price)}`.trim()
+    : "Register Now";
 
   return (
     <div className="flex flex-col items-end gap-2">
@@ -97,11 +114,7 @@ export default function RegisterButton({
         onClick={handleRegister}
         disabled={disabled || loading}
       >
-        {loading
-          ? "Submitting..."
-          : requiresPayment
-            ? `Pay ${typeof price === "number" && price > 0 ? `$${price}` : ""}`.trim()
-            : "Register"}
+        {loading ? "Processing..." : disabled ? "Registration Closed" : ctaLabel}
       </button>
       {message && <p className="text-xs text-jpm-muted">{message}</p>}
     </div>

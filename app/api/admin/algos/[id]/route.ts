@@ -1,42 +1,38 @@
-import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { logAdminAction } from "@/lib/admin/audit";
+import {
+  assignIfPresent,
+  fromSupabaseError,
+  getRouteId,
+  jsonDeleteOk,
+  jsonItem,
+  logMutation,
+  parseJsonBody,
+  resolveAdminContext,
+  type RouteParams,
+} from "@/lib/admin/api";
 import { algoUpdateSchema } from "@/lib/validation/admin";
 
-type Params = { params: Promise<{ id: string }> };
+export async function PATCH(request: Request, { params }: RouteParams) {
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-export async function PATCH(request: Request, { params }: Params) {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+  const id = await getRouteId(params);
+  const parsed = await parseJsonBody(request, algoUpdateSchema);
+  if ("error" in parsed) return parsed.error;
 
-  const { id } = await params;
-  const payload = algoUpdateSchema.safeParse(await request.json());
-  if (!payload.success) {
-    return NextResponse.json(
-      { error: payload.error.issues[0]?.message ?? "Invalid request body." },
-      { status: 400 },
-    );
-  }
-
-  const input = payload.data;
+  const input = parsed.data as Record<string, unknown>;
   const update: Record<string, unknown> = {};
-  if ("name" in input) update.name = input.name;
-  if ("slug" in input) update.slug = input.slug;
-  if ("description" in input) update.description = input.description;
-  if ("risk_classification" in input) {
-    update.risk_classification = input.risk_classification;
-  }
-  if ("monthly_roi_pct" in input) update.monthly_roi_pct = input.monthly_roi_pct;
-  if ("min_capital" in input) update.min_capital = input.min_capital;
-  if ("price" in input) update.price = input.price;
-  if ("compliance_disclaimer" in input) {
-    update.compliance_disclaimer = input.compliance_disclaimer;
-  }
-  if ("image_url" in input) update.image_url = input.image_url ?? null;
-  if ("is_active" in input) update.is_active = input.is_active;
+  assignIfPresent(update, input, "name");
+  assignIfPresent(update, input, "slug");
+  assignIfPresent(update, input, "description");
+  assignIfPresent(update, input, "risk_classification");
+  assignIfPresent(update, input, "monthly_roi_pct");
+  assignIfPresent(update, input, "min_capital");
+  assignIfPresent(update, input, "price");
+  assignIfPresent(update, input, "compliance_disclaimer");
+  assignIfPresent(update, input, "image_url", { nullIfNil: true });
+  assignIfPresent(update, input, "is_active");
 
-  const admin = createSupabaseAdminClient();
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("algorithms")
     .update(update)
@@ -45,28 +41,25 @@ export async function PATCH(request: Request, { params }: Params) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  if (guard.auth?.user?.id && data?.id) {
-    await logAdminAction(admin, {
-      actorId: guard.auth.user.id,
-      action: "update",
-      entity: "algorithms",
-      entityId: data.id,
-      payload: update,
-    });
-  }
+  await logMutation(resolved.context, {
+    action: "update",
+    entity: "algorithms",
+    entityId: data?.id,
+    payload: update,
+  });
 
-  return NextResponse.json({ item: data });
+  return jsonItem(data);
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
-  const guard = await requireAdminApi();
-  if (guard.error) return guard.error;
+export async function DELETE(_request: Request, { params }: RouteParams) {
+  const resolved = await resolveAdminContext();
+  if ("error" in resolved) return resolved.error;
 
-  const { id } = await params;
-  const admin = createSupabaseAdminClient();
+  const id = await getRouteId(params);
+  const { admin } = resolved.context;
   const { data, error } = await admin
     .from("algorithms")
     .delete()
@@ -75,18 +68,14 @@ export async function DELETE(_request: Request, { params }: Params) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return fromSupabaseError(error);
   }
 
-  if (guard.auth?.user?.id && data?.id) {
-    await logAdminAction(admin, {
-      actorId: guard.auth.user.id,
-      action: "delete",
-      entity: "algorithms",
-      entityId: data.id,
-    });
-  }
+  await logMutation(resolved.context, {
+    action: "delete",
+    entity: "algorithms",
+    entityId: data?.id,
+  });
 
-  return NextResponse.json({ ok: true, id });
+  return jsonDeleteOk(id);
 }
-
