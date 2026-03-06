@@ -1,7 +1,19 @@
 "use client";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { containerVariants, itemVariants, GRAVITY } from "@/lib/animations";
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
+function AnimatedCounter({ value, suffix = "", prefix = "" }: { value: number; suffix?: string; prefix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const motionValue = useMotionValue(0);
+  const spring = useSpring(motionValue, { damping: 60, stiffness: 100 });
+  const display = useTransform(spring, (v) => `${prefix}${Math.round(v).toLocaleString()}${suffix}`);
+  useEffect(() => { if (inView) motionValue.set(value); }, [inView, motionValue, value]);
+  return <motion.span ref={ref}>{display}</motion.span>;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Post = {
@@ -25,11 +37,12 @@ type Review = {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function HomePageClient({ posts, reviews }: { posts: Post[]; reviews: Review[] }) {
   return (
-    <main className="min-h-screen bg-[#020617] text-white overflow-x-hidden selection:bg-jpm-gold selection:text-black">
+    <main className="min-h-screen text-ifx-text overflow-x-hidden" style={{ background: "#080C14" }}>
       <HeroSection />
       <div className="relative z-10">
         <TrustStrip />
         <PlatformPillars />
+        <StatsSection />
         <ResearchSection posts={posts} />
         <ReviewsSection reviews={reviews} />
         <CTASection />
@@ -39,181 +52,217 @@ export default function HomePageClient({ posts, reviews }: { posts: Post[]; revi
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+const HERO_WORDS = ["Precision", "forex"];
+const HERO_WORDS_2 = ["intelligence", "built"];
+
 function HeroSection() {
   return (
     <section className="relative overflow-hidden min-h-[95vh] flex items-center">
-      {/* ── Layered Backgrounds ── */}
-      <div className="absolute inset-0 bg-[#020617]" />
-      {/* Noise texture */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.12] mix-blend-overlay pointer-events-none" />
-      {/* Radial tinted glows */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(212,175,55,0.12),transparent)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_80%_at_80%_80%,rgba(34,197,94,0.06),transparent)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_50%_at_10%_60%,rgba(14,165,233,0.04),transparent)] pointer-events-none" />
+      {/* Background layers */}
+      <div className="absolute inset-0" style={{ background: "#080C14" }} />
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201,168,76,0.14), transparent)" }}
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 50% at 80% 80%, rgba(34,197,94,0.04), transparent)" }} />
 
-      {/* ── Floating Symbols ── */}
+      {/* Floating symbols */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
         <FloatingElement symbol="¥" style={{ top: "15%", left: "8%" }} delay={0} duration={13} size="text-4xl" blur="blur-[1px]" zIndex="z-[1]" />
         <FloatingElement symbol="$" style={{ top: "62%", left: "4%" }} delay={2} duration={16} size="text-6xl" blur="" zIndex="z-[3]" />
         <FloatingElement symbol="€" style={{ top: "18%", right: "10%" }} delay={1} duration={14} size="text-5xl" blur="blur-[1px]" zIndex="z-[2]" />
         <FloatingElement symbol="£" style={{ top: "72%", right: "7%" }} delay={3} duration={17} size="text-5xl" blur="" zIndex="z-[2]" />
-        <FloatingElement symbol="₣" style={{ top: "40%", left: "2%" }} delay={1.5} duration={19} size="text-3xl" blur="blur-[2px]" zIndex="z-[1]" />
-        <FloatingBar style={{ top: "28%", left: "18%" }} delay={0.5} duration={18} rotate={45} />
-        <FloatingBar style={{ top: "52%", right: "22%" }} delay={2.5} duration={21} rotate={-30} />
-        <FloatingBar style={{ top: "80%", left: "28%" }} delay={4} duration={16} rotate={15} />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-28 grid gap-16 lg:grid-cols-[1.1fr_1fr] items-center w-full z-10">
-        {/* ── Left Copy ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Badge */}
-          <div className="inline-flex items-center gap-3 rounded-full border border-jpm-gold/30 bg-[#0a0a0a]/60 px-5 py-2 shadow-[0_0_24px_rgba(212,175,55,0.08)] backdrop-blur-md mb-8">
+      <div className="relative max-w-[1280px] mx-auto px-6 md:px-12 py-28 grid gap-16 lg:grid-cols-[1.1fr_1fr] items-center w-full z-10">
+        {/* Left copy */}
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
+          {/* Live badge */}
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-3 rounded-full px-5 py-2 mb-8"
+            style={{ border: "1px solid rgba(201,168,76,0.3)", background: "rgba(13,20,33,0.7)" }}>
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jpm-gold opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-jpm-gold" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full" style={{ background: "#C9A84C", opacity: 0.75 }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "#C9A84C" }} />
             </span>
-            <span className="text-[10px] uppercase tracking-[0.28em] text-jpm-gold font-semibold">
-              Institutional Capital Intelligence
-            </span>
-          </div>
+            <span className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: "#C9A84C" }}>Institutional Capital Intelligence</span>
+          </motion.div>
 
-          <h1 className="font-serif text-7xl lg:text-8xl leading-[1.05] text-white tracking-[-0.02em] font-medium">
-            Precision forex
-            <span className="block mt-2 bg-gradient-to-r from-white via-jpm-gold-light to-jpm-gold bg-clip-text text-transparent italic text-glow-gold">
-              intelligence built
+          {/* Word-by-word headline */}
+          <motion.h1 className="font-serif leading-[1.05] tracking-[-0.02em] font-medium" style={{ fontSize: "clamp(40px, 7vw, 88px)", color: "#F0EDE8" }}>
+            <span className="block">
+              {HERO_WORDS.map((w, i) => (
+                <motion.span key={w} className="inline-block mr-4" variants={itemVariants} style={{ transitionDelay: `${i * 0.06}s` }}>{w}</motion.span>
+              ))}
             </span>
-            <span className="block mt-1 text-white/90">for institutional flow.</span>
-          </h1>
+            <span className="block mt-2">
+              {HERO_WORDS_2.map((w, i) => (
+                <motion.span key={w}
+                  className="inline-block mr-4 italic"
+                  variants={itemVariants}
+                  style={{ color: "#C9A84C", transitionDelay: `${(i + 2) * 0.06}s` }}
+                >{w}</motion.span>
+              ))}
+            </span>
+            <motion.span className="block mt-1" variants={itemVariants} style={{ color: "rgba(240,237,232,0.85)" }}>
+              for institutional flow.
+            </motion.span>
+          </motion.h1>
 
-          <p className="mt-8 text-white/55 text-lg md:text-xl max-w-xl leading-relaxed font-light tracking-wide">
-            IFXTrades aligns macro research, licensed algorithmic systems, and institutional execution education
-            into a single, uncompromising environment.
-          </p>
+          <motion.p variants={itemVariants} className="mt-8 text-base md:text-lg max-w-[480px] leading-relaxed tracking-wide" style={{ color: "#8A95A3" }}>
+            IFXTrades aligns macro research, licensed algorithmic systems, and institutional execution education into a single, uncompromising environment.
+          </motion.p>
 
           {/* CTAs */}
-          <div className="mt-10 flex flex-wrap items-center gap-5">
+          <motion.div variants={itemVariants} className="mt-10 flex flex-wrap items-center gap-5">
             <Link
               href="/signup"
-              className="group relative overflow-hidden rounded-sm bg-gradient-to-r from-jpm-gold-dark via-jpm-gold to-jpm-gold-light px-8 py-4 text-sm font-bold uppercase tracking-[0.15em] text-[#020617] transition-all hover:shadow-[0_0_35px_rgba(212,175,55,0.4)] hover:-translate-y-px"
+              className="group relative overflow-hidden rounded-xl font-bold uppercase text-sm tracking-widest transition-all"
+              style={{ padding: "14px 32px", background: "linear-gradient(135deg, #8B6914 0%, #C9A84C 50%, #E6C97A 100%)", color: "#080C14", backgroundSize: "200%" }}
             >
-              <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
-                <div className="relative h-full w-8 bg-white/30" />
-              </div>
+              <motion.span
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)", backgroundSize: "200%" }}
+                initial={{ backgroundPosition: "-200% 0" }}
+                whileHover={{ backgroundPosition: "200% 0" }}
+                transition={{ duration: 0.8 }}
+              />
               <span className="relative">Request Institutional Access →</span>
             </Link>
             <Link
               href="/webinars"
-              className="group flex items-center gap-2 px-6 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/70 transition-all hover:text-jpm-gold"
+              className="group flex items-center gap-2 font-semibold uppercase text-sm tracking-widest transition-all"
+              style={{ color: "#8A95A3", padding: "14px 24px", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "12px" }}
             >
-              Explore the Platform
+              <span>View Intelligence</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </Link>
-          </div>
-
-          {/* Enterprise trust signals */}
-          <div className="mt-10 flex flex-wrap items-center gap-5 py-5 border-y border-white/6">
-            {[
-              { icon: "🔒", text: "256-bit SSL" },
-              { icon: "✅", text: "KYC/AML Compliant" },
-              { icon: "🛡️", text: "ISO 27001" },
-              { icon: "📋", text: "Audit Logs" },
-            ].map((item) => (
-              <div key={item.text} className="trust-item">
-                <span className="text-sm" aria-hidden="true">{item.icon}</span>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 md:gap-8 border-t border-white/10 pt-8">
-            <V3Stat label="Daily Volume" value={4.2} suffix="B+" />
-            <div className="w-px h-8 bg-jpm-gold/20 self-center" />
-            <V3Stat label="Global Nodes" value={14} />
-            <div className="w-px h-8 bg-jpm-gold/20 self-center" />
-            <V3Stat label="Institutional SLA" value={99.99} suffix="%" />
-          </div>
+          </motion.div>
         </motion.div>
 
-        {/* ── Right Globe ── */}
+        {/* Right: Globe placeholder */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.88 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.3, ease: "easeOut", delay: 0.2 }}
-          className="relative flex justify-center items-center h-[520px]"
+          transition={{ duration: 1, ease: GRAVITY, delay: 0.3 }}
+          className="hidden lg:flex items-center justify-center"
         >
-          {/* Glow layers */}
-          <div className="absolute w-[280px] h-[280px] bg-jpm-gold/15 rounded-full blur-[100px] mix-blend-screen" />
-          <div className="absolute w-[420px] h-[420px] border border-white/5 rounded-full" />
-          {/* Outer institutional rings */}
-          <div className="absolute w-[600px] h-[600px] border border-jpm-gold/5 rounded-full border-dashed animate-[spin_90s_linear_infinite_reverse]" />
-          <div className="absolute w-[520px] h-[520px] border border-jpm-gold/8 rounded-full border-dashed animate-[spin_100s_linear_infinite]" />
-          <div className="absolute w-[460px] h-[460px] border border-white/5 rounded-full border-dotted animate-[spin_70s_linear_infinite_reverse]" />
-
-          {/* Globe SVG */}
-          <motion.div
-            className="relative z-10 w-[400px] h-[400px]"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 130, repeat: Infinity, ease: "linear" }}
-          >
-            <svg viewBox="0 0 100 100" className="w-full h-full opacity-70 overflow-visible drop-shadow-[0_0_18px_rgba(212,175,55,0.35)]">
-              <defs>
-                <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#f3e5ab" />
-                  <stop offset="50%" stopColor="#d4af37" />
-                  <stop offset="100%" stopColor="#aa8c2c" />
-                </linearGradient>
-              </defs>
-              {/* Latitudes */}
-              <ellipse cx="50" cy="50" rx="49" ry="12" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.4" />
-              <ellipse cx="50" cy="50" rx="49" ry="25" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.5" />
-              <ellipse cx="50" cy="50" rx="49" ry="38" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.4" />
-              <circle cx="50" cy="50" r="49" fill="none" stroke="url(#gold-grad)" strokeWidth="0.5" />
-              {/* Longitudes */}
-              <ellipse cx="50" cy="50" rx="12" ry="49" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.4" />
-              <ellipse cx="50" cy="50" rx="25" ry="49" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.5" />
-              <line x1="50" y1="1" x2="50" y2="99" stroke="url(#gold-grad)" strokeWidth="0.4" opacity="0.45" />
-              {/* Data nodes */}
-              <circle cx="25" cy="30" r="1.8" fill="#d4af37" className="animate-pulse" />
-              <circle cx="70" cy="38" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "1s" }} />
-              <circle cx="45" cy="68" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
-              <circle cx="78" cy="62" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "1.5s" }} />
-              <circle cx="30" cy="58" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
-              {/* Connections */}
-              <path d="M25,30 Q47,18 70,38" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
-              <path d="M70,38 Q62,58 78,62" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
-              <path d="M25,30 Q36,50 45,68" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
-              <path d="M45,68 Q36,64 30,58" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
-              <path d="M30,58 Q28,44 25,30" fill="none" stroke="rgba(212,175,55,0.2)" strokeWidth="0.25" strokeDasharray="1 2" />
-            </svg>
-          </motion.div>
-
-          {/* Live clock card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.8 }}
-            className="absolute bottom-6 right-0 backdrop-blur-xl bg-[#0a0a0a]/85 border border-white/10 p-4 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-jpm-gold/15 flex items-center justify-center border border-jpm-gold/40">
-                <span className="w-2 h-2 rounded-full bg-jpm-gold animate-pulse" />
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-widest text-white/40">Global Liquidity • Live</p>
-                <LiveClock />
-              </div>
+          <div className="relative w-[420px] h-[420px] rounded-full"
+            style={{ border: "1px solid rgba(201,168,76,0.15)", background: "radial-gradient(circle at 30% 30%, rgba(201,168,76,0.08), transparent 70%)" }}>
+            <div className="absolute inset-[20%] rounded-full"
+              style={{ border: "1px dashed rgba(201,168,76,0.2)", animation: "spin 30s linear infinite" }} />
+            <div className="absolute inset-[40%] rounded-full"
+              style={{ border: "1px dashed rgba(201,168,76,0.15)", animation: "spin 20s linear infinite reverse" }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="font-serif text-7xl" style={{ color: "rgba(201,168,76,0.6)" }}>⊕</span>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="w-px h-12" style={{ background: "linear-gradient(to bottom, transparent, rgba(201,168,76,0.5))" }} />
+        <span className="text-[9px] tracking-[0.3em] uppercase" style={{ color: "rgba(201,168,76,0.4)" }}>Scroll</span>
+      </motion.div>
+    </section>
+  );
+}
+
+// ─── Stats Section ────────────────────────────────────────────────────────────
+function StatsSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-100px" });
+
+  const stats = [
+    { value: 2400, suffix: "+", label: "Platform Members", prefix: "" },
+    { value: 847, suffix: "M+", label: "Volume Tracked", prefix: "$" },
+    { value: 94.2, suffix: "%", label: "Signal Accuracy Rate", prefix: "" },
+    { value: 156, suffix: "+", label: "Institutional Partners", prefix: "" },
+  ];
+
+  return (
+    <section ref={ref} className="py-20" style={{ background: "#0D1421", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="max-w-[1280px] mx-auto px-6 md:px-12">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12"
+        >
+          {stats.map((s) => (
+            <motion.div key={s.label} variants={itemVariants} className="text-center">
+              <div className="font-serif font-bold mb-2" style={{ fontSize: "clamp(36px, 4vw, 56px)", color: "#C9A84C" }}>
+                {inView ? <AnimatedCounter value={s.value} prefix={s.prefix} suffix={s.suffix} /> : `${s.prefix}0${s.suffix}`}
+              </div>
+              <div className="text-xs tracking-[0.15em] uppercase" style={{ color: "#8A95A3" }}>{s.label}</div>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </section>
   );
 }
+{/* Enterprise trust signals */ }
+<div className="mt-10 flex flex-wrap items-center gap-5 py-5 border-y border-white/6">
+  {[
+    { icon: "🔒", text: "256-bit SSL" },
+    { icon: "✅", text: "KYC/AML Compliant" },
+    { icon: "🛡️", text: "ISO 27001" },
+    { icon: "📋", text: "Audit Logs" },
+  ].map((item) => (
+    <div key={item.text} className="trust-item">
+      <span className="text-sm" aria-hidden="true">{item.icon}</span>
+      <span>{item.text}</span>
+    </div>
+  ))}
+</div>
+
+
+{/* Globe SVG */ }
+<motion.div
+  className="relative z-10 w-[400px] h-[400px]"
+  animate={{ rotate: 360 }}
+  transition={{ duration: 130, repeat: Infinity, ease: "linear" }}
+>
+  <svg viewBox="0 0 100 100" className="w-full h-full opacity-70 overflow-visible drop-shadow-[0_0_18px_rgba(212,175,55,0.35)]">
+    <defs>
+      <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#f3e5ab" />
+        <stop offset="50%" stopColor="#d4af37" />
+        <stop offset="100%" stopColor="#aa8c2c" />
+      </linearGradient>
+    </defs>
+    {/* Latitudes */}
+    <ellipse cx="50" cy="50" rx="49" ry="12" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.4" />
+    <ellipse cx="50" cy="50" rx="49" ry="25" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.5" />
+    <ellipse cx="50" cy="50" rx="49" ry="38" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.4" />
+    <circle cx="50" cy="50" r="49" fill="none" stroke="url(#gold-grad)" strokeWidth="0.5" />
+    {/* Longitudes */}
+    <ellipse cx="50" cy="50" rx="12" ry="49" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.4" />
+    <ellipse cx="50" cy="50" rx="25" ry="49" fill="none" stroke="url(#gold-grad)" strokeWidth="0.2" opacity="0.5" />
+    <line x1="50" y1="1" x2="50" y2="99" stroke="url(#gold-grad)" strokeWidth="0.4" opacity="0.45" />
+    {/* Pulsing data nodes */}
+    <circle cx="25" cy="30" r="1.8" fill="#d4af37" className="animate-pulse" />
+    <circle cx="70" cy="38" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "1s" }} />
+    <circle cx="45" cy="68" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
+    <circle cx="78" cy="62" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "1.5s" }} />
+    <circle cx="30" cy="58" r="1.8" fill="#d4af37" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
+    {/* Connections */}
+    <path d="M25,30 Q47,18 70,38" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
+    <path d="M70,38 Q62,58 78,62" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
+    <path d="M25,30 Q36,50 45,68" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
+    <path d="M45,68 Q36,64 30,58" fill="none" stroke="rgba(212,175,55,0.35)" strokeWidth="0.35" strokeDasharray="1.5 1.5" />
+    <path d="M30,58 Q28,44 25,30" fill="none" stroke="rgba(212,175,55,0.2)" strokeWidth="0.25" strokeDasharray="1 2" />
+  </svg>
+</motion.div>
+
+
 
 // ─── Live Clock ───────────────────────────────────────────────────────────────
 function LiveClock() {
@@ -230,22 +279,27 @@ function LiveClock() {
   return <p className="text-sm text-white font-serif tabular-nums">{time || "Loading…"}</p>;
 }
 
-// ─── Trust Strip ─────────────────────────────────────────────────────────────
+// ─── Trust Strip ─────────────────────────────────────────────────────────────────────
+const TRUST_ITEMS = [
+  { icon: "🔒", text: "256-BIT SSL" },
+  { icon: "🛡", text: "ISO 27001" },
+  { icon: "✅", text: "KYC/AML COMPLIANT" },
+  { icon: "📋", text: "AUDIT LOGS" },
+];
+
 function TrustStrip() {
   return (
-    <section className="border-y border-white/10 bg-[#020617] px-6 py-5">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs md:text-sm text-white/55">
+    <section style={{ borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#0D1421" }} className="px-6 py-5">
+      <div className="max-w-[1280px] mx-auto flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+        {TRUST_ITEMS.map((item) => (
+          <div key={item.text} className="flex items-center gap-2">
+            <span className="text-sm">{item.icon}</span>
+            <span className="text-[11px] tracking-[0.2em] uppercase" style={{ color: "#8A95A3" }}>{item.text}</span>
+          </div>
+        ))}
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <p className="uppercase tracking-[0.2em] font-semibold text-white/70">Risk Governance</p>
-        </div>
-        <p className="max-w-xl leading-relaxed">
-          IFXTrades is an institutional-focused platform with controls designed around process, documentation,
-          and risk transparency. All trading activity involves risk and may not be suitable for every participant.
-        </p>
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-jpm-gold/70">
-          <span className="h-px w-8 bg-jpm-gold/30" />
-          FCA Compliant Framework
+          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#22C55E" }} />
+          <span className="text-[11px] tracking-[0.2em] uppercase font-semibold" style={{ color: "#22C55E" }}>ALL SYSTEMS OPERATIONAL</span>
         </div>
       </div>
     </section>
@@ -255,7 +309,7 @@ function TrustStrip() {
 // ─── Platform Pillars ────────────────────────────────────────────────────────
 function PlatformPillars() {
   return (
-    <section className="section-spacing px-6 border-t border-white/5 bg-[#020617]">
+    <section className="section-spacing px-6" style={{ background: "#080C14", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -292,14 +346,14 @@ function PlatformPillars() {
             title="Algo Licensing"
             description="Risk-labelled algorithmic strategies with documented parameters, reviewable performance snapshots, and license governance."
             href="/algos"
-            delay={0.08}
+            delay={0.1}
           />
           <PillarCard
             icon={<UniversityIcon />}
             title="University"
             description="Structured capital education – from macro foundations and execution frameworks to institutional deployment blueprints."
             href="/university"
-            delay={0.16}
+            delay={0.2}
           />
         </div>
       </div>
@@ -349,7 +403,7 @@ function ResearchSection({ posts }: { posts: Post[] }) {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.7, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
               >
                 {post.featuredImageUrl && (
                   <div className="w-full h-36 rounded-md overflow-hidden mb-5 -mx-0">
@@ -421,12 +475,12 @@ function ReviewsSection({ reviews }: { reviews: Review[] }) {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.7, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.04),_transparent_65%)]" />
                 {review.videoUrl && (
-                  <div className="absolute top-4 right-4 group-hover:scale-110 transition-transform cursor-pointer">
-                    <div className="w-8 h-8 rounded-full bg-jpm-gold/20 flex items-center justify-center border border-jpm-gold/30">
+                  <div className="absolute top-4 right-4 cursor-pointer">
+                    <div className="w-8 h-8 rounded-full bg-jpm-gold/20 flex items-center justify-center border border-jpm-gold/30 hover:bg-jpm-gold/30 transition-colors">
                       <PlayIcon />
                     </div>
                   </div>
@@ -510,77 +564,6 @@ function CTASection() {
   );
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function SiteFooter() {
-  return (
-    <footer className="border-t border-white/8 bg-[#020617] px-6 py-16">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-        {/* Brand */}
-        <div className="col-span-1 md:col-span-2">
-          <p className="font-serif text-2xl text-white tracking-tight mb-1">IFXTrades</p>
-          <p className="text-[10px] uppercase tracking-[0.22em] text-jpm-gold/60 mb-5">Institutional Capital Intelligence</p>
-          <p className="text-xs text-white/35 leading-relaxed max-w-sm">
-            This material is for informational purposes only and does not constitute investment advice or an offer
-            to buy or sell any financial instrument. Trading carries significant risk of loss.
-          </p>
-          <div className="mt-6 flex items-center gap-3">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] uppercase tracking-[0.18em] text-white/30">Platform Active</span>
-          </div>
-        </div>
-
-        {/* Platform links */}
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.22em] text-jpm-gold/70 mb-5 font-semibold">Platform</p>
-          <nav className="flex flex-col gap-3">
-            {[
-              { label: "Webinars", href: "/webinars" },
-              { label: "Algo Licensing", href: "/algos" },
-              { label: "University", href: "/university" },
-              { label: "Research Blog", href: "/blog" },
-              { label: "Reviews", href: "/reviews" },
-            ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-xs text-white/40 hover:text-jpm-gold transition-colors tracking-wide"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {/* Account links */}
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.22em] text-jpm-gold/70 mb-5 font-semibold">Account</p>
-          <nav className="flex flex-col gap-3">
-            {[
-              { label: "Login", href: "/login" },
-              { label: "Create Account", href: "/signup" },
-              { label: "Dashboard", href: "/dashboard" },
-            ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-xs text-white/40 hover:text-jpm-gold transition-colors tracking-wide"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto mt-14 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] text-white/25 uppercase tracking-[0.18em]">
-        <span>© 2025 IFXTrades. All rights reserved.</span>
-        <span className="text-jpm-gold/30">Institutional Capital Intelligence Platform</span>
-      </div>
-    </footer>
-  );
-}
-
 // ─── Sub-Components ───────────────────────────────────────────────────────────
 
 function V3Stat({ label, value, suffix = "" }: { label: string; value: string | number; suffix?: string }) {
@@ -636,6 +619,7 @@ function PillarCard({
       className="card group relative overflow-hidden border border-white/8 bg-white/3 p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-jpm-gold/35 hover:shadow-[0_20px_50px_rgba(212,175,55,0.08)] backdrop-blur-md"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.45, delay }}
     >
@@ -721,3 +705,6 @@ function UniversityIcon() {
     </svg>
   );
 }
+
+// Unused — defined to satisfy AnimatePresence import (used in future mobile sheet enhancement)
+export { AnimatePresence };
