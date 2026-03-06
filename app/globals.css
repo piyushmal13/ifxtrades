@@ -119,16 +119,16 @@ html {
 
 body {
   overflow-x: hidden;
-  background:
-    radial-gradient(120% 60% at 50% -10%, rgba(212, 175, 55, 0.08), transparent 55%),
-    linear-gradient(180deg, #01040f 0%, #030712 55%, #020205 100%);
+  background: #080C14;
   color: var(--color-text-primary);
   font-family: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
   font-feature-settings: "cv11", "ss01", "liga", "kern";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  line-height: 1.6;
+  line-height: 1.65;
+  letter-spacing: -0.011em;
+  font-size: 16px;
 }
 
 /* ── Skip Link (WCAG 2.4.1) ──────────────────────────────────── */

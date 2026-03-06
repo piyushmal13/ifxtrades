@@ -4,9 +4,10 @@ export function createSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!supabaseUrl || !serviceRoleKey || serviceRoleKey === "dummykey") {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.",
+      "[IFX] SUPABASE_SERVICE_ROLE_KEY is not set or is using the placeholder value. " +
+      "Go to Supabase → Settings → API and paste the real service_role key into your Vercel environment variables.",
     );
   }
 
