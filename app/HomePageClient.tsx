@@ -3,6 +3,7 @@ import Link from "next/link";
 import { motion, AnimatePresence, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { containerVariants, itemVariants, GRAVITY } from "@/lib/animations";
+import { TradingRobot3D } from "@/components/home/TradingRobot3D";
 
 // ─── Animated Counter ─────────────────────────────────────────────────────────
 function AnimatedCounter({ value, suffix = "", prefix = "" }: { value: number; suffix?: string; prefix?: string }) {
@@ -52,8 +53,8 @@ export default function HomePageClient({ posts, reviews }: { posts: Post[]; revi
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-const HERO_WORDS = ["Precision", "forex"];
-const HERO_WORDS_2 = ["intelligence", "built"];
+const HERO_WORDS = ["Institutional", "Algo"];
+const HERO_WORDS_2 = ["Trading,", "Redefined."];
 
 function HeroSection() {
   return (
@@ -86,7 +87,7 @@ function HeroSection() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full" style={{ background: "#C9A84C", opacity: 0.75 }} />
               <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "#C9A84C" }} />
             </span>
-            <span className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: "#C9A84C" }}>Institutional Capital Intelligence</span>
+            <span className="text-[10px] uppercase tracking-[0.28em] font-semibold" style={{ color: "#C9A84C" }}>#1 Trusted CFD & Forex Algo Platform</span>
           </motion.div>
 
           {/* Word-by-word headline */}
@@ -111,7 +112,7 @@ function HeroSection() {
           </motion.h1>
 
           <motion.p variants={itemVariants} className="mt-8 text-base md:text-lg max-w-[480px] leading-relaxed tracking-wide" style={{ color: "#8A95A3" }}>
-            IFXTrades aligns macro research, licensed algorithmic systems, and institutional execution education into a single, uncompromising environment.
+            #1 Most Trusted CFD & Forex Algo Platform. Institutional-grade algorithms at prices built for everyone — from aspiring traders to professional desks. Maximum profit, minimum risk.
           </motion.p>
 
           {/* CTAs */}
@@ -141,22 +142,17 @@ function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Right: Globe placeholder */}
+        {/* Right: 3D Trading Robot */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: GRAVITY, delay: 0.3 }}
+          initial={{ opacity: 0, scale: 0.88, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: GRAVITY, delay: 0.2 }}
           className="hidden lg:flex items-center justify-center"
         >
-          <div className="relative w-[420px] h-[420px] rounded-full"
-            style={{ border: "1px solid rgba(201,168,76,0.15)", background: "radial-gradient(circle at 30% 30%, rgba(201,168,76,0.08), transparent 70%)" }}>
-            <div className="absolute inset-[20%] rounded-full"
-              style={{ border: "1px dashed rgba(201,168,76,0.2)", animation: "spin 30s linear infinite" }} />
-            <div className="absolute inset-[40%] rounded-full"
-              style={{ border: "1px dashed rgba(201,168,76,0.15)", animation: "spin 20s linear infinite reverse" }} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="font-serif text-7xl" style={{ color: "rgba(201,168,76,0.6)" }}>⊕</span>
-            </div>
+          <div className="relative w-[480px] h-[540px]">
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(ellipse 70% 70% at 50% 50%, rgba(201,168,76,0.07) 0%, transparent 70%)" }} />
+            <TradingRobot3D className="w-full h-full" />
           </div>
         </motion.div>
       </div>

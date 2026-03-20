@@ -1111,3 +1111,62 @@ p,
   font-family: var(--font-inter), "Inter", sans-serif !important;
   letter-spacing: 0.01em;
 }
+/* ── Additional keyframes ─────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes border-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gold-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ── Robot 3D ambient glow pulse ─────────────────────── */
+@keyframes robot-glow {
+  0%, 100% { box-shadow: 0 0 40px rgba(201,168,76,0.08), 0 0 80px rgba(201,168,76,0.04); }
+  50% { box-shadow: 0 0 60px rgba(201,168,76,0.16), 0 0 120px rgba(201,168,76,0.08); }
+}
+
+/* ── Card hover lift ─────────────────────────────────── */
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.6), 0 0 24px rgba(201,168,76,0.08);
+}
+
+/* ── Admin panel improvements ────────────────────────── */
+.admin-card {
+  background: rgba(13, 20, 33, 0.85);
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.admin-card:hover {
+  border-color: rgba(201,168,76,0.25);
+  box-shadow: 0 0 20px rgba(201,168,76,0.06);
+}
+
+/* ── Supabase realtime indicator ─────────────────────── */
+.realtime-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34,197,94,0.8);
+  animation: pulse 2s ease-in-out infinite;
+}
