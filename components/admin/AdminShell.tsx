@@ -45,7 +45,7 @@ export function AdminShell({ children }: AdminShellProps) {
         </>
       )}
 
-      <div className="flex-1 min-w-0 pt-24 px-4 md:px-6 lg:px-8 pb-12 overflow-y-auto">
+      <div className="flex-1 min-w-0 pt-8 px-4 md:px-6 lg:px-8 pb-12 overflow-y-auto">
         <div className="max-w-6xl mx-auto">{children}</div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { designTokens } from '@/lib/design-tokens';
+import { TradingRobot3D } from '@/components/home/TradingRobot3D';
 
 const TICKER_PAIRS = [
   { pair: 'EUR/USD', price: '1.08432', change: '+0.12%', up: true },
@@ -236,8 +237,17 @@ function HeroSectionComponent() {
               initial={{ opacity: 0, x: 60 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, delay: 0.6, ease: designTokens.easing.outExpo }}
-              className="terminal-box p-6 scanlines"
+              className="flex flex-col gap-4"
             >
+              {/* 3D Trading Robot */}
+              <div className="relative w-full h-[340px]">
+                <div className="absolute inset-0 pointer-events-none"
+                  style={{ background: "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 70%)" }} />
+                <TradingRobot3D className="w-full h-full" />
+              </div>
+
+              {/* Terminal Stats Box */}
+              <div className="terminal-box p-6 scanlines">
               <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: '1px solid var(--border-gold)' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-500 opacity-80" />
@@ -299,6 +309,7 @@ function HeroSectionComponent() {
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--text-tertiary)' }}>12H AGO</span>
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--text-tertiary)' }}>NOW</span>
                 </div>
+              </div>
               </div>
             </motion.div>
           </div>
